@@ -33,7 +33,7 @@ Configuration baseline:
 
 - Single repository (monorepo): `src/`, `tests/`, `infra/`, `docs/`.
 - `main` protected: pull request required, linear history, status checks required, no force push.
-- Trunk-based development with short-lived feature branches named `feature/AB<id>-short-name`.
+- Trunk-based development with short-lived branches named `<type>/AB<id>-short-name`, squash merges and releases by tag. The operating procedure is the [Branching and release standard](../standards/branching-and-release.md).
 - Conventional Commits; commit and PR titles reference Azure Boards items with `AB#<id>` ([0003](0003-application-lifecycle-management.md)).
 - CODEOWNERS: `docs/adr/` and `infra/` require the Solution Architect role.
 - Dependabot (NuGet, GitHub Actions), secret scanning and push protection enabled.
