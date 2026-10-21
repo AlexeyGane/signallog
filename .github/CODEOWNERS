@@ -1,0 +1,5 @@
+# Ownership map (ADR 0002). Solo project: review by code owners is not enforced
+# in the ruleset, because an author cannot approve their own pull request.
+*            @AlexeyGane
+/docs/adr/   @AlexeyGane
+/infra/      @AlexeyGane
