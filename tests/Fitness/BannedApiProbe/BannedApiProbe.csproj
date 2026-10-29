@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Architecture fitness function for ADR 0012 and ADR 0017.
+    This project MUST NOT compile and is deliberately left out of SignalLog.slnx.
+    CI builds it and asserts that every line marked "BANNED" in Probe.cs fails with RS0030,
+    and that no other line does.
+  -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Venue → Product → Contract, trading sessions and roll rules (ADR 0014, ADR 0017). No dependencies. -->
+</Project>

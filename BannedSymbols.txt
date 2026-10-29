@@ -1,0 +1,13 @@
+// Banned APIs, enforced by Microsoft.CodeAnalysis.BannedApiAnalyzers (RS0030 = error in .editorconfig).
+// A justified exception needs "#pragma warning disable RS0030" with a comment that references the ADR.
+
+// ADR 0012 — identifiers
+M:System.Guid.ToByteArray;Mixed little-endian layout breaks RFC 9562 byte order and UUIDv7 sorting. Use ToByteArray(bigEndian: true) — ADR 0012
+M:System.Guid.NewGuid;Event ids are UUIDv7. Use Guid.CreateVersion7() — ADR 0012
+
+// ADR 0017 — time
+P:System.DateTime.Now;Use TimeProvider.GetUtcNow() — ADR 0017
+P:System.DateTime.UtcNow;Use TimeProvider.GetUtcNow() — ADR 0017
+P:System.DateTime.Today;Use TimeProvider and the venue timezone — ADR 0017
+P:System.DateTimeOffset.Now;Use TimeProvider.GetUtcNow() — ADR 0017
+P:System.DateTimeOffset.UtcNow;Use TimeProvider.GetUtcNow() — ADR 0017
