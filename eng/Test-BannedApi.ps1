@@ -48,3 +48,7 @@ if ($otherErrors.Count -gt 0) {
 }
 
 Write-Host "OK: RS0030 reported on all $($expected.Count) banned call sites and nowhere else."
+
+# The probe build fails on purpose and leaves $LASTEXITCODE = 1. GitHub Actions ends pwsh steps
+# with "exit $LASTEXITCODE", so reset it explicitly: reaching this line means the check passed.
+exit 0
