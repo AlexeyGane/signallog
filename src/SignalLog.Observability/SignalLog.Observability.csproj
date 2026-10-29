@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Shared OpenTelemetry setup for every host (ADR 0007). -->
+</Project>

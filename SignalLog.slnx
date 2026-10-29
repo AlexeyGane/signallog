@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="BannedSymbols.txt" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/SignalLog.Adapters/SignalLog.Adapters.csproj" />
+    <Project Path="src/SignalLog.Api/SignalLog.Api.csproj" />
+    <Project Path="src/SignalLog.Contracts/SignalLog.Contracts.csproj" />
+    <Project Path="src/SignalLog.Domain/SignalLog.Domain.csproj" />
+    <Project Path="src/SignalLog.Ingestion/SignalLog.Ingestion.csproj" />
+    <Project Path="src/SignalLog.Ingress/SignalLog.Ingress.csproj" />
+    <Project Path="src/SignalLog.Observability/SignalLog.Observability.csproj" />
+    <Project Path="src/SignalLog.Web/SignalLog.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SignalLog.Contracts.Tests/SignalLog.Contracts.Tests.csproj" />
+  </Folder>
+</Solution>
