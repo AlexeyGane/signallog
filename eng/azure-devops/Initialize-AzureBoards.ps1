@@ -3,6 +3,8 @@
 .SYNOPSIS
     Creates or updates the SignalLog Azure Boards project from boards.settings.psd1 (ADR 0003).
 
+    Status: not yet run against a live Azure DevOps organization. Expect fixes after the first run.
+
 .DESCRIPTION
     Idempotent: every step reads the current state first and only creates or changes what differs.
     Applies, in order:
