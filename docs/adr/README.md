@@ -1,6 +1,6 @@
 # Architecture Decision Records — SignalLog
 
-This folder is the decision log for SignalLog. Format: [MADR 4](https://adr.github.io/madr/) with two project additions: a weighted evaluation table and a **Traces to** field linking each decision to NFRs, C4 elements and Azure Boards work items.
+This folder is the decision log for SignalLog. Format: [MADR 4](https://adr.github.io/madr/) with two project additions: a weighted evaluation table and a **Traces to** field linking each decision to NFRs ([catalogue](../requirements/nfr.md)), C4 elements and Azure Boards work items.
 
 ## Conventions
 
@@ -28,10 +28,11 @@ This folder is the decision log for SignalLog. Format: [MADR 4](https://adr.gith
 | [0011](0011-market-data-sourcing-and-licensing.md) | Market data sourcing and licensing | Proposed | new |
 | [0012](0012-message-contract-and-versioning.md) | Message contract and versioning | Proposed | new |
 | [0013](0013-adapter-control-plane.md) | Adapter control plane | Proposed | new |
-| [0014](0014-instrument-domain-model.md) | Instrument domain model | Proposed | new |
+| [0014](0014-instrument-domain-model.md) | Instrument domain model and delivery periods | Proposed (revision 2) | new |
 | [0015](0015-ui-and-real-time-push.md) | User interface and real-time push | Proposed | new |
 | [0016](0016-environments-and-infrastructure-as-code.md) | Environments and infrastructure as code | Proposed | new |
-| [0017](0017-time-and-timezones.md) | Time and timezone handling | Proposed | new |
+| [0017](0017-time-and-timezones.md) | Time, timezones and delivery periods | Proposed (revision 2) | new |
+| [0018](0018-latency-and-freshness-targets.md) | Latency and freshness targets: provisional values and calibration | Proposed | new |
 
 ## What changed versus the original ADR files
 
