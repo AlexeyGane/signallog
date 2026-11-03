@@ -51,6 +51,8 @@ Build rules applied to every project (`Directory.Build.props`): nullable referen
 ## Documentation
 
 - [Architecture Decision Records](docs/adr/README.md)
+- [Domain knowledge base](docs/domain/README.md): glossary, domain model, time and delivery rules, tenors and delivery periods, market conventions
+- [Requirements](docs/requirements/README.md): non-functional requirements catalogue (`NFR-*` identifiers used by the ADRs)
 - [Branching and release standard](docs/standards/branching-and-release.md)
 
 ## License
