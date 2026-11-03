@@ -8,6 +8,7 @@ This section describes the commodity-market domain that SignalLog models: the vo
 | [Domain model](model.md) | Entities, value objects, their relationships and invariants |
 | [Time and delivery](time-and-delivery.md) | UTC versus local rules, delivery days of 23/24/25 hours, gaps and overlaps, trading days, worked examples |
 | [Tenors and delivery periods](tenors-and-delivery-periods.md) | Day-ahead, weekend, balance of month, months, quarters, seasons, gas and calendar years; relative labels such as M+1 and how they roll |
+| [Market data sources](market-data-sources.md) | Where exchange data comes from: native feeds, exchange files, vendors; costs and terms; one event model across venues; why replay is the default |
 | [Market conventions](market-conventions.md) | How exchanges define sessions, settlement periods, peak windows and indices; what is verified and what is open |
 
 ## How this section relates to the ADRs
