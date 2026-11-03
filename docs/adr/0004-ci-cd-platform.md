@@ -44,6 +44,19 @@ Build, test, quality gates, infrastructure deployment and application deployment
 
 GitHub Actions authenticates with **OpenID Connect workload identity federation** to a dedicated Entra ID app registration (or user-assigned managed identity) per environment, scoped by federated credential to the repository, branch and GitHub Environment. No client secret is stored in GitHub ([0005](0005-identity-and-access.md)).
 
+### Action pinning
+
+Every action, including first-party `actions/*`, is referenced by its **full-length commit SHA** with the release in a trailing comment:
+
+```yaml
+- uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+```
+
+- A tag such as `@v5` is a movable pointer: the maintainer moves it to each new release, and an attacker who compromises the action's repository can move it to malicious code (the `tj-actions/changed-files` incident, CVE-2025-30066, March 2025, printed runner secrets to public logs this way). A commit SHA identifies content and cannot be moved; GitHub documents SHA pinning as the only way to use an action as an immutable release.
+- Updates arrive as Dependabot pull requests (`github-actions` ecosystem, weekly, prefix `ci(deps)`), which change the SHA and the version comment together. A major-version upgrade is a separate, reviewed pull request.
+- The repository's *Allowed actions and reusable workflows* policy has **Require actions to be pinned to a full-length commit SHA** enabled, so a workflow that references a tag or branch fails.
+- The SHA is taken from the action's own repository (`git ls-remote --tags https://github.com/<owner>/<repo>`), never from a fork.
+
 ### Consequences
 
 - Good, because fork pull requests run only on ephemeral GitHub-hosted machines.
@@ -54,6 +67,7 @@ GitHub Actions authenticates with **OpenID Connect workload identity federation*
 
 - Repository settings: no self-hosted runners registered; "Require approval for fork pull request workflows" enabled.
 - No secrets of type client secret in repository or environment secrets.
+- Repository Actions policy: "Require actions to be pinned to a full-length commit SHA" enabled; every `uses:` line in `.github/workflows` references a 40-character SHA.
 
 ## Pros and Cons of the Options
 
@@ -71,4 +85,6 @@ GitHub Actions authenticates with **OpenID Connect workload identity federation*
 
 ## More Information
 
+- GitHub changelog, Actions policy supports blocking and SHA pinning (2025-08-15): https://github.blog/changelog/2025-08-15-github-actions-policy-now-supports-blocking-and-sha-pinning-actions/
+- GitHub Advisory GHSA-mrrh-fwg8-r2c3 (tj-actions/changed-files): https://github.com/advisories/GHSA-mrrh-fwg8-r2c3
 - Microsoft Learn, Explore runners — security considerations: https://learn.microsoft.com/training/modules/introduction-to-github-actions/8-explore-runners
