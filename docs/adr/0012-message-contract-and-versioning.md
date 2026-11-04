@@ -5,7 +5,7 @@
 | Status | Proposed |
 | Date | 2026-10-18 |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
-| Related | [0008](0008-data-storage.md), [0009](0009-event-driven-ingestion.md), [0010](0010-api-management-ingestion-gateway.md), [0014](0014-instrument-domain-model.md), [0017](0017-time-and-timezones.md) |
+| Related | [0008](0008-data-storage.md), [0009](0009-event-driven-ingestion.md), [0010](0010-api-management-ingestion-gateway.md), [0014](0014-instrument-domain-model.md), [0017](0017-time-and-timezones.md), [0019](0019-market-status-events.md) |
 | Traces to | NFR-MNT-02 (backward-compatible evolution), NFR-DATA-01 |
 
 ## Context and Problem Statement
@@ -58,6 +58,7 @@ Producers (adapters) and consumers (ingestion, live push, alerts) are deployed i
 - `traceparent` follows the CloudEvents distributed-tracing extension ([0007](0007-observability.md)).
 - Prices are `decimal` in .NET, serialized as JSON numbers; never `double`.
 - The instrument identifier format is illustrative; the authoritative format is defined in [0014](0014-instrument-domain-model.md).
+- **Event types.** `signallog.price.tick.v1` (above) and `signallog.market.status.v1` ([0019](0019-market-status-events.md)). Every type follows the envelope rules in this ADR and has its own JSON Schema; a new type is added by its own ADR.
 
 ### Enforcement (architecture fitness function)
 

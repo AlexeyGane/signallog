@@ -82,7 +82,7 @@ The procedure is the decision; the numbers are data. Measured values change the 
 
 - Staleness is published as the metric `signallog.instrument.staleness_seconds` ([0007](0007-observability.md)) and alerted by a **metric alert**, not a log search alert, because metric alerts are near real-time and Microsoft recommends them for detecting missing data.
 - Evaluation frequency 1 minute, window 5 minutes, one dimension per instrument; the threshold is per product.
-- The metric is emitted only while the product's session is open ([0017](0017-time-and-timezones.md)), so the alert cannot fire outside sessions.
+- The metric is emitted only while the instrument's effective market status is `OPEN` — the session from reference data ([0017](0017-time-and-timezones.md)), overridden by venue-reported status ([0019](0019-market-status-events.md)) — so the alert cannot fire outside sessions or during a venue halt.
 
 ### Consequences
 

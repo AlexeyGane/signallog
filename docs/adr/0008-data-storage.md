@@ -54,6 +54,7 @@ The ingestion processor writes price ticks continuously during trading hours; th
 | `price-ticks` | `/pk` = `{instrumentId}\|{yyyy-MM}` (synthetic) | `eventId` from the message ([0012](0012-message-contract-and-versioning.md)) | Append-only tick history; TTL 90 days |
 | `latest-prices` | `/instrumentId` | `instrumentId` | One document per instrument, upserted on every tick; the UI reads only this container for live views |
 | `instruments` | `/venueCode` | `instrumentId` | Reference data ([0014](0014-instrument-domain-model.md)) |
+| `market-status` | `/scopeId` | `scopeId` (e.g. `NDEX.TFM`) | Latest reported market status per venue, product or instrument; upserted only when newer ([0019](0019-market-status-events.md)) |
 | `adapter-status` | `/adapterId` | `adapterId` | Last heartbeat and state ([0013](0013-adapter-control-plane.md)) |
 
 - **Why the synthetic key:** `instrumentId` has tens to hundreds of values (contracts per venue), and the month bucket caps each logical partition at one month of one contract, far below 20 GB. A history query for one contract and a date range touches one or two partitions.

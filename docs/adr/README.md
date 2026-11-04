@@ -33,6 +33,7 @@ This folder is the decision log for SignalLog. Format: [MADR 4](https://adr.gith
 | [0016](0016-environments-and-infrastructure-as-code.md) | Environments and infrastructure as code | Proposed | new |
 | [0017](0017-time-and-timezones.md) | Time, timezones and delivery periods | Proposed (revision 2) | new |
 | [0018](0018-latency-and-freshness-targets.md) | Latency and freshness targets: provisional values and calibration | Proposed | new |
+| [0019](0019-market-status-events.md) | Market status events | Proposed | new |
 
 ## What changed versus the original ADR files
 

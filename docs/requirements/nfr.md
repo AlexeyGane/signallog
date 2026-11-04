@@ -18,7 +18,7 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 | [NFR-REL-01](#nfr-rel-01) | No tick loss | Reliability — fault tolerance | 0 accepted ticks lost | Agreed | [0009](../adr/0009-event-driven-ingestion.md) |
 | [NFR-REL-02](#nfr-rel-02) | Resilience policies | Reliability — fault tolerance | Timeout, retry with jitter and circuit breaker on every upstream call | Agreed | [0013](../adr/0013-adapter-control-plane.md) |
 | [NFR-OPS-01](#nfr-ops-01) | End-to-end tracing | Operational excellence — observability | ≥ 99 % of stored ticks carry trace context end to end | Proposed | [0007](../adr/0007-observability.md), [0018](../adr/0018-latency-and-freshness-targets.md) |
-| [NFR-OPS-02](#nfr-ops-02) | Data freshness alerting | Operational excellence — monitoring | Alert ≤ 5 min after staleness breach in session; 0 alerts out of session | Proposed | [0007](../adr/0007-observability.md), [0013](../adr/0013-adapter-control-plane.md), [0017](../adr/0017-time-and-timezones.md), [0018](../adr/0018-latency-and-freshness-targets.md) |
+| [NFR-OPS-02](#nfr-ops-02) | Data freshness alerting | Operational excellence — monitoring | Alert ≤ 5 min after staleness breach while open; 0 alerts out of session or during venue halts | Proposed | [0007](../adr/0007-observability.md), [0013](../adr/0013-adapter-control-plane.md), [0017](../adr/0017-time-and-timezones.md), [0018](../adr/0018-latency-and-freshness-targets.md), [0019](../adr/0019-market-status-events.md) |
 | [NFR-OPS-03](#nfr-ops-03) | Operator can stop and start a source | Operational excellence — operability | ≤ 2 min, no deployment | Agreed | [0013](../adr/0013-adapter-control-plane.md) |
 | [NFR-MNT-01](#nfr-mnt-01) | Reviewability | Maintainability — analysability | 100 % of changes to `main` via PR with green checks | Agreed | [0002](../adr/0002-source-control-platform.md) |
 | [NFR-MNT-02](#nfr-mnt-02) | Backward-compatible evolution | Maintainability — modifiability | No consumer breaks on a minor contract version | Agreed | [0012](../adr/0012-message-contract-and-versioning.md) |
@@ -131,7 +131,7 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 
 - **Labels in ADRs:** "data freshness alerting" ([0007](../adr/0007-observability.md)); "staleness only during sessions" ([0017](../adr/0017-time-and-timezones.md)). Both are this requirement.
 - **Scenario:** an instrument stops receiving ticks.
-- **Target:** an alert fires within 5 minutes after the instrument's staleness exceeds its threshold (5 minutes as a placeholder until the per-product threshold is measured) **while its trading session is open**; 0 alerts fire outside sessions, on weekends or on venue holidays. Implemented as a metric alert evaluated every minute over a 5-minute window. **Proposed** — thresholds and their calibration in [ADR 0018](../adr/0018-latency-and-freshness-targets.md).
+- **Target:** an alert fires within 5 minutes after the instrument's staleness exceeds its threshold (5 minutes as a placeholder until the per-product threshold is measured) **while its effective market status is `OPEN`** (trading session from reference data, overridden by venue-reported status, [0019](../adr/0019-market-status-events.md)); 0 alerts fire outside sessions, on weekends, on venue holidays or during a reported venue halt. Implemented as a metric alert evaluated every minute over a 5-minute window. **Proposed** — thresholds and their calibration in [ADR 0018](../adr/0018-latency-and-freshness-targets.md).
 - **Verification:** replay a full month including a DST weekend and a venue holiday and count alerts (confirmation in [ADR 0017](../adr/0017-time-and-timezones.md)); runbook exercise from [ADR 0013](../adr/0013-adapter-control-plane.md).
 - **Status:** Proposed.
 
@@ -271,6 +271,7 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 | [0016](../adr/0016-environments-and-infrastructure-as-code.md) | DEL-01, SEC-02 |
 | [0017](../adr/0017-time-and-timezones.md) | DATA-04, DATA-05, OPS-02 |
 | [0018](../adr/0018-latency-and-freshness-targets.md) | PERF-01, PERF-02, OPS-01, OPS-02 |
+| [0019](../adr/0019-market-status-events.md) | OPS-02, MNT-02, DATA-01 |
 
 ## Open items
 

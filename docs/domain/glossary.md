@@ -45,7 +45,9 @@ The ubiquitous language of SignalLog. Terms are used with exactly these meanings
 | **Replay** | Deterministic synthetic price generation calibrated on real reference statistics, used as the default data source (ADR 0011). |
 | **Calibration parameters** | Statistics derived from a permitted public source (price level, volatility) that drive the replay generator. Raw licensed price series are never stored in the repository. |
 | **Reference data** | Facts about venues, products and market conventions, transcribed from public specifications with source and date. No prices. |
-| **Staleness** | Time since the last tick of an instrument, evaluated only while its session is open (ADR 0013, ADR 0017). |
+| **Staleness** | Time since the last tick of an instrument, evaluated only while its effective market status is `OPEN` (ADR 0013, ADR 0017, ADR 0019). |
+| **Market status** (`MarketStatus`) | A venue-reported state of a venue, product or instrument: `PRE_OPEN`, `OPEN`, `PAUSED`, `CLOSED`. Published as event `signallog.market.status.v1` (ADR 0019). |
+| **Effective status** | The calendar status from trading sessions, replaced by a reported market status received since the last session boundary. Never survives a session boundary (ADR 0019). |
 | **Index** | An aggregate of market prices over a window, for example Phelix-DE Day Peak = arithmetic mean of German day-ahead prices for periods from 08:00 to 20:00. |
 
 ## Time and delivery
