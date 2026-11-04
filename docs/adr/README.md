@@ -1,6 +1,6 @@
 # Architecture Decision Records — SignalLog
 
-This folder is the decision log for SignalLog. Format: [MADR 4](https://adr.github.io/madr/) with two project additions: a weighted evaluation table and a **Traces to** field linking each decision to NFRs ([catalogue](../requirements/nfr.md)), C4 elements and Azure Boards work items.
+This folder is the decision log for SignalLog. Format: [MADR 4](https://adr.github.io/madr/) with two project additions: a weighted evaluation table and a **Traces to** field linking each decision to NFRs ([catalogue](../requirements/nfr.md)), C4 elements and Azure Boards work items. The domain rules that decisions establish are catalogued in [business rules](../requirements/business-rules.md).
 
 ## Conventions
 

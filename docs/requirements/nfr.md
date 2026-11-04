@@ -199,7 +199,7 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 #### NFR-DATA-05 — Correct delivery volumes on DST days
 
 - **Scenario:** a volume or a number of hours is computed for a delivery period that contains a daylight-saving transition.
-- **Target:** delivered energy equals capacity × elapsed duration between the period's UTC boundaries (BR-TIME-01): 1 MW delivers 23, 24 or 25 MWh per day, and periods of any kind follow from their extent ([ADR 0017](../adr/0017-time-and-timezones.md), [ADR 0014](../adr/0014-instrument-domain-model.md)).
+- **Target:** delivered energy equals capacity × elapsed duration between the period's UTC boundaries ([BR-TIME-01](business-rules.md#br-time-01)): 1 MW delivers 23, 24 or 25 MWh per day, and periods of any kind follow from their extent ([ADR 0017](../adr/0017-time-and-timezones.md), [ADR 0014](../adr/0014-instrument-domain-model.md)).
 - **Verification:** unit tests with the real-date tables in ADR 0017 and ADR 0014 (for example, TTF October 2026 = 745 MWh, weekend starting 2026-10-24 = 49 MWh).
 - **Status:** Agreed.
 

@@ -28,7 +28,11 @@ The ubiquitous language of SignalLog. Terms are used with exactly these meanings
 | **Cascading** | EEX power mechanism by which a year or quarter contract is replaced by its shorter periods as delivery approaches. |
 | **Roll** | The instant at which a relative tenor starts resolving to a different contract. Shown in charts; prices are not back-adjusted by default. |
 | **Commodity** | Classification tag only: `CrudeOil`, `NaturalGas`, `LNG`. |
-| **Hub** | A pricing or delivery location, not an exchange. TTF (Netherlands) and THE (Germany) are gas hubs; contracts on them trade on exchanges. |
+| **Hub** | A pricing or delivery location, not an exchange. European gas hubs are **virtual trading points**: gas changes owner inside a transmission network, not at a physical site. TTF (Netherlands) and THE (Germany) are virtual gas hubs; contracts on them trade on exchanges. |
+| **TTF** | Title Transfer Facility: the virtual trading point of the Dutch gas transmission network, operated by Gasunie Transport Services (GTS). ICE Endex TTF futures are delivered by transfer of rights in gas at this point. The main gas price benchmark of continental Europe. |
+| **THE** | Trading Hub Europe: the virtual trading point of the single German gas market area, operating since 2021-10-01, when the GASPOOL and NetConnect Germany market areas merged. |
+| **JKM** | Japan Korea Marker: a daily price assessment by S&P Global Commodity Insights (Platts) for spot LNG cargoes delivered ex-ship (DES) into Japan, South Korea, China and Taiwan. **Not a hub**: nothing is delivered at "JKM"; JKM futures on ICE settle in cash against the Platts JKM average. |
+| **DES** | Delivered Ex-Ship: the seller delivers the LNG cargo to the buyer's import terminal and bears the transport risk until unloading. |
 | **Tick size** | The minimum price increment of a product, for example EUR 0.005/MWh for TTF. |
 | **Contract size** | The quantity of one lot: 1,000 barrels (Brent), 10,000 MMBtu (JKM), 1 MW for every hour of the delivery period (TTF, THE). |
 | **Settlement method** | Physical delivery (TTF, THE), delivery by Exchange of Futures for Physical with optional cash settlement (Brent), or cash settlement against an index (JKM). |
@@ -82,6 +86,7 @@ The ubiquitous language of SignalLog. Terms are used with exactly these meanings
 |---|---|
 | **MW** | Megawatt: a rate of energy flow (capacity). |
 | **MWh** | Megawatt-hour: an amount of energy. 1 MW for 1 hour = 1 MWh. |
-| **BR-TIME-01** | Delivered energy = capacity × elapsed duration of the delivery period. 1 MW delivers 24 / 23 / 25 MWh on a normal / short / long day (ADR 0017). |
+| **Business rule** (`BR-*`) | A rule of the domain that holds in any implementation and that a domain expert can check, identified as `BR-<AREA>-<NN>`. Catalogued in [business rules](../requirements/business-rules.md). |
+| **BR-TIME-01** | Delivered energy = capacity × elapsed duration of the delivery period. 1 MW delivers 24 / 23 / 25 MWh on a normal / short / long day ([ADR 0017](../adr/0017-time-and-timezones.md), [catalogue](../requirements/business-rules.md#br-time-01)). |
 | **bbl** | Barrel of crude oil, 158.987 litres. Brent prices are quoted in USD per barrel. |
-| **MMBtu** | Million British thermal units, an energy unit for gas and LNG. JKM is quoted in USD per MMBtu. |
+| **MMBtu** | Million British thermal units, an energy unit for gas and LNG. 1 MMBtu = 10⁶ Btu (International Table Btu, 1 Btu = 1,055.056 J) ≈ 1.055 GJ ≈ 293.07 kWh. JKM is quoted in USD per MMBtu. |
