@@ -37,15 +37,43 @@ Every market data layer reviewed in [Market data sources](../domain/market-data-
 
 ### Weighted evaluation
 
+*Expert judgement (one assessor), not a measurement.* Rebuilt on 2026-11-04 under the [weighted evaluation method](README.md#weighted-evaluation-method). The first version scored "Clear contract" and "Effort", which are not drivers, and left out D2 and D4; its weights were chosen after the options were known.
+
+Weights (swing weighting, fixed before scoring):
+
+| Criterion | Driver | Weight | Why this weight |
+|---|---|---|---|
+| No staleness alert during a venue halt | D1 | 40 | The reason for this ADR; the worst case is a false alert at every halt |
+| Lost status cannot suppress alerts indefinitely | D2 | 30 | The worst case is a real outage hidden for days; rare but severe |
+| Existing `PriceTick` consumers unchanged | D3 | 20 | The worst case is a breaking change, but consumers are few and all in this repository |
+| Same path for replay and live status | D4 | 10 | Live sources are not in scope yet ([0011](0011-market-data-sourcing-and-licensing.md)) |
+
+Scale anchors:
+
+| Criterion | 1 | 3 | 5 |
+|---|---|---|---|
+| No alert during a halt | An alert fires during every halt | Suppressed only for scheduled breaks, or late | Suppressed for the whole venue-reported halt |
+| Lost status bounded | A lost message can suppress alerts without limit | Suppression bounded by a known limit (the next session boundary) | No message loss can suppress alerts |
+| Consumers unchanged | Breaking change to `PriceTick` | Consumers must ignore new message types or fields | No change for any existing subscriber |
+| Same path replay and live | Live status cannot be used | Works with adapter-specific translation | One code path for both |
+
 | Criterion (weight) | 1. Own type and topic | 2. Own type on `price-ticks` | 3. Field in `PriceTick` | 4. Sessions only |
 |---|---|---|---|---|
-| Correct staleness during halts (30%) | 5 | 5 | 2 | 1 |
-| Existing consumers unaffected (25%) | 5 | 3 | 3 | 5 |
-| Clear contract and scope (25%) | 5 | 4 | 1 | 5 |
-| Effort (20%) | 3 | 4 | 4 | 5 |
-| **Weighted score** | **4.60** | **4.05** | **2.40** | **3.80** |
+| No alert during a halt (40) | 5 | 5 | 2 | 1 |
+| Lost status bounded (30) | 3 | 3 | 3 | 5 |
+| Consumers unchanged (20) | 5 | 3 | 3 | 5 |
+| Same path replay and live (10) | 5 | 5 | 3 | 1 |
+| **Weighted score** | **4.40** | **4.00** | **2.60** | **3.00** |
 
-Option 3 scores low on correct staleness because a status carried on ticks cannot report a halt: a halt is precisely the period without ticks.
+Option 3 scores low on halts because a status carried on ticks cannot report a halt: a halt is precisely the period without ticks.
+
+Drivers not scored: D5 (no new cost); all four options stay inside the existing Service Bus and Cosmos DB resources.
+
+Sensitivity:
+
+- Option 1 scores at least as well as Options 2 and 3 on every criterion, so no weights put either of them ahead.
+- Option 4 wins only if the weight of D2 exceeds twice the weights of D1 and D4 combined (with D1 = 40 and D4 = 10, D2 would need more than 100 points, which is impossible out of 100; even if D1 alone were halved, D2 would need more than 60). That would mean a bounded suppression until the next session boundary is worse than a false alert at every halt, which contradicts D1. The result is robust.
+- Not scored, because it is not a driver: effort. Option 1 is the most work (a topic, two subscriptions, a container, a schema); Option 4 is none. See *Consequences*.
 
 ### Event
 

@@ -33,6 +33,8 @@ SignalLog needs one place for architecture documentation (C4), ADRs, NFRs, secur
 
 ### Weighted evaluation
 
+> **Predates the [weighted evaluation method](README.md#weighted-evaluation-method) (2026-11-04).** Weights were not fixed before scoring, the scale has no anchors, criteria are not mapped to drivers one to one, and no sensitivity check was made. Read the table as an illustration of the reasoning, not as evidence; the decision rests on the drivers and the pros and cons below. The table is kept unchanged because this ADR is Accepted.
+
 | Criterion (weight) | MkDocs + Pages | Azure DevOps Wiki | Confluence | SharePoint |
 |---|---|---|---|---|
 | Docs-as-code and PR review (35%) | 5 | 3 | 2 | 1 |

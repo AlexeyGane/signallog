@@ -37,13 +37,42 @@ The questions are: which values apply until measurements exist, where each value
 
 ### Weighted evaluation
 
+*Expert judgement (one assessor), not a measurement.* Rebuilt on 2026-11-04 under the [weighted evaluation method](README.md#weighted-evaluation-method). The first version scored "Effort", which is not a driver, and left out D4 and D5; its weights were chosen after the options were known.
+
+Weights (swing weighting, fixed before scoring):
+
+| Criterion | Driver | Weight | Why this weight |
+|---|---|---|---|
+| Traceable origin | D1 | 30 | The reason for this ADR: numbers of unknown origin are what a review board rejects first |
+| Targets usable now | D2 | 25 | Without targets, tests and alerts have nothing to check; second only to honesty about origin |
+| Defined path to measured values | D3 | 25 | Without it, estimates become permanent; as important as having targets at all |
+| Staleness per product | D4 | 10 | Matters, but concerns one NFR out of four |
+| Fits the budget | D5 | 10 | No option needs paid tiers by itself; the swing is small |
+
+Scale anchors:
+
+| Criterion | 1 | 3 | 5 |
+|---|---|---|---|
+| Traceable origin | Origin hidden or misleading | Origin named, no reasoning | Every value labelled estimate, vendor constraint or measurement, with reasoning |
+| Targets usable now | No numbers | Numbers for some NFRs | A number for every NFR |
+| Defined path to measured values | No reason to ever replace the values | Replacement intended, procedure not written | Repeatable procedure written down |
+| Staleness per product | One threshold for all products | Per-product structure, values not derived | Per-product values derived from observed liquidity |
+| Fits the budget | Needs paid tiers to meet targets | Might push towards paid tiers | No cost effect |
+
 | Criterion (weight) | 1. Provisional + calibration | 2. No targets until measured | 3. External benchmark |
 |---|---|---|---|
-| Traceable origin (30%) | 5 | 4 | 2 |
-| Usable from day one (25%) | 4 | 1 | 4 |
-| Path to measured values (30%) | 5 | 3 | 2 |
-| Effort (15%) | 3 | 5 | 4 |
-| **Weighted score** | **4.45** | **3.10** | **2.80** |
+| Traceable origin (30) | 5 | 5 ¹ | 2 |
+| Targets usable now (25) | 5 | 1 | 3 |
+| Defined path to measured values (25) | 5 | 3 | 1 |
+| Staleness per product (10) | 4 ² | 3 | 1 |
+| Fits the budget (10) | 5 | 5 | 3 |
+| **Weighted score** | **4.90** | **3.30** | **2.00** |
+
+¹ Vacuously: with no numbers there is nothing of unknown origin. ² Per-product structure now; derived values only after calibration.
+
+Drivers not scored: none.
+
+Sensitivity: Option 1 scores at least as well as both alternatives on every criterion, so no choice of weights changes the order. Per the method, what the table leaves out: effort, which is not a driver here. Option 1 costs one deliberate measurement run and its repetition after major changes; Option 2 costs nothing now. That cost is recorded under *Consequences* and is the honest argument against the decision.
 
 ### Provisional values and their origin
 
@@ -89,6 +118,7 @@ The procedure is the decision; the numbers are data. Measured values change the 
 - Good, because every number in the NFR catalogue states where it came from, which is what a review board asks first.
 - Good, because tests, dashboards and alerts can be built now and keep working when the numbers change.
 - Good, because the conflict between trace sampling and trace coverage is resolved explicitly.
+- Bad, because it costs effort that Option 2 does not: one deliberate 24-hour measurement run, repeated after every review trigger.
 - Bad, because until calibration the targets may be wrong in either direction; a too-strict target produces failing checks, a too-loose one hides problems.
 - Risk: the baseline runs on replay, whose tick pattern is cleaner than a live source (mitigation: repeat calibration for each live adapter before enabling it in `prod`, [0011](0011-market-data-sourcing-and-licensing.md)).
 - Risk: the Azure environment is delayed by the subscription billing issue, so provisional values stay in place longer (mitigation: no gate depends on them until the baseline story is done).

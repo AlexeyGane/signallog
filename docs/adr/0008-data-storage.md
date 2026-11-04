@@ -37,6 +37,8 @@ The ingestion processor writes price ticks continuously during trading hours; th
 
 ### Weighted evaluation
 
+> **Predates the [weighted evaluation method](README.md#weighted-evaluation-method) (2026-11-04).** Weights were not fixed before scoring, the scale has no anchors, criteria are not mapped to drivers one to one, and no sensitivity check was made. Read the table as an illustration of the reasoning, not as evidence; the decision rests on the drivers and the pros and cons below. The table will be rebuilt under the method when this revision is next changed.
+
 | Criterion (weight) | Cosmos DB free tier | Azure SQL free offer | Table Storage |
 |---|---|---|---|
 | Zero cost under continuous writes (35%) | 5 | 1 | 4 |
