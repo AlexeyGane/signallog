@@ -60,6 +60,8 @@ All boundaries used by SignalLog (06:00, 08:00, 18:00, 20:00, 20:50, 00:00) lie 
 
 ### 3. Delivery volume — business rule BR-TIME-01
 
+This and the other time rules of this ADR are catalogued as BR-TIME-01 … BR-TIME-08 in [business rules](../requirements/business-rules.md#time-and-delivery).
+
 > **Delivered energy = capacity × elapsed duration of the delivery period**, where the period is bounded by the product's local delivery-day start in the delivery zone, and elapsed duration is measured between the two UTC instants.
 
 | Delivery day | Elapsed hours | 1 MW delivers |

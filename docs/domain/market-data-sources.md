@@ -73,7 +73,7 @@ Every layer above carries the same five kinds of information. SignalLog's contra
 | Top of book | MBP-1 | Top-5 price levels | EMDI | `PriceTick`, `priceType = BID` / `ASK` |
 | Full order book | MBO, MBP-10 | Full order depth | EOBI | **Not needed** for monitoring |
 | Statistics | Statistics | End of Day Market Summary | not checked | `priceType = SETTLE`; open interest and volume are candidates for a minor contract version |
-| Market status | Status | not checked | not checked | **Gap**: staleness uses sessions from reference data only ([ADR 0017](../adr/0017-time-and-timezones.md), [ADR 0018](../adr/0018-latency-and-freshness-targets.md)) |
+| Market status | Status | not checked | not checked | Event `signallog.market.status.v1`; effective status combines sessions and reported status ([ADR 0019](../adr/0019-market-status-events.md)) |
 
 Confirmations of existing decisions:
 
@@ -110,7 +110,6 @@ Former employer data seen by the project author (volume forecasts and deal price
 | May statistics derived from Databento historical ICE data be published? | Calibration of replay from real TTF and Brent history | Databento terms of service and ICE data policies |
 | Do ICE licence fees apply to historical downloads? | Cost of one-off calibration | Databento support, ICE market data fee schedule |
 | Terms of the EIA Brent spot series, including whether EIA credits a third-party vendor as the source of its spot prices | Planned calibration source for Brent | EIA copyright and reuse page; series notes |
-| Should `MarketStatus` become its own event type? | Staleness during venue halts, not only outside sessions | ADR 0012 (contract), ADR 0013 (control plane) |
 | Are London TTF futures on ICE Futures Europe still listed? | Avoid confusing two TTF venues | ICE product guide |
 
 ## Sources

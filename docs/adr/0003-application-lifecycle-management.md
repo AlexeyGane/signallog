@@ -32,6 +32,8 @@ The project must demonstrate an enterprise SDLC: planned work, a visible flow of
 
 ### Weighted evaluation
 
+> **Predates the [weighted evaluation method](README.md#weighted-evaluation-method) (2026-11-04).** Weights were not fixed before scoring, the scale has no anchors, criteria are not mapped to drivers one to one, and no sensitivity check was made. Read the table as an illustration of the reasoning, not as evidence; the decision rests on the drivers and the pros and cons below. The table is kept unchanged because this ADR is Accepted.
+
 | Criterion (weight) | GitHub + Boards | GitHub + Projects | Azure DevOps | GitHub + Jira |
 |---|---|---|---|---|
 | Hierarchy and planning (35%) | 5 | 3 | 5 | 5 |

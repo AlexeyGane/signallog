@@ -115,6 +115,9 @@ A market convention is reference data with effective-dated versions (ADR 0017, s
 
 - ICE, Brent Crude Futures — https://www.ice.com/products/219/Brent-Crude-Futures (checked 2026-10-30)
 - ICE, Dutch TTF Natural Gas Futures — https://www.ice.com/products/27996665/Dutch-TTF-Gas-Futures (checked 2026-10-30)
+- S&P Global Commodity Insights, JKM (Japan Korea Marker) price explained — https://www.spglobal.com/energy/en/pricing-benchmarks/assessments/lng/jkm-japan-korea-marker-gas-price-explained (checked 2026-11-04)
+- Trading Hub Europe, press release on the start of the THE market area (2021-10-01) — https://www.tradinghub.eu/Portals/0/DLC%20Presse/20211001_Press%20Release.pdf (checked 2026-11-04)
+- ICE, Dutch TTF Natural Gas Daily Futures, contract specification (TTF Virtual Trading Point, GTS) — https://www.ice.com/api/productguide/spec/45436633/pdf (checked 2026-11-01)
 - ICE, JKM LNG (Platts) Future — https://www.ice.com/products/6753280/JKM-LNG-PLATTS-Future (checked 2026-10-30)
 - EEX Contract Specifications 0105a — https://www.eex.com/fileadmin/EEX/Downloads/Rules/Contract_Specifications/20261002_EEX_Contract_Spezifications_0105a_E_FINAL.pdf
 - ECC Clearing Circular 13/2021 (THE product codes) — https://www.ecc.de/fileadmin/Global/News/ECC/ECC_Circulars/2021/20210324_ECC_Clearing_Circular_No._13_Further_information_related_to_German_Gas_Market_Merger_on_1_October_2021.pdf

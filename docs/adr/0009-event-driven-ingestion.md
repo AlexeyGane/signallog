@@ -36,13 +36,14 @@ Adapters produce price ticks independently and at different rates. Persistence, 
 | Entity | Type | Producer | Consumers (subscriptions) |
 |---|---|---|---|
 | `price-ticks` | topic | Ingress function behind API Management ([0010](0010-api-management-ingestion-gateway.md)) | `persist` → ingestion function; `live-push` → SignalR broadcaster ([0015](0015-ui-and-real-time-push.md)); `alerts` (reserved) |
+| `market-status` | topic | Ingress function, routed by CloudEvents `type` ([0019](0019-market-status-events.md)) | `persist` → ingestion function; `live-push` → SignalR broadcaster |
 | `adapter-heartbeats` | topic | adapters | `status` → admin API ([0013](0013-adapter-control-plane.md)) |
 | `adapter-commands` | topic | admin API | one subscription per adapter, filtered on `adapterId` ([0013](0013-adapter-control-plane.md)) |
 
 ### Delivery semantics
 
 - **At-least-once.** Consumers are idempotent: the `eventId` is the Cosmos DB document id ([0008](0008-data-storage.md)).
-- **Duplicate detection** on `price-ticks` with `MessageId = eventId` and a 10-minute window, which removes most producer-side retry duplicates before they reach consumers.
+- **Duplicate detection** on `price-ticks` and `market-status` with `MessageId = eventId` and a 10-minute window, which removes most producer-side retry duplicates before they reach consumers.
 - **Ordering is not relied upon.** `latest-prices` is updated only when the incoming `eventTimeUtc` is newer. Sessions are therefore not used, which keeps consumers simple and parallel.
 - **Dead-lettering** after the maximum delivery count; a DLQ message raises an alert ([0007](0007-observability.md)) and is reprocessed by a runbook after the cause is fixed.
 

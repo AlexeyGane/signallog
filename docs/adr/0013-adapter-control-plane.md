@@ -46,7 +46,7 @@ An administrator must be able to see whether each adapter is healthy, stop and s
 | Signal | Meaning | Source |
 |---|---|---|
 | Heartbeat | Adapter run completed (success or handled failure), with counts and circuit state | `adapter-heartbeats` topic, stored in `adapter-status` ([0008](0008-data-storage.md)) |
-| Staleness | Time since the last tick per instrument, evaluated only during the instrument's trading session ([0017](0017-time-and-timezones.md)) | `latest-prices` |
+| Staleness | Time since the last tick per instrument, evaluated only while the instrument's effective market status is `OPEN`: trading session from reference data ([0017](0017-time-and-timezones.md)), overridden by venue-reported status ([0019](0019-market-status-events.md)) | `latest-prices` |
 | Circuit state | Closed / Open / Half-open per upstream | Heartbeat payload |
 
 The UI shows the three side by side; an adapter can be "running" while data is stale, and that is exactly the state an operator needs to see.

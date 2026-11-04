@@ -32,14 +32,36 @@ Each driver should be testable or traceable to an NFR / ADR-0000 budget line.
 
 ### Weighted evaluation
 
+Optional. Follow the [weighted evaluation method](README.md#weighted-evaluation-method): criteria from drivers, weights fixed before scoring, anchored scale, sensitivity line.
+
+*Expert judgement (one assessor), not a measurement.*
+
+Weights (swing weighting, fixed before scoring):
+
+| Criterion | Driver | Weight | Why this weight |
+|---|---|---|---|
+| <criterion> | D1 | 40 | <worst-to-best difference on this driver, compared with the others> |
+| <criterion> | D2 | 35 | … |
+| <criterion> | D3 | 25 | … |
+
+Scale anchors:
+
+| Criterion | 1 | 3 | 5 |
+|---|---|---|---|
+| <criterion> | <observable meaning> | … | … |
+
 | Criterion (weight) | Option A | Option B | Option C |
 |---|---|---|---|
-| Criterion 1 (40%) | 4 | 3 | 2 |
-| Criterion 2 (30%) | 3 | 4 | 2 |
-| Criterion 3 (30%) | 5 | 2 | 3 |
-| **Weighted score** | **4.0** | **3.0** | **2.3** |
+| <criterion> (40) | 4 | 3 | 2 |
+| <criterion> (35) | 3 | 4 | 2 |
+| <criterion> (25) | 5 | 2 | 3 |
+| **Weighted score** | **3.90** | **3.10** | **2.25** |
 
-Scores: 1 = poor, 5 = excellent. Keep 2–3 honest pros and cons per option; an option that collects eight cons while the winner has none reads as a post-hoc justification.
+Drivers not scored: <driver on which all options are equal, or "none">.
+
+Sensitivity: <which options the winner dominates; for each other option, the weight condition under which it would win, and whether that condition is plausible>.
+
+Keep 2–3 honest pros and cons per option; an option that collects eight cons while the winner has none reads as a post-hoc justification.
 
 ### Consequences
 
