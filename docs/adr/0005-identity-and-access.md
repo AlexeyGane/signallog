@@ -39,7 +39,7 @@ The original ADR selected Entra ID, OAuth 2.0 client credentials, RBAC and Key V
 | Ingress function | Service Bus | Managed identity | `Azure Service Bus Data Sender` on the `price-ticks` topic |
 | Ingestion Function | Service Bus, Cosmos DB | Managed identity | `Azure Service Bus Data Receiver` on its subscription; Cosmos DB built-in data contributor role scoped to the SignalLog database |
 | Admin/Query API | Cosmos DB, Service Bus, ARM | Managed identity | Cosmos DB built-in data reader role (plus contributor on `adapter-status`); `Data Sender` on `adapter-commands`; custom role limited to updating app settings on adapter Function apps ([0013](0013-adapter-control-plane.md)) |
-| Human users | UI and API | Entra ID sign-in (OIDC, authorization code + PKCE) | App roles `SignalLog.Viewer`, `SignalLog.Admin` |
+| Human users | UI and API | Entra ID sign-in ([OIDC, authorization code + PKCE](../standards/concepts-and-sources.md#oauth)) | App roles `SignalLog.Viewer`, `SignalLog.Admin` |
 | GitHub Actions | Azure Resource Manager | OIDC workload identity federation ([0004](0004-ci-cd-platform.md)) | Contributor on the environment's resource group only |
 
 Key Vault remains for genuinely secret material that cannot be replaced by identity (for example, a third-party market data API key in [0011](0011-market-data-sourcing-and-licensing.md)). Access via Key Vault references and RBAC, not access policies.
@@ -53,7 +53,7 @@ Key Vault remains for genuinely secret material that cannot be replaced by ident
 ### Confirmation
 
 - IaC sets `disableLocalAuth` on Service Bus and on the Cosmos DB account, so key-based access is impossible rather than merely unused.
-- A threat model (STRIDE) for the ingestion path references this ADR.
+- A threat model ([STRIDE](../standards/concepts-and-sources.md#stride)) for the ingestion path references this ADR.
 
 ## Pros and Cons of the Options
 
@@ -68,3 +68,13 @@ Key Vault remains for genuinely secret material that cannot be replaced by ident
 ### SAS keys / connection strings
 - Good, because it is the quickest to start.
 - Bad, because shared keys carry broad rights and are not tied to an identity.
+
+## More Information
+
+Sources (checked 2026-11-04):
+
+- Workload identity federation (GitHub Actions to Entra ID without secrets): https://learn.microsoft.com/entra/workload-id/workload-identity-federation
+- Service Bus: managed identities and built-in roles (Data Sender, Data Receiver, Data Owner), scoped to a queue, topic or subscription: https://learn.microsoft.com/azure/service-bus-messaging/service-bus-managed-service-identity
+- Service Bus: disable local (SAS) authentication with `disableLocalAuth`: https://learn.microsoft.com/azure/service-bus-messaging/disable-local-authentication
+- Cosmos DB for NoSQL: data-plane role-based access control and `disableLocalAuth`: https://learn.microsoft.com/azure/cosmos-db/how-to-connect-role-based-access-control
+- Key Vault: Azure RBAC is the recommended data-plane authorization model; access policies are legacy: https://learn.microsoft.com/azure/key-vault/general/rbac-access-policy

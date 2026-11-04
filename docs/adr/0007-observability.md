@@ -49,9 +49,9 @@ A price tick crosses six hops: adapter → API Management → ingress function �
 
 ### Cost controls
 
-- Workspace-based Application Insights with a **daily cap**.
+- Workspace-based Application Insights with a **daily cap** set on both the Application Insights resource and the Log Analytics workspace: the effective cap is the lower of the two, and a workspace has no cap until one is enabled ([daily cap](https://learn.microsoft.com/azure/azure-monitor/logs/daily-cap)).
 - Sampling for successful request traces; exceptions and dead-letter events never sampled.
-- 30-day retention (default) for the portfolio environment.
+- Default retention: 30 days for workspace tables, 90 days for the tables that have a 90-day default, such as Application Insights tables; 31 days are included in the ingestion price ([data retention](https://learn.microsoft.com/azure/azure-monitor/logs/data-retention-configure)). *Corrected 2026-11-04: the earlier text said "30-day retention (default)" for all data.*
 
 ### Consequences
 
@@ -76,4 +76,15 @@ A price tick crosses six hops: adapter → API Management → ingress function �
 
 ### Classic Application Insights SDK
 - Good, because it is the simplest to start.
-- Bad, because it is not vendor-neutral and Microsoft's direction is OpenTelemetry.
+- Bad, because it is not vendor-neutral, and Microsoft recommends OpenTelemetry for new Application Insights projects ([Application Insights FAQ](https://learn.microsoft.com/azure/azure-monitor/app/application-insights-faq#should-i-use-opentelemetry-for-new-application-insights-projects)).
+
+## More Information
+
+Sources (checked 2026-11-04):
+
+- Application Insights FAQ: use the Microsoft OpenTelemetry Distro for new .NET projects; the standalone `Azure.Monitor.OpenTelemetry.Exporter` remains for cases that need it: https://learn.microsoft.com/azure/azure-monitor/app/application-insights-faq#should-i-use-opentelemetry-for-new-application-insights-projects
+- Use OpenTelemetry with Azure Functions: https://learn.microsoft.com/azure/azure-functions/opentelemetry-howto
+- Sampling with OpenTelemetry in Application Insights: https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-sampling
+- Daily cap for Application Insights and Log Analytics: https://learn.microsoft.com/azure/azure-monitor/logs/daily-cap
+- Data retention in a Log Analytics workspace: https://learn.microsoft.com/azure/azure-monitor/logs/data-retention-configure
+- Open point for the implementation story: Distro or standalone exporter in the Functions isolated worker; the ADR's decision (OpenTelemetry, `ILogger`, Application Insights) does not depend on it.

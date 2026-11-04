@@ -13,8 +13,8 @@
 
 The original ADR-006 and ADR-007 both chose Azure Functions on the Consumption plan, deferred Container Apps and rejected VMs. Two facts change the decision:
 
-- The platform targets **.NET 10**. Microsoft states that .NET 9 is the last .NET version supported on the **Linux Consumption** plan; newer versions will not be added.
-- Hosting function apps on Linux in a Consumption plan **retires on 30 September 2028**; Microsoft recommends migrating to **Flex Consumption**.
+- The platform targets **.NET 10**. .NET 9 is the last .NET version supported on the **Linux Consumption** plan; newer versions will not be added ([supported languages](https://learn.microsoft.com/azure/azure-functions/supported-languages), [isolated worker guide](https://learn.microsoft.com/azure/azure-functions/dotnet-isolated-process-guide#supported-versions)).
+- Hosting function apps on Linux in a Consumption plan **retires on 30 September 2028**; Microsoft's guidance is to migrate to **Flex Consumption** before that date ([Consumption plan](https://learn.microsoft.com/azure/azure-functions/consumption-plan), [migration guide](https://learn.microsoft.com/azure/azure-functions/migration/migrate-plan-consumption-to-flex)).
 
 .NET 10 is generally available for the Functions isolated worker model. Where do the adapters, the ingestion processor and the APIs run?
 
@@ -72,9 +72,15 @@ Separate function apps give separate managed identities and least-privilege role
 - Bad, because it offers no VNet integration and fewer future features.
 
 ### Container Apps
-- Good, because it supports any ASP.NET Core host, KEDA scaling and a free monthly grant.
+- Good, because it supports any ASP.NET Core host, KEDA scaling and a free monthly grant (180,000 vCPU-seconds, 360,000 GiB-seconds and 2 million requests per subscription).
 - Bad, because there is more to configure (images, registry, revisions) for workloads that fit Functions triggers natively.
 
 ## More Information
 
 - Azure Functions runtime versions and .NET support: https://learn.microsoft.com/azure/azure-functions/functions-versions
+- Supported languages (".NET 9 is the last .NET version supported for Linux Consumption plan apps"): https://learn.microsoft.com/azure/azure-functions/supported-languages
+- Consumption plan (legacy), Linux retirement on 30 September 2028: https://learn.microsoft.com/azure/azure-functions/consumption-plan
+- Flex Consumption plan, supported .NET versions: https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan#supported-language-stack-versions
+- Functions networking options by plan: https://learn.microsoft.com/azure/azure-functions/functions-networking-options
+- Container Apps consumption plan free grant: https://learn.microsoft.com/azure/container-apps/billing#consumption-plan
+- Sources checked 2026-11-04.

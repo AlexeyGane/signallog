@@ -61,3 +61,11 @@ Branch protection and security settings are exported or codified and checked in 
 ### GitLab.com
 - Good, because it has strong built-in CI.
 - Bad, because it is less common in Microsoft-centric hiring contexts.
+
+## More Information
+
+Sources (checked 2026-11-04):
+
+- GitHub Docs, approving a pull request with required reviews ("Pull request authors cannot approve their own pull requests"): https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/approving-a-pull-request-with-required-reviews
+- GitHub changelog, push protection available on public repositories for free (2023-05-09): https://github.blog/changelog/2023-05-09-secret-scannings-push-protection-is-available-on-public-repositories-for-free
+- GitHub Docs, working with secret scanning and push protection: https://docs.github.com/en/code-security/secret-scanning/working-with-secret-scanning-and-push-protection

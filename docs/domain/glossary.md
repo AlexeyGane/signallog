@@ -1,13 +1,13 @@
 # Glossary
 
-The ubiquitous language of SignalLog. Terms are used with exactly these meanings in code (type and member names), documents and discussions. Code names are given in `monospace` where a type exists or is planned.
+The [ubiquitous language](../standards/concepts-and-sources.md#ubiquitous-language) of SignalLog. Terms are used with exactly these meanings in code (type and member names), documents and discussions. Code names are given in `monospace` where a type exists or is planned.
 
 ## Markets and instruments
 
 | Term | Definition |
 |---|---|
 | **Venue** (`Venue`) | A trading venue (exchange or segment) identified by its MIC. Examples: ICE Futures Europe, ICE Endex, European Energy Exchange. |
-| **MIC** | Market Identifier Code, ISO 10383: a four-letter code that identifies a venue worldwide. Used by regulators (MiFID II reporting), FIX and market-data vendors. `IFEU` = ICE Futures Europe, `NDEX` = ICE Endex, `XEEE` = EEX. |
+| **MIC** | Market Identifier Code, [ISO 10383](https://www.iso20022.org/market-identifier-codes): a four-letter code that identifies a venue worldwide. Used by regulators (MiFID II reporting), FIX and market-data vendors. `IFEU` = ICE Futures Europe, `NDEX` = ICE Endex, `XEEE` = EEX. |
 | **Product** (`Product`) | A standardised contract type on a venue: Brent Crude Futures, Dutch TTF Natural Gas Futures. Defines currency, unit, tick size, contract size, session, delivery rules. Identified by a product code unique within its venue. |
 | **Product code** | The venue's short code for a product: `BRN` (Brent, ICE), `TFM` (TTF, ICE Endex), `JKM` (JKM LNG, ICE), `G0BM` (THE gas month, EEX). Not globally unique; combined with the MIC it is. |
 | **Contract** | One delivery period of a product, for example Brent January 2027 or the TTF weekend starting 2026-11-07. Has a period kind, an extent (first and last delivery day) and an expiry (last trading day). |
@@ -88,5 +88,12 @@ The ubiquitous language of SignalLog. Terms are used with exactly these meanings
 | **MWh** | Megawatt-hour: an amount of energy. 1 MW for 1 hour = 1 MWh. |
 | **Business rule** (`BR-*`) | A rule of the domain that holds in any implementation and that a domain expert can check, identified as `BR-<AREA>-<NN>`. Catalogued in [business rules](../requirements/business-rules.md). |
 | **BR-TIME-01** | Delivered energy = capacity × elapsed duration of the delivery period. 1 MW delivers 24 / 23 / 25 MWh on a normal / short / long day ([ADR 0017](../adr/0017-time-and-timezones.md), [catalogue](../requirements/business-rules.md#br-time-01)). |
-| **bbl** | Barrel of crude oil, 158.987 litres. Brent prices are quoted in USD per barrel. |
-| **MMBtu** | Million British thermal units, an energy unit for gas and LNG. 1 MMBtu = 10⁶ Btu (International Table Btu, 1 Btu = 1,055.056 J) ≈ 1.055 GJ ≈ 293.07 kWh. JKM is quoted in USD per MMBtu. |
+| **bbl** | Barrel of crude oil, 42 US gallons = 158.987 litres ([NIST SP 811](https://www.nist.gov/pml/special-publication-811)). Brent prices are quoted in USD per barrel. |
+| **MMBtu** | Million British thermal units, an energy unit for gas and LNG. 1 MMBtu = 10⁶ Btu (International Table Btu, 1 Btu = 1,055.056 J, [NIST SP 811](https://www.nist.gov/pml/special-publication-811)) ≈ 1.055 GJ ≈ 293.07 kWh. JKM is quoted in USD per MMBtu. |
+
+## Sources
+
+- Engineering and methodology concepts used across the documents, with their primary sources: [Concepts and their sources](../standards/concepts-and-sources.md).
+- Units: NIST Special Publication 811, *Guide for the Use of the International System of Units*, Appendix B — https://www.nist.gov/pml/special-publication-811
+- Venue codes: ISO 10383 Market Identifier Codes — https://www.iso20022.org/market-identifier-codes
+- Market-specific definitions (gas day, products, hubs) cite their sources on the domain pages: [market conventions](market-conventions.md), [tenors and delivery periods](tenors-and-delivery-periods.md), [market data sources](market-data-sources.md).

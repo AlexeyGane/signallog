@@ -71,11 +71,11 @@ Adapter ──(MI token, app role Prices.Publish)──► APIM Consumption
 ### Ingress function ("thin")
 
 - One HTTP-triggered function in `func-signallog-ingress` ([0006](0006-compute-hosting.md)): reads the body, sets `MessageId = id`, copies `traceparent`, sends to `price-ticks`, returns `202 Accepted`. No business logic, no database access.
-- Protected by built-in App Service authentication (Entra ID): only tokens issued to APIM's managed identity are accepted. Consumption-tier APIM has no static outbound IP, so IP restrictions are not used.
+- Protected by built-in App Service authentication (Entra ID): only tokens issued to APIM's managed identity are accepted. Consumption-tier APIM has no static outbound IP ([IP addresses](https://learn.microsoft.com/azure/api-management/api-management-howto-ip-addresses)), so IP restrictions are not used.
 
 ### Consequences
 
-- Good, because there is no fixed gateway charge; Consumption includes the first 1 million operations per month ([0000](0000-cost-optimization-strategy.md)).
+- Good, because there is no fixed gateway charge; Consumption includes the first 1 million operations per month ([pricing](https://azure.microsoft.com/pricing/details/api-management/), to re-check with [0000](0000-cost-optimization-strategy.md)).
 - Good, because every component is GA and secretless.
 - Good, because the boundary still validates identity and contract before anything reaches the broker.
 - Bad, because one more deployable and one more cold start on the path.
@@ -112,3 +112,6 @@ Adapter ──(MI token, app role Prices.Publish)──► APIM Consumption
 - Feature comparison by tier: https://learn.microsoft.com/azure/api-management/api-management-features
 - v2 tier region availability: https://learn.microsoft.com/azure/api-management/api-management-region-availability
 - `rate-limit-by-key`: https://learn.microsoft.com/azure/api-management/rate-limit-by-key-policy
+- `validate-content` policy: https://learn.microsoft.com/azure/api-management/validate-content-policy
+- IP addresses by tier (Consumption and v2 tiers have no dedicated IP): https://learn.microsoft.com/azure/api-management/api-management-howto-ip-addresses
+- API Management pricing: https://azure.microsoft.com/pricing/details/api-management/

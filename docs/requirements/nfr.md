@@ -85,9 +85,9 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 #### NFR-SEC-03 — Supply-chain security
 
 - **Scenario:** a dependency (NuGet package, GitHub Action) has a published vulnerability or is changed upstream.
-- **Target:** no pull request merges with a known high or critical vulnerability (NuGet audit `NU1903`/`NU1904` fail the build); Dependabot monitors NuGet and GitHub Actions; secret scanning and push protection are on; CodeQL runs on pull requests ([ADR 0002](../adr/0002-source-control-platform.md), [ADR 0004](../adr/0004-ci-cd-platform.md)).
+- **Target:** no pull request merges with a known high or critical vulnerability (NuGet audit `NU1903`/`NU1904` fail the build, [NuGet auditing](https://learn.microsoft.com/nuget/concepts/auditing-packages)); Dependabot monitors NuGet and GitHub Actions; secret scanning and push protection are on; CodeQL runs on pull requests ([ADR 0002](../adr/0002-source-control-platform.md), [ADR 0004](../adr/0004-ci-cd-platform.md)).
 - **Verification:** CI build (NuGet audit, `TreatWarningsAsErrors`); repository security settings; CodeQL workflow.
-- **Known gap:** third-party actions are pinned to major tags (`@v5`), not to commit SHAs. Pinning by SHA is recommended by GitHub for third-party actions; to be decided when the deploy workflow is added.
+- **Action pinning:** every action is pinned to a full-length commit SHA and the repository policy requires it ([ADR 0004](../adr/0004-ci-cd-platform.md), pull request #6), as GitHub's [secure use reference](https://docs.github.com/en/actions/reference/security/secure-use) recommends. Workflow dependency lockfiles (public preview since 2026-10-14) are a review trigger in ADR 0004. *Updated 2026-11-04: the earlier "known gap" (major tags) was closed by pull request #6.*
 - **Status:** Agreed.
 
 <a id="nfr-sec-04"></a>
@@ -278,5 +278,10 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 | Item | Decision needed |
 |---|---|
 | PERF-01, PERF-02, OPS-01, OPS-02 targets | Run the calibration procedure in [ADR 0018](../adr/0018-latency-and-freshness-targets.md) (User Story "Latency and freshness baseline") once the Azure environment exists; then mark Agreed |
-| SEC-03 action pinning | Pin third-party actions by commit SHA, or accept major tags with Dependabot updates |
 | GOV-01 `AB#` check | Restore to error after the Azure DevOps organization is connected |
+
+## Sources
+
+- ISO/IEC 25010:2023, product quality model: https://www.iso.org/standard/78176.html
+- Azure Well-Architected Framework: https://learn.microsoft.com/azure/well-architected/
+- Vendor limits and recommendations behind individual targets are cited in the ADRs listed for each NFR.

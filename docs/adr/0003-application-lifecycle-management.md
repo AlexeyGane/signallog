@@ -15,7 +15,7 @@ The project must demonstrate an enterprise SDLC: planned work, a visible flow of
 ## Decision Drivers
 
 - D1 — Mature hierarchy (Epic → Feature → Story) and portfolio views (Delivery Plans).
-- D2 — Kanban board with WIP limits for a Scrumban flow.
+- D2 — Kanban board with [WIP limits](../standards/concepts-and-sources.md#kanban) for a [Scrumban](../standards/concepts-and-sources.md#scrumban) flow.
 - D3 — Traceability Epic → … → Pull Request → Build → Deployment.
 - D4 — Free ([0000](0000-cost-optimization-strategy.md)).
 
@@ -91,5 +91,13 @@ ADR / NFR ─► Epic ─► Feature ─► User Story ─► PR (AB#id) ─► 
 - Bad, because it weakens public visibility of the code ([0002](0002-source-control-platform.md)).
 
 ### GitHub + Jira
-- Good, because Jira is an industry standard.
-- Bad, because paid tiers would be needed for comparable features.
+- Good, because Jira is widely used in enterprises (author's assessment).
+- Bad, because paid tiers would be needed for comparable features (author's assessment; current Atlassian plans not checked).
+
+## More Information
+
+Sources (checked 2026-11-04):
+
+- Azure DevOps, free users: five with Basic access, unlimited with Stakeholder access: https://learn.microsoft.com/azure/devops/organizations/accounts/add-organization-users
+- Azure DevOps access levels (Delivery Plans with Basic access): https://learn.microsoft.com/azure/devops/organizations/security/access-levels
+- Link GitHub commits and pull requests to work items with `AB#`: https://learn.microsoft.com/azure/devops/boards/github/link-to-from-github

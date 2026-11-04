@@ -71,7 +71,7 @@ Keep 2–3 honest pros and cons per option; an option that collects eight cons w
 
 ### Confirmation
 
-How we will know the decision is implemented and still holds: a fitness function, a pipeline check, a dashboard, a review trigger.
+How we will know the decision is implemented and still holds: a [fitness function](../standards/concepts-and-sources.md#fitness-function), a pipeline check, a dashboard, a review trigger.
 
 ## Pros and Cons of the Options
 

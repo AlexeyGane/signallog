@@ -45,8 +45,8 @@ Figures are planning estimates based on public pricing at the time of writing an
 | Storage account | 0006 | Standard LRS (Functions host storage, exports) | ≈ 1 |
 | Application Insights / Log Analytics | 0007 | Pay-as-you-go with daily cap | ≈ 0–2 |
 | Key Vault | 0005 | Standard (operations only) | < 1 |
-| Azure SignalR Service | 0015 | Free tier | 0 |
-| Azure App Configuration | 0013 | Free tier | 0 |
+| Azure SignalR Service | 0015 | Free tier: 1 unit, 20 concurrent connections, 20,000 messages per day | 0 |
+| Azure App Configuration | 0013 | Free tier: 1,000 requests per day, 10 MB, 7-day history | 0 |
 | Static Web Apps (UI) | 0015 | Free plan | 0 |
 | GitHub, Azure Boards | 0002, 0003 | Free plans | 0 |
 | **Total (planned)** | | | **≈ 12–17** |
@@ -91,4 +91,10 @@ Figures are planning estimates based on public pricing at the time of writing an
 
 - Azure Service Bus pricing: https://azure.microsoft.com/pricing/details/service-bus/
 - Azure Cosmos DB free tier: https://learn.microsoft.com/azure/cosmos-db/free-tier
+- Service Bus tiers (Basic: queues only; Standard adds topics, subscriptions and duplicate detection): https://learn.microsoft.com/azure/service-bus-messaging/service-bus-premium-messaging#choosing-a-tier
+- Azure SignalR Service limits by tier: https://learn.microsoft.com/azure/azure-resource-manager/management/azure-subscription-service-limits#azure-signalr-service-limits
+- Azure App Configuration tiers and quotas: https://learn.microsoft.com/azure/azure-app-configuration/faq#which-app-configuration-tier-should-i-use
+- Azure Static Web Apps plans: https://learn.microsoft.com/azure/static-web-apps/plans
+- Cost Management budgets, actual and forecast alerts: https://learn.microsoft.com/azure/cost-management-billing/costs/tutorial-acm-create-budgets
+- Limits and tiers above were checked on 2026-11-04; prices are still to be re-checked in the pricing calculator before Acceptance.
 - Review triggers: guardrail breached two months in a row; a free offer is withdrawn; a new paid component is proposed.

@@ -9,7 +9,7 @@
 
 This standard describes **how** code moves from a work item to production. The decision **that** SignalLog uses trunk-based development is recorded in ADR 0002; this document is the operating procedure and can change through a normal pull request without a new ADR.
 
-## 1. Model: trunk-based development
+## 1. Model: [trunk-based development](concepts-and-sources.md#trunk-based-development)
 
 - `main` is the only long-lived branch. It is always releasable.
 - All changes reach `main` through short-lived branches and pull requests.
