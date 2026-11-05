@@ -2,11 +2,11 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed \| Accepted \| Deprecated \| Superseded by [NNNN](NNNN-title.md) |
+| Status | Proposed \| Accepted \| Deprecated \| Superseded by `[NNNN](NNNN-title.md)` |
 | Date | YYYY-MM-DD |
 | Deciders | Solution Architect, Key Developer *(both roles held by one person — see README)* |
 | Supersedes | — |
-| Related | [NNNN](NNNN-title.md) |
+| Related | `[NNNN](NNNN-title.md)` |
 | Traces to | NFR-xx, C4 container/component, Azure Boards Epic #nnn |
 
 ## Context and Problem Statement

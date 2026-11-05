@@ -37,7 +37,7 @@ Build, test, quality gates, infrastructure deployment and application deployment
 | `ci.yml` | pull request, push to `main` | restore, build with analyzers (banned-API rule `RS0030` as error, [0012](0012-message-contract-and-versioning.md), [0017](0017-time-and-timezones.md)), unit tests, coverage gate, `dotnet format --verify-no-changes`, PR title lint (Conventional Commits + `AB#`) |
 | `iac.yml` | changes under `infra/` | Bicep lint, `what-if` on PR, deploy on `main` ([0016](0016-environments-and-infrastructure-as-code.md)) |
 | `deploy.yml` | push to `main`, manual for prod | build artefacts once, deploy to dev, then prod behind a GitHub Environment with required approval |
-| `docs.yml` | changes under `docs/` | `mkdocs build --strict`, publish to GitHub Pages ([0001](0001-documentation-platform.md)) |
+| `docs.yml` | changes under `docs/`, `zensical.toml`, `eng/docs/` | `zensical build --strict`, publish to GitHub Pages ([0020](0020-documentation-site.md), which superseded 0001 on 2026-11-05) |
 | `codeql.yml` | schedule, pull request | CodeQL analysis for C# |
 
 ### Authentication to Azure

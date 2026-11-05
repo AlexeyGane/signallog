@@ -30,7 +30,7 @@ Tables written before 2026-11-04 (ADR 0001, 0003, 0008) carry a note that they p
 | ADR | Title | Status | Replaces original file |
 |---|---|---|---|
 | [0000](0000-cost-optimization-strategy.md) | Cost optimization strategy and budget envelope | Proposed (revision) | ADR-000 |
-| [0001](0001-documentation-platform.md) | Documentation platform | Accepted | ADR-001 |
+| [0001](0001-documentation-platform.md) | Documentation platform | Superseded by 0020 | ADR-001 |
 | [0002](0002-source-control-platform.md) | Source control platform | Accepted | ADR-002 |
 | [0003](0003-application-lifecycle-management.md) | Application lifecycle management | Accepted (amended) | ADR-003 |
 | [0004](0004-ci-cd-platform.md) | CI/CD platform | Accepted (revision) | ADR-004 |
@@ -49,6 +49,7 @@ Tables written before 2026-11-04 (ADR 0001, 0003, 0008) carry a note that they p
 | [0017](0017-time-and-timezones.md) | Time, timezones and delivery periods | Accepted (revision 2) | new |
 | [0018](0018-latency-and-freshness-targets.md) | Latency and freshness targets: provisional values and calibration | Accepted | new |
 | [0019](0019-market-status-events.md) | Market status events | Accepted | new |
+| [0020](0020-documentation-site.md) | Documentation site: Zensical on GitHub Pages | Proposed | new (supersedes 0001) |
 
 ## What changed versus the original ADR files
 

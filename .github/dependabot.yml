@@ -15,3 +15,9 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "ci(deps)"
+  - package-ecosystem: "pip"
+    directory: "/eng/docs"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "docs(deps)"

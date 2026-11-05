@@ -1,0 +1,84 @@
+# Documentation site (ADR 0020). Build: zensical build --strict ; preview: zensical serve
+[project]
+site_name = "SignalLog"
+site_description = "Cloud-native, event-driven commodity market data platform on Azure (.NET 10): architecture decisions, requirements and domain knowledge."
+site_author = "Alexey Gane"
+site_url = "https://alexeygane.github.io/signallog/"
+repo_url = "https://github.com/AlexeyGane/signallog"
+repo_name = "AlexeyGane/signallog"
+edit_uri = "edit/main/docs/"
+copyright = "&copy; 2026 Alexey Gane · MIT License"
+docs_dir = "docs"
+site_dir = "site"
+strict = true
+
+nav = [
+  { "Home" = "index.md" },
+  { "Architecture decisions" = [
+      "adr/README.md",
+      "adr/0000-cost-optimization-strategy.md",
+      "adr/0001-documentation-platform.md",
+      "adr/0002-source-control-platform.md",
+      "adr/0003-application-lifecycle-management.md",
+      "adr/0004-ci-cd-platform.md",
+      "adr/0005-identity-and-access.md",
+      "adr/0006-compute-hosting.md",
+      "adr/0007-observability.md",
+      "adr/0008-data-storage.md",
+      "adr/0009-event-driven-ingestion.md",
+      "adr/0010-api-management-ingestion-gateway.md",
+      "adr/0011-market-data-sourcing-and-licensing.md",
+      "adr/0012-message-contract-and-versioning.md",
+      "adr/0013-adapter-control-plane.md",
+      "adr/0014-instrument-domain-model.md",
+      "adr/0015-ui-and-real-time-push.md",
+      "adr/0016-environments-and-infrastructure-as-code.md",
+      "adr/0017-time-and-timezones.md",
+      "adr/0018-latency-and-freshness-targets.md",
+      "adr/0019-market-status-events.md",
+      "adr/0020-documentation-site.md",
+      "adr/template.md",
+  ] },
+  { "Requirements" = [
+      "requirements/README.md",
+      "requirements/nfr.md",
+      "requirements/business-rules.md",
+  ] },
+  { "Domain" = [
+      "domain/README.md",
+      "domain/glossary.md",
+      "domain/model.md",
+      "domain/time-and-delivery.md",
+      "domain/tenors-and-delivery-periods.md",
+      "domain/market-data-sources.md",
+      "domain/market-conventions.md",
+  ] },
+  { "Standards" = [
+      "standards/documentation.md",
+      "standards/branching-and-release.md",
+      "standards/concepts-and-sources.md",
+  ] },
+]
+
+[project.validation]
+invalid_links = true
+invalid_link_anchors = true
+
+[project.theme]
+language = "en"
+features = [
+  "navigation.tabs",
+  "navigation.sections",
+  "navigation.indexes",
+  "navigation.instant",
+  "navigation.top",
+  "content.action.edit",
+  "content.action.view",
+  "content.code.copy",
+  "search.highlight",
+]
+
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]

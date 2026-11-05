@@ -1,0 +1,3 @@
+# Direct dependencies of the documentation site (ADR 0020).
+# Regenerate requirements.txt: uv pip compile eng/docs/requirements.in --generate-hashes --python-version 3.13 --universal -o eng/docs/requirements.txt
+zensical==0.1.0
