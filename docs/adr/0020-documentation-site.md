@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed |
+| Status | Accepted 2026-11-05 |
 | Date | 2026-11-05 |
 | Deciders | Solution Architect, Key Developer *(both roles held by one person — see README)* |
 | Supersedes | [0001](0001-documentation-platform.md) |
@@ -73,7 +73,7 @@ Scale anchors:
 | Broken links fail CI (15) | 5 | 5 | 3 | 3 ⁵ |
 | **Weighted score** | **4.70** | **3.80** | **3.00** | **3.75** |
 
-¹ Verified on 2026-11-05: `zensical build --strict` over all pages reported two issues, both placeholder links in `template.md`. ² Navigation is passed to themes as pre-rendered HTML, which per the Material team prevents tabs and collapsible sections (one party's account). ³ Built into the `modern` template ([DocFX Markdown](https://dotnet.github.io/docfx/docs/markdown.html)). ⁴ Not 5: the 0.x line is one day old and plugin parity with MkDocs is incomplete. ⁵ Not tested here.
+¹ Verified on 2026-11-05: `zensical build --strict` over all pages reported two issues, both placeholder links in `template.md`; after they were wrapped in code spans, the build reported none. ² Navigation is passed to themes as pre-rendered HTML, which per the Material team prevents tabs and collapsible sections (one party's account). ³ Built into the `modern` template ([DocFX Markdown](https://dotnet.github.io/docfx/docs/markdown.html)). ⁴ Not 5: the 0.x line is one day old and plugin parity with MkDocs is incomplete. ⁵ Not tested here.
 
 Drivers not scored: D4 (all four produce static files for GitHub Pages at no cost).
 
