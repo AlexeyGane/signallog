@@ -58,6 +58,10 @@ nav = [
       "standards/branching-and-release.md",
       "standards/concepts-and-sources.md",
   ] },
+  { "Fun facts" = [
+      { "English" = "fun-facts/index.md" },
+      { "Русский" = "fun-facts/ru.md" },
+  ] },
 ]
 
 [project.validation]

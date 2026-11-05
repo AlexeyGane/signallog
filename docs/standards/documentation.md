@@ -23,7 +23,7 @@ A page belongs to one folder by what it records: a choice goes to `adr/`, a test
 
 ## 2. Writing rules
 
-- **Language:** English for everything in the repository, so that the site, code and commit history read the same. The one exception is an unlisted page written for a specific Russian-speaking audience (section 6); it says so in a comment at its top.
+- **Language:** English for everything in the repository, so that the site, code and commit history read the same. Two exceptions: a Russian mirror of a page (section 7) and an unlisted page written for a specific Russian-speaking audience (section 6), which says so in a comment at its top.
 - **One idea per sentence.** Name things precisely (`price-ticks` topic, not "the queue"); expand abbreviations on first use on each page or link the glossary.
 - **Sources:** facts about markets, vendors, standards or concepts cite a primary source with the date checked; concepts link to [Concepts and their sources](concepts-and-sources.md). Text without a source is the author's assessment and says so.
 - **Dates** are ISO 8601 (`2026-11-05`). Examples use real calendar dates so they can become tests.
@@ -71,4 +71,18 @@ A page meant for a particular reader (a cover note sent with an application, for
 
 | Page | Audience | Language |
 |---|---|---|
-| `docs/note.md` (`/note/`) | Readers of the project cover note | Russian |
+| `docs/note.md` (`/note/`) | Readers of the project cover note | Russian; English mirror planned (section 7) |
+
+## 7. Russian mirrors
+
+A page may be published in English and Russian at once. English stays the primary version; the Russian one is a mirror.
+
+- The mirror lives next to the page as `ru.md` (`fun-facts/index.md` and `fun-facts/ru.md`); both pages link to each other in their first line.
+- Both versions change in the **same pull request**. A pull request that edits one without the other is incomplete.
+- Facts, numbers and sources are identical; only the language differs. Each version links the same sources.
+- A listed page and its mirror are both in `nav`; an unlisted page and its mirror are both unlisted (section 6).
+
+| Page | Mirror | Status |
+|---|---|---|
+| [Fun facts](../fun-facts/index.md) | [Русский](../fun-facts/ru.md) | Published |
+| `docs/note.md` (cover note, unlisted) | English, `docs/note/en.md` or similar | Planned: written for one reader; the English version waits until the note is generalised |

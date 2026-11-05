@@ -146,6 +146,20 @@
                             Tags               = 'ADR-0020; NFR-DOC-01'
                             AcceptanceCriteria = 'The cover note is published at https://alexeygane.github.io/signallog/note/; it is not in the navigation, search or sitemap.xml and carries noindex; its links point to site pages and pass the strict build; the documentation standard describes unlisted pages.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Publish Fun Facts in English and Russian'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0020; NFR-DOC-01'
+                            AcceptanceCriteria = 'Fun facts are published in English and Russian, both in the navigation and linked to each other; every fact cites a source; the documentation standard describes Russian mirrors.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Mirror the cover note in English'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0020; NFR-DOC-01'
+                            AcceptanceCriteria = 'The cover note is generalised beyond one reader and published in English as an unlisted mirror of the Russian page, under the rules for unlisted pages and mirrors in the documentation standard.'
+                        }
                     )
                 }
             )
