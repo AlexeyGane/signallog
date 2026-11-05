@@ -96,6 +96,12 @@ ADR / NFR ─► Epic ─► Feature ─► User Story ─► PR (AB#id) ─► 
 
 ## More Information
 
+Implementation notes (2026-11-05):
+
+- The Azure DevOps organization `alexeygane` is connected to the Microsoft Entra directory of the Azure subscription ([0005](0005-identity-and-access.md)) and billed through that subscription; only free-tier features are used.
+- The Boards project is **private**: new organizations cannot create public projects, and existing public projects are being converted to private ([public projects retirement](https://learn.microsoft.com/azure/devops/organizations/projects/public-projects-retirement)). Reviewers see the board through a free Stakeholder invitation; the public trail is the GitHub repository, where every pull request title carries `AB#<id>`.
+- The project, board and seed backlog are created by `eng/azure-devops/Initialize-AzureBoards.ps1` from `boards.settings.psd1`. GitHub is connected through the Azure Boards GitHub App, limited to `AlexeyGane/signallog`.
+
 Sources (checked 2026-11-04):
 
 - Azure DevOps, free users: five with Basic access, unlimited with Stakeholder access: https://learn.microsoft.com/azure/devops/organizations/accounts/add-organization-users
