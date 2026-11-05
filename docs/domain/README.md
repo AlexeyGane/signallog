@@ -22,4 +22,4 @@ This section describes the commodity-market domain that SignalLog models: the vo
 - Every market fact cites its source (exchange specification, regulator document) and the date it was checked.
 - Anything inferred rather than read in a source is marked **Inferred**; anything not yet confirmed is listed under **Open questions** on the page.
 - Examples use real calendar dates so that they can be turned directly into unit tests.
-- Diagrams are written in Mermaid, which GitHub and MkDocs both render.
+- Diagrams are written in Mermaid, which GitHub and the documentation site both render ([documentation standard](../standards/documentation.md#2-writing-rules)).

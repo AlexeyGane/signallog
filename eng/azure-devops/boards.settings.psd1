@@ -118,6 +118,29 @@
                         }
                     )
                 }
+                @{
+                    Type        = 'Feature'
+                    Title       = 'Documentation site'
+                    Area        = 'Architecture'
+                    Description = 'Public documentation site built from docs/ with Zensical and published to GitHub Pages; broken links and anchors fail the build.'
+                    Links       = @('https://github.com/AlexeyGane/signallog/blob/main/docs/adr/0020-documentation-site.md')
+                    Children    = @(
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Decide the documentation site generator'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0001; ADR-0020; NFR-DOC-01'
+                            AcceptanceCriteria = 'ADR 0020 records the generator choice with a weighted evaluation; ADR 0001 is marked superseded; the documentation standard exists and is linked from ADR 0001.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Publish the documentation site to GitHub Pages'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0004; ADR-0020; NFR-DOC-01'
+                            AcceptanceCriteria = 'zensical.toml with explicit navigation and a landing page; strict build passes locally and in CI; docs workflow builds on pull requests and deploys on main with SHA-pinned actions and hash-pinned Python packages; the site is reachable at https://alexeygane.github.io/signallog/.'
+                        }
+                    )
+                }
             )
         }
     )

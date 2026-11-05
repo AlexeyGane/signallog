@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Accepted |
+| Status | Superseded by [0020](0020-documentation-site.md) (2026-11-05): the generator changes from MkDocs with Material to Zensical; docs-as-code and GitHub Pages stay |
 | Date | 2026-10-09 (revised 2026-10-18) |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Supersedes | — |
@@ -75,6 +75,6 @@ SignalLog needs one place for architecture documentation ([C4](../standards/conc
 
 ## More Information
 
-- The documentation structure and update rules (which were part of the original ADR-001) are a standard, not a decision; they move to `docs/standards/documentation.md`.
+- The documentation structure and update rules (which were part of the original ADR-001) are a standard, not a decision. They were announced here for `docs/standards/documentation.md`, but that page was only written on 2026-11-05, together with ADR 0020: [Documentation standard](../standards/documentation.md).
 - Material for MkDocs maintenance notice: https://github.com/squidfunk/mkdocs-material/issues/8523
 - Review triggers: Material for MkDocs end of security fixes; GitHub Pages limits reached.

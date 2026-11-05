@@ -10,6 +10,8 @@ SignalLog ingests futures prices for crude oil, natural gas and LNG from ICE Fut
 
 Solution skeleton. Decisions are recorded in [docs/adr](docs/adr/README.md).
 
+Documentation site: **https://alexeygane.github.io/signallog/** (built from `docs/` with Zensical, [ADR 0020](docs/adr/0020-documentation-site.md)).
+
 ## Architecture at a glance
 
 ```text
@@ -55,6 +57,7 @@ Build rules applied to every project (`Directory.Build.props`): nullable referen
 - [Requirements](docs/requirements/README.md): non-functional requirements catalogue (`NFR-*` identifiers used by the ADRs)
 - [Branching and release standard](docs/standards/branching-and-release.md)
 - [Concepts and their sources](docs/standards/concepts-and-sources.md)
+- [Documentation standard](docs/standards/documentation.md): structure, writing rules, local preview
 
 ## License
 

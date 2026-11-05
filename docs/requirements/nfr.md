@@ -29,7 +29,7 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 | [NFR-DATA-05](#nfr-data-05) | Correct delivery volumes on DST days | Functional suitability — correctness | Volumes equal capacity × elapsed hours on 23/24/25-hour days | Agreed | [0014](../adr/0014-instrument-domain-model.md), [0017](../adr/0017-time-and-timezones.md) |
 | [NFR-LEGAL-01](#nfr-legal-01) | Licensed data only | Compliance | 0 sources enabled without a recorded terms review | Agreed | [0011](../adr/0011-market-data-sourcing-and-licensing.md) |
 | [NFR-GOV-01](#nfr-gov-01) | Requirement-to-release traceability | Governance | 100 % of merged PRs linked to a work item | Agreed | [0003](../adr/0003-application-lifecycle-management.md) |
-| [NFR-DOC-01](#nfr-doc-01) | Public, versioned documentation | Maintainability — documentation | Docs built strictly and published from `main` | Agreed | [0001](../adr/0001-documentation-platform.md) |
+| [NFR-DOC-01](#nfr-doc-01) | Public, versioned documentation | Maintainability — documentation | Docs built strictly and published from `main` | Agreed | [0020](../adr/0020-documentation-site.md) |
 | [NFR-DEMO-01](#nfr-demo-01) | Demo always works | Reliability — availability (demo) | Demo runs with no live source; smoke test green before every demo | Agreed | [0011](../adr/0011-market-data-sourcing-and-licensing.md) |
 | [NFR-DEL-01](#nfr-del-01) | Automated, repeatable deployment and environments | Operational excellence — deployment | Environment from scratch with 0 manual portal steps | Agreed | [0004](../adr/0004-ci-cd-platform.md), [0016](../adr/0016-environments-and-infrastructure-as-code.md) |
 
@@ -227,8 +227,8 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 #### NFR-DOC-01 — Public, versioned documentation
 
 - **Scenario:** a reader opens the project documentation.
-- **Target:** all documentation lives in the repository, changes through pull requests together with the code it describes, builds with `mkdocs build --strict` without warnings and is published to GitHub Pages from `main` ([ADR 0001](../adr/0001-documentation-platform.md)).
-- **Verification:** `docs.yml` workflow (planned in [ADR 0004](../adr/0004-ci-cd-platform.md)).
+- **Target:** all documentation lives in the repository, changes through pull requests together with the code it describes, builds with `zensical build --strict` (invalid links and anchors abort the build) and is published to GitHub Pages from `main` ([ADR 0020](../adr/0020-documentation-site.md), which superseded [ADR 0001](../adr/0001-documentation-platform.md)).
+- **Verification:** `docs` workflow: strict build on pull requests, deployment on merge to `main` ([ADR 0004](../adr/0004-ci-cd-platform.md), [documentation standard](../standards/documentation.md#5-publication-and-checks)).
 - **Status:** Agreed.
 
 <a id="nfr-demo-01"></a>
@@ -253,7 +253,8 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 | ADR | NFRs |
 |---|---|
 | [0000](../adr/0000-cost-optimization-strategy.md) | COST-01 |
-| [0001](../adr/0001-documentation-platform.md) | DOC-01 |
+| [0001](../adr/0001-documentation-platform.md) (superseded) | DOC-01 |
+| [0020](../adr/0020-documentation-site.md) | DOC-01 |
 | [0002](../adr/0002-source-control-platform.md) | SEC-03, MNT-01 |
 | [0003](../adr/0003-application-lifecycle-management.md) | GOV-01 |
 | [0004](../adr/0004-ci-cd-platform.md) | SEC-03, DEL-01 |

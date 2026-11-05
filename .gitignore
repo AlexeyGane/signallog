@@ -434,5 +434,6 @@ local.settings.json
 __azurite_db_*.json
 __blobstorage__/
 __queuestorage__/
-# MkDocs build output
+# Documentation site build output (Zensical, ADR 0020)
 site/
+.venv-docs/
