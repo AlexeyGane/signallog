@@ -218,7 +218,7 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 
 - **Scenario:** a reviewer asks why a change exists and which release contains it.
 - **Target:** 100 % of merged pull requests reference an Azure Boards work item (`AB#<id>`); every User Story belongs to a Feature and every Feature to an Epic; Features reference the ADRs and NFRs they implement ([ADR 0003](../adr/0003-application-lifecycle-management.md)).
-- **Verification:** `pr-title` CI job. **Current state:** the `AB#` check reports a warning instead of failing until the Azure DevOps organization exists; it returns to an error after the Azure Boards GitHub app is connected.
+- **Verification:** `pr-title` CI job fails a pull request whose title has no `AB#<id>` (Dependabot pull requests are exempt). The Azure Boards GitHub app, connected on 2026-11-05 to `dev.azure.com/alexeygane/SignalLog` with access to this repository only, turns each reference into a link on the work item.
 - **Status:** Agreed.
 
 ### Documentation, demo and delivery
@@ -278,7 +278,6 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 | Item | Decision needed |
 |---|---|
 | PERF-01, PERF-02, OPS-01, OPS-02 targets | Run the calibration procedure in [ADR 0018](../adr/0018-latency-and-freshness-targets.md) (User Story "Latency and freshness baseline") once the Azure environment exists; then mark Agreed |
-| GOV-01 `AB#` check | Restore to error after the Azure DevOps organization is connected |
 
 ## Sources
 

@@ -3,7 +3,8 @@
 .SYNOPSIS
     Creates or updates the SignalLog Azure Boards project from boards.settings.psd1 (ADR 0003).
 
-    Status: not yet run against a live Azure DevOps organization. Expect fixes after the first run.
+    Status: first run against dev.azure.com/alexeygane on 2026-11-05 created the project, board,
+    Delivery Plan and seed backlog without errors.
 
 .DESCRIPTION
     Idempotent: every step reads the current state first and only creates or changes what differs.
@@ -234,11 +235,15 @@ function Set-AreasAndIterations([string] $ProjectUrl) {
     Write-Step 'Iteration paths (monthly cadence)'
     $first = [datetime]::ParseExact($Settings.Cadence.FirstMonth, 'yyyy-MM', [Globalization.CultureInfo]::InvariantCulture)
     $iterations = @()
+    $years = @{}
     for ($i = 0; $i -lt $Settings.Cadence.Months; $i++) {
         $start = $first.AddMonths($i)
         $finish = $start.AddMonths(1).AddDays(-1)
         $year = $start.ToString('yyyy')
-        $null = New-ClassificationNode $ProjectUrl 'Iterations' '' $year $null
+        if (-not $years.ContainsKey($year)) {
+            $null = New-ClassificationNode $ProjectUrl 'Iterations' '' $year $null
+            $years[$year] = $true
+        }
         $iterations += New-ClassificationNode $ProjectUrl 'Iterations' $year $start.ToString('yyyy-MM') @{
             startDate  = $start.ToString('yyyy-MM-ddT00:00:00Z')
             finishDate = $finish.ToString('yyyy-MM-ddT00:00:00Z')

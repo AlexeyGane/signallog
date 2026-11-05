@@ -36,10 +36,9 @@ jobs:
             echo "::error::PR title must follow Conventional Commits: <type>(<scope>): <summary> AB#<id>"
             exit 1
           fi
-          # TEMPORARY: warning instead of error until the Azure Boards organization exists
-          # (blocked by Azure sign-up support request). Restore "::error::" and "exit 1" afterwards.
           if [[ "$AUTHOR" != "dependabot[bot]" && ! "$TITLE" =~ AB#[0-9]+ ]]; then
-            echo "::warning::PR title should reference an Azure Boards work item: AB#<id>"
+            echo "::error::PR title must reference an Azure Boards work item: AB#<id>"
+            exit 1
           fi
 
   build:
