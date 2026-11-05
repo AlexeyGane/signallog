@@ -82,3 +82,6 @@ features = [
 custom_fences = [
   { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
 ]
+
+# Bare URLs (as in the Sources lists) become links, as they do on GitHub.
+[project.markdown_extensions.pymdownx.magiclink]
