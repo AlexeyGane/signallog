@@ -5,7 +5,7 @@
 | Status | Active |
 | Owner | Solution Architect |
 | Implements | [ADR 0002](../adr/0002-source-control-platform.md), [ADR 0003](../adr/0003-application-lifecycle-management.md), [ADR 0004](../adr/0004-ci-cd-platform.md) |
-| Related | [ADR 0013](../adr/0013-adapter-control-plane.md) (feature flags via App Configuration), [ADR 0016](../adr/0016-environments-and-infrastructure-as-code.md) (environments) |
+| Related | [Change workflow](change-workflow.md) (work item, evidence, review gate, closure), [ADR 0013](../adr/0013-adapter-control-plane.md) (feature flags via App Configuration), [ADR 0016](../adr/0016-environments-and-infrastructure-as-code.md) (environments) |
 
 This standard describes **how** code moves from a work item to production. The decision **that** SignalLog uses trunk-based development is recorded in ADR 0002; this document is the operating procedure and can change through a normal pull request without a new ADR.
 
@@ -63,10 +63,11 @@ A branch that cannot be merged within two days signals that the story is too lar
   ```
 
   Examples: `feat(adapters): add replay adapter AB#12`, `fix(domain): handle DST fall-back in session check AB#15`.
+- **PR description** repeats `AB#<id>`: only the description or a commit message links the pull request to the work item, and no transition keyword (`fixes`, `Closed`) precedes it ([change workflow, section 3](change-workflow.md#3-linking-pull-requests-to-work-items)).
 - **Scopes** follow the solution layout: `adapters`, `ingress`, `ingestion`, `api`, `web`, `domain`, `contracts`, `infra`, `docs`, `ci`.
 - **Breaking changes** to the message contract or public API use `!` (`feat(contracts)!: ...`) and require a contract-version decision ([ADR 0012](../adr/0012-message-contract-and-versioning.md)).
 - **Commits inside a branch** may be informal (`wip`, `fix typo`); they are squashed away.
-- **Review:** the PR template's self-review checklist is mandatory; required status checks must pass (ADR 0002 explains why approvals are set to 0 in a solo project).
+- **Review:** the PR template's self-review checklist is mandatory; required status checks must pass (ADR 0002 explains why approvals are set to 0 in a solo project). Every changed file is marked Viewed before the merge ([review gate](change-workflow.md#5-review-gate-every-file-viewed)).
 - **After merge** the head branch is deleted automatically.
 
 ## 4. Unfinished work: feature flags
