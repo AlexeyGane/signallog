@@ -39,6 +39,8 @@ Every Azure resource, role assignment and alert must be reproducible from the re
 
 - One subscription, two resource groups. The single free-tier Cosmos DB account is shared: databases `signallog-dev` and `signallog-prod` under database-level throughput, or `dev` uses the emulator only ([0008](0008-data-storage.md)).
 - `dev` resources that carry a fixed charge (Service Bus Standard) are shared with `prod` through separate topics, or `dev` is deployed on demand and torn down; the choice is recorded in [0000](0000-cost-optimization-strategy.md).
+- Region: **Sweden Central** for every environment resource (checks in [0006](0006-compute-hosting.md) and [0010](0010-api-management-ingestion-gateway.md)). Exception: Static Web Apps offers few regions; its region only hosts the managed Functions API and staging environments, while static assets are distributed globally ([Static Web Apps FAQ](https://learn.microsoft.com/azure/static-web-apps/faq#how-do-i-ensure-my-app-is-deployed-to-a-specific-azure-region)), so the closest offered region (West Europe) is used ([0015](0015-ui-and-real-time-push.md)).
+- The resource group `VisualStudioOnline-<id>` in the subscription belongs to the Azure DevOps organization's billing link ([0003](0003-application-lifecycle-management.md)); it is not managed by SignalLog's IaC and must not be deleted.
 - Naming: `<type>-signallog-<env>[-<qualifier>]` following the Cloud Adoption Framework abbreviations.
 
 ### Pipeline integration

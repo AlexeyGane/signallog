@@ -35,11 +35,11 @@ Tables written before 2026-11-04 (ADR 0001, 0003, 0008) carry a note that they p
 | [0003](0003-application-lifecycle-management.md) | Application lifecycle management | Accepted (amended) | ADR-003 |
 | [0004](0004-ci-cd-platform.md) | CI/CD platform | Accepted (revision) | ADR-004 |
 | [0005](0005-identity-and-access.md) | Identity and access model | Accepted (revision) | ADR-005 |
-| [0006](0006-compute-hosting.md) | Compute and hosting model | Proposed (revision) | ADR-006 + ADR-007 (merged) |
+| [0006](0006-compute-hosting.md) | Compute and hosting model | Accepted (revision) | ADR-006 + ADR-007 (merged) |
 | [0007](0007-observability.md) | Observability platform | Accepted | ADR-008 |
 | [0008](0008-data-storage.md) | Operational data store | Proposed (revision) | ADR-009 |
 | [0009](0009-event-driven-ingestion.md) | Event-driven ingestion via Azure Service Bus | Proposed | new |
-| [0010](0010-api-management-ingestion-gateway.md) | API Management in the ingestion path | Proposed | new |
+| [0010](0010-api-management-ingestion-gateway.md) | API Management in the ingestion path | Accepted | new |
 | [0011](0011-market-data-sourcing-and-licensing.md) | Market data sourcing and licensing | Accepted | new |
 | [0012](0012-message-contract-and-versioning.md) | Message contract and versioning | Accepted | new |
 | [0013](0013-adapter-control-plane.md) | Adapter control plane | Accepted | new |

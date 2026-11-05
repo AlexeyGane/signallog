@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed |
+| Status | Accepted 2026-11-05 |
 | Date | 2026-10-18 (revised same day after tier verification) |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Related | [0000](0000-cost-optimization-strategy.md), [0005](0005-identity-and-access.md), [0006](0006-compute-hosting.md), [0009](0009-event-driven-ingestion.md), [0012](0012-message-contract-and-versioning.md) |
@@ -36,7 +36,7 @@ The first draft of this ADR chose the built-in `send-service-bus-message` policy
 Notes:
 
 - `send-service-bus-message` is documented for the **classic gateway only** (Developer, Basic, Standard, Premium) and not for Consumption, v2 or workspaces. The how-to page marks the Service Bus integration as preview; the policy reference page does not. Treated as preview.
-- Microsoft does not document **regional** restrictions for individual policies; availability is defined per tier/gateway. Regional limits apply to tiers: v2 tiers are available in a subset of regions (in Europe, some regions such as UK South, North Europe and Germany West Central show temporary capacity warnings for some tiers). The Consumption tier's regions are not listed on the v2 availability page; confirm in the portal when creating the instance in the chosen region.
+- Microsoft does not document **regional** restrictions for individual policies; availability is defined per tier/gateway. Regional limits apply to tiers: v2 tiers are available in a subset of regions (in Europe, some regions such as UK South, North Europe and Germany West Central show temporary capacity warnings for some tiers). The Consumption tier's regions are not listed on the v2 availability page; checked in the portal on 2026-11-05: Consumption is offered in Sweden Central, the region chosen in [0006](0006-compute-hosting.md). Sweden Central also has no capacity warning for Basic v2 or Standard v2, the upgrade path named under *Throttling*.
 - The policy's `message-id` attribute must be a valid **GUID**. This drives the identifier choice in [0012](0012-message-contract-and-versioning.md).
 
 ## Considered Options
