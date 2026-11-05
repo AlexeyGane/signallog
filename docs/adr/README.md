@@ -49,7 +49,7 @@ Tables written before 2026-11-04 (ADR 0001, 0003, 0008) carry a note that they p
 | [0017](0017-time-and-timezones.md) | Time, timezones and delivery periods | Accepted (revision 2) | new |
 | [0018](0018-latency-and-freshness-targets.md) | Latency and freshness targets: provisional values and calibration | Accepted | new |
 | [0019](0019-market-status-events.md) | Market status events | Accepted | new |
-| [0020](0020-documentation-site.md) | Documentation site: Zensical on GitHub Pages | Proposed | new (supersedes 0001) |
+| [0020](0020-documentation-site.md) | Documentation site: Zensical on GitHub Pages | Accepted | new (supersedes 0001) |
 
 ## What changed versus the original ADR files
 
