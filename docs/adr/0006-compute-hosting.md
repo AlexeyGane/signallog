@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed (revision; merges original ADR-006 and ADR-007, both Accepted) |
+| Status | Accepted 2026-11-05 (revision; merges original ADR-006 and ADR-007) |
 | Date | 2026-10-18 |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Supersedes | ADR-006 Execution Platform Baseline, ADR-007 Runtime Hosting Model |
@@ -59,7 +59,7 @@ Separate function apps give separate managed identities and least-privilege role
 ### Confirmation
 
 - IaC deploys Flex Consumption with `FUNCTIONS_WORKER_RUNTIME=dotnet-isolated` and .NET 10.
-- Verify .NET 10 availability for Flex Consumption in the target region before Accepting this ADR.
+- Region **Sweden Central** (`swedencentral`) for all SignalLog resources ([0016](0016-environments-and-infrastructure-as-code.md)). Verified 2026-11-05: `az functionapp list-flexconsumption-runtimes --location swedencentral --runtime dotnet-isolated` lists .NET 10, 9 and 8; all 16 European Flex Consumption regions list .NET 10.
 
 ## Pros and Cons of the Options
 
