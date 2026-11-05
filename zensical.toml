@@ -65,6 +65,7 @@ invalid_links = true
 invalid_link_anchors = true
 
 [project.theme]
+custom_dir = "overrides"
 language = "en"
 features = [
   "navigation.tabs",
@@ -85,3 +86,7 @@ custom_fences = [
 
 # Bare URLs (as in the Sources lists) become links, as they do on GitHub.
 [project.markdown_extensions.pymdownx.magiclink]
+
+# Task lists ("- [x]") render as checkboxes, as they do on GitHub.
+[project.markdown_extensions.pymdownx.tasklist]
+custom_checkbox = true

@@ -139,6 +139,13 @@
                             Tags               = 'ADR-0004; ADR-0020; NFR-DOC-01'
                             AcceptanceCriteria = 'zensical.toml with explicit navigation and a landing page; strict build passes locally and in CI; docs workflow builds on pull requests and deploys on main with SHA-pinned actions and hash-pinned Python packages; the site is reachable at https://alexeygane.github.io/signallog/.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Publish the cover note as an unlisted page'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0020; NFR-DOC-01'
+                            AcceptanceCriteria = 'The cover note is published at https://alexeygane.github.io/signallog/note/; it is not in the navigation, search or sitemap.xml and carries noindex; its links point to site pages and pass the strict build; the documentation standard describes unlisted pages.'
+                        }
                     )
                 }
             )
