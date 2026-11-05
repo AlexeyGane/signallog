@@ -23,7 +23,7 @@ A page belongs to one folder by what it records: a choice goes to `adr/`, a test
 
 ## 2. Writing rules
 
-- **Language:** English for everything in the repository, so that the site, code and commit history read the same.
+- **Language:** English for everything in the repository, so that the site, code and commit history read the same. The one exception is an unlisted page written for a specific Russian-speaking audience (section 6); it says so in a comment at its top.
 - **One idea per sentence.** Name things precisely (`price-ticks` topic, not "the queue"); expand abbreviations on first use on each page or link the glossary.
 - **Sources:** facts about markets, vendors, standards or concepts cite a primary source with the date checked; concepts link to [Concepts and their sources](concepts-and-sources.md). Text without a source is the author's assessment and says so.
 - **Dates** are ISO 8601 (`2026-11-05`). Examples use real calendar dates so they can become tests.
@@ -47,6 +47,7 @@ python -m venv .venv-docs
 pip install --require-hashes -r eng/docs/requirements.txt
 zensical serve          # preview at http://localhost:8000, rebuilds on save
 zensical build --clean  # the same strict build as CI; fails on any broken link or anchor
+python eng/docs/remove-unlisted-from-sitemap.py site  # as CI: drop unlisted pages from sitemap.xml
 ```
 
 `site/` and `.venv-docs/` are not committed.
@@ -56,3 +57,18 @@ zensical build --clean  # the same strict build as CI; fails on any broken link 
 - The `docs` workflow builds the site in strict mode on every pull request that touches `docs/`, `zensical.toml`, `eng/docs/` or the workflow itself, and fails on an invalid link or anchor ([ADR 0020](../adr/0020-documentation-site.md)).
 - On merge to `main`, the same workflow deploys the site to GitHub Pages: `https://alexeygane.github.io/signallog/`.
 - Dependency updates for the site (Zensical and its packages, GitHub Actions) arrive as Dependabot pull requests and are reviewed like code.
+
+## 6. Unlisted pages
+
+A page meant for a particular reader (a cover note sent with an application, for example) can be published without being listed. Such a page:
+
+- is **not** added to `nav` in `zensical.toml`;
+- sets `search: exclude: true` and `robots: noindex, nofollow` in its front matter; the template override `overrides/main.html` turns the second into `<meta name="robots">`;
+- is removed from `sitemap.xml` by `eng/docs/remove-unlisted-from-sitemap.py`, which the `docs` workflow runs after the build;
+- is not linked from any listed page.
+
+"Unlisted" is not "private": the Markdown source is in the public repository, and anyone with the link can open the page. Nothing that must stay confidential goes on such a page.
+
+| Page | Audience | Language |
+|---|---|---|
+| `docs/note.md` (`/note/`) | Readers of the project cover note | Russian |
