@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed (revision 2) |
+| Status | Accepted 2026-11-05 (revision 2) |
 | Date | 2026-11-01 |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Related | [0008](0008-data-storage.md), [0011](0011-market-data-sourcing-and-licensing.md), [0012](0012-message-contract-and-versioning.md), [0017](0017-time-and-timezones.md) |

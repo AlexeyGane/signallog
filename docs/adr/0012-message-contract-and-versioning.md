@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed |
+| Status | Accepted 2026-11-05 |
 | Date | 2026-10-18 |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Related | [0008](0008-data-storage.md), [0009](0009-event-driven-ingestion.md), [0010](0010-api-management-ingestion-gateway.md), [0014](0014-instrument-domain-model.md), [0017](0017-time-and-timezones.md), [0019](0019-market-status-events.md) |

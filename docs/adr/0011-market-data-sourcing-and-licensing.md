@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed |
+| Status | Accepted 2026-11-05 |
 | Date | 2026-10-18 |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Related | [0012](0012-message-contract-and-versioning.md), [0013](0013-adapter-control-plane.md), [0014](0014-instrument-domain-model.md) |

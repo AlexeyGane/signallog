@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed (revision of original ADR-004, Accepted) |
+| Status | Accepted 2026-11-05 (revision of original ADR-004) |
 | Date | 2026-10-18 |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Supersedes | ADR-004 (original one-line version) |
@@ -42,7 +42,9 @@ Build, test, quality gates, infrastructure deployment and application deployment
 
 ### Authentication to Azure
 
-GitHub Actions authenticates with **OpenID Connect workload identity federation** to a dedicated Entra ID app registration (or user-assigned managed identity) per environment, scoped by federated credential to the repository, branch and GitHub Environment. No client secret is stored in GitHub ([0005](0005-identity-and-access.md)).
+GitHub Actions authenticates with **OpenID Connect workload identity federation** to a dedicated **user-assigned managed identity** per environment (`id-signallog-github-<env>`, declared in Bicep, [0016](0016-environments-and-infrastructure-as-code.md)), scoped by federated credential to the repository, branch and GitHub Environment. No client secret is stored in GitHub ([0005](0005-identity-and-access.md)).
+
+A managed identity is chosen over an Entra ID app registration (decided 2026-11-05): it is an Azure resource that is created, role-assigned and removed with the environment's Bicep, needs no permission to register applications in the directory, and supports federated credentials for GitHub Actions ([Microsoft Learn](https://learn.microsoft.com/entra/workload-id/workload-identity-federation-create-trust-user-assigned-managed-identity)). An app registration remains the fallback if a scenario needs a multi-tenant application.
 
 ### Action pinning
 

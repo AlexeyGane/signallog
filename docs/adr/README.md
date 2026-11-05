@@ -33,22 +33,22 @@ Tables written before 2026-11-04 (ADR 0001, 0003, 0008) carry a note that they p
 | [0001](0001-documentation-platform.md) | Documentation platform | Accepted | ADR-001 |
 | [0002](0002-source-control-platform.md) | Source control platform | Accepted | ADR-002 |
 | [0003](0003-application-lifecycle-management.md) | Application lifecycle management | Accepted (amended) | ADR-003 |
-| [0004](0004-ci-cd-platform.md) | CI/CD platform | Proposed (revision) | ADR-004 |
-| [0005](0005-identity-and-access.md) | Identity and access model | Proposed (revision) | ADR-005 |
+| [0004](0004-ci-cd-platform.md) | CI/CD platform | Accepted (revision) | ADR-004 |
+| [0005](0005-identity-and-access.md) | Identity and access model | Accepted (revision) | ADR-005 |
 | [0006](0006-compute-hosting.md) | Compute and hosting model | Proposed (revision) | ADR-006 + ADR-007 (merged) |
-| [0007](0007-observability.md) | Observability platform | Proposed | ADR-008 |
+| [0007](0007-observability.md) | Observability platform | Accepted | ADR-008 |
 | [0008](0008-data-storage.md) | Operational data store | Proposed (revision) | ADR-009 |
 | [0009](0009-event-driven-ingestion.md) | Event-driven ingestion via Azure Service Bus | Proposed | new |
 | [0010](0010-api-management-ingestion-gateway.md) | API Management in the ingestion path | Proposed | new |
-| [0011](0011-market-data-sourcing-and-licensing.md) | Market data sourcing and licensing | Proposed | new |
-| [0012](0012-message-contract-and-versioning.md) | Message contract and versioning | Proposed | new |
-| [0013](0013-adapter-control-plane.md) | Adapter control plane | Proposed | new |
-| [0014](0014-instrument-domain-model.md) | Instrument domain model and delivery periods | Proposed (revision 2) | new |
-| [0015](0015-ui-and-real-time-push.md) | User interface and real-time push | Proposed | new |
+| [0011](0011-market-data-sourcing-and-licensing.md) | Market data sourcing and licensing | Accepted | new |
+| [0012](0012-message-contract-and-versioning.md) | Message contract and versioning | Accepted | new |
+| [0013](0013-adapter-control-plane.md) | Adapter control plane | Accepted | new |
+| [0014](0014-instrument-domain-model.md) | Instrument domain model and delivery periods | Accepted (revision 2) | new |
+| [0015](0015-ui-and-real-time-push.md) | User interface and real-time push | Accepted | new |
 | [0016](0016-environments-and-infrastructure-as-code.md) | Environments and infrastructure as code | Proposed | new |
-| [0017](0017-time-and-timezones.md) | Time, timezones and delivery periods | Proposed (revision 2) | new |
-| [0018](0018-latency-and-freshness-targets.md) | Latency and freshness targets: provisional values and calibration | Proposed | new |
-| [0019](0019-market-status-events.md) | Market status events | Proposed | new |
+| [0017](0017-time-and-timezones.md) | Time, timezones and delivery periods | Accepted (revision 2) | new |
+| [0018](0018-latency-and-freshness-targets.md) | Latency and freshness targets: provisional values and calibration | Accepted | new |
+| [0019](0019-market-status-events.md) | Market status events | Accepted | new |
 
 ## What changed versus the original ADR files
 

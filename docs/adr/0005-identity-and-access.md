@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed (revision of original ADR-005, Accepted) |
+| Status | Accepted 2026-11-05 (revision of original ADR-005) |
 | Date | 2026-10-18 |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Supersedes | ADR-005 (original one-line version) |

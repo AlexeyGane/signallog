@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed (revision 2) |
+| Status | Accepted 2026-11-05 (revision 2) |
 | Date | 2026-11-01 (revision 1: 2026-10-18) |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Related | [0007](0007-observability.md), [0008](0008-data-storage.md), [0012](0012-message-contract-and-versioning.md), [0013](0013-adapter-control-plane.md), [0014](0014-instrument-domain-model.md) |
