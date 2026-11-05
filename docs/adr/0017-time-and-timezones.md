@@ -153,7 +153,7 @@ Unit tests with `FakeTimeProvider` for `America/New_York`, `Europe/London`, `Eur
 - Bad, because there is no gap/overlap policy (`TimeZoneInfo.ConvertTimeToUtc` throws on invalid times and silently picks one offset for ambiguous ones); it would have to be written and tested here.
 
 ### UTC + IANA + NodaTime in the domain
-- Good, because it is the de facto standard for date and time in .NET, with explicit types, resolvers and an embedded tzdb.
+- Good, because it is the most widely used dedicated date and time library for .NET (author's assessment), with explicit types, resolvers and an embedded tzdb.
 - Bad, because it is an additional dependency whose types must be kept out of contracts.
 
 ### Venue local time
@@ -168,4 +168,5 @@ Unit tests with `FakeTimeProvider` for `America/New_York`, `Europe/London`, `Eur
 
 - NodaTime: https://nodatime.org/
 - IANA Time Zone Database: https://www.iana.org/time-zones
+- `TimeProvider` (.NET 8 and later) and `FakeTimeProvider`: https://learn.microsoft.com/dotnet/standard/datetime/timeprovider-overview
 - EPEX SPOT, 15-minute products in market coupling: https://www.epexspot.com/en/15-minute-products-market-coupling

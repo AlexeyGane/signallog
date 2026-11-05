@@ -11,11 +11,11 @@
 
 ## Context and Problem Statement
 
-SignalLog needs one place for architecture documentation (C4), ADRs, NFRs, security notes, runbooks and a short technical blog. The documentation is also the main artefact a prospective employer reads, so it must be public, navigable and reviewable. Where should documentation live and how is it published?
+SignalLog needs one place for architecture documentation ([C4](../standards/concepts-and-sources.md#c4)), ADRs, NFRs, security notes, runbooks and a short technical blog. The documentation is also the main artefact a prospective employer reads, so it must be public, navigable and reviewable. Where should documentation live and how is it published?
 
 ## Decision Drivers
 
-- D1 — Docs-as-code: Markdown in the same repository as the code, reviewed in pull requests.
+- D1 — [Docs-as-code](../standards/concepts-and-sources.md#docs-as-code): Markdown in the same repository as the code, reviewed in pull requests.
 - D2 — Public, searchable site suitable for an employer-facing portfolio.
 - D3 — Mermaid diagrams rendered natively.
 - D4 — Zero recurring cost ([0000](0000-cost-optimization-strategy.md)).

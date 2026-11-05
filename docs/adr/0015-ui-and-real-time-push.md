@@ -39,7 +39,7 @@ Users watch current prices; administrators control adapters ([0013](0013-adapter
 
 - Good, because the stack is one language with shared contract types.
 - Good, because push scales with the number of instruments, not with users × polling rate.
-- Bad, because the SignalR Free tier has small connection and message quotas; enough for a demo, and the quota numbers must be checked against the current pricing page and recorded in [0000](0000-cost-optimization-strategy.md).
+- Bad, because the SignalR Free tier allows 20 concurrent connections (client and server connections together) and 20,000 messages per day on one unit ([service limits](https://learn.microsoft.com/azure/azure-resource-manager/management/azure-subscription-service-limits#azure-signalr-service-limits)); enough for a demo, recorded in [0000](0000-cost-optimization-strategy.md). A broadcast to a group counts one message per receiving connection, so the daily quota, not the connection limit, is the likely constraint.
 - Bad, because WebAssembly has a larger first download than server rendering.
 
 ### Confirmation
@@ -62,5 +62,13 @@ Users watch current prices; administrators control adapters ([0013](0013-adapter
 - Bad, because it is laggy and wasteful; weak demonstration of event-driven design.
 
 ### React SPA
-- Good, because it is the market standard for front ends.
+- Good, because it is widely used for front ends (author's assessment).
 - Bad, because it adds a second language and toolchain to a .NET-focused portfolio.
+
+## More Information
+
+Sources (checked 2026-11-04):
+
+- Azure SignalR Service limits by tier: https://learn.microsoft.com/azure/azure-resource-manager/management/azure-subscription-service-limits#azure-signalr-service-limits
+- Messages and connections in Azure SignalR Service (how they are counted): https://learn.microsoft.com/azure/azure-signalr/signalr-concept-messages-and-connections
+- Azure Static Web Apps plans: https://learn.microsoft.com/azure/static-web-apps/plans

@@ -82,7 +82,7 @@ Sensitivity: Option 1 scores at least as well as both alternatives on every crit
 | PERF-01 tick-to-screen | p95 ≤ 3 s; p99 ≤ 5 s | **Estimate.** PERF-02 plus SignalR push and browser render ([0015](0015-ui-and-real-time-push.md)). Anchor: must stay below the replay tick interval (a few seconds), otherwise the screen falls more than one tick behind and shows an outdated price as current. | Tick interval of the replay adapter is not yet fixed. |
 | OPS-01 trace coverage | ≥ 99 % of stored ticks traceable | **Estimate.** | Conflicts with trace sampling in [0007](0007-observability.md); see *Trace coverage and sampling* below. |
 | OPS-02 staleness threshold | 5 min, per product | **Placeholder.** | Depends on liquidity: Brent front month trades almost continuously; JKM can go minutes without a trade. One number for all products is wrong by design. |
-| OPS-02 alert delay | alert ≤ 5 min after the threshold is breached, in session | **Vendor constraint.** Azure Monitor alert rules evaluate at most once per minute; log ingestion averages under 10 s but can take minutes, and Microsoft recommends metric alerts when log alerts arrive more than about 4 minutes late or when detecting absent data. 5 min = 1 min evaluation + aggregation window + ingestion margin. | Ingestion delay in our workspace is not measured. |
+| OPS-02 alert delay | alert ≤ 5 min after the threshold is breached, in session | **Vendor constraint.** Azure Monitor alert rules evaluate at most once per minute; log ingestion averages under 10 s but can take minutes, and Microsoft recommends metric alerts when log alerts arrive more than about 4 minutes late or when detecting absent data ([troubleshoot log alerts](https://learn.microsoft.com/azure/azure-monitor/alerts/alerts-troubleshoot-log), [ingestion time](https://learn.microsoft.com/azure/azure-monitor/logs/data-ingestion-time)). 5 min = 1 min evaluation + aggregation window + ingestion margin. | Ingestion delay in our workspace is not measured. |
 
 ### Calibration procedure
 
@@ -109,7 +109,7 @@ The procedure is the decision; the numbers are data. Measured values change the 
 
 ### Alerting mechanics for freshness
 
-- Staleness is published as the metric `signallog.instrument.staleness_seconds` ([0007](0007-observability.md)) and alerted by a **metric alert**, not a log search alert, because metric alerts are near real-time and Microsoft recommends them for detecting missing data.
+- Staleness is published as the metric `signallog.instrument.staleness_seconds` ([0007](0007-observability.md)) and alerted by a **metric alert**, not a log search alert, because metric alerts are near real-time and Microsoft recommends them for detecting missing data ([VM alerts guidance](https://learn.microsoft.com/azure/azure-monitor/vm/monitor-virtual-machine-alerts)).
 - Evaluation frequency 1 minute, window 5 minutes, one dimension per instrument; the threshold is per product.
 - The metric is emitted only while the instrument's effective market status is `OPEN` — the session from reference data ([0017](0017-time-and-timezones.md)), overridden by venue-reported status ([0019](0019-market-status-events.md)) — so the alert cannot fire outside sessions or during a venue halt.
 

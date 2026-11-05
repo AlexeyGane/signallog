@@ -11,7 +11,7 @@
 
 ## Context and Problem Statement
 
-Build, test, quality gates, infrastructure deployment and application deployment must be automated and repeatable. The original ADR allowed self-hosted runners. The repository is public ([0002](0002-source-control-platform.md)), and Microsoft's guidance is unambiguous: self-hosted runners must never be used with public repositories, because anyone who can open a pull request can execute code on the runner's host.
+Build, test, quality gates, infrastructure deployment and application deployment must be automated and repeatable. The original ADR allowed self-hosted runners. The repository is public ([0002](0002-source-control-platform.md)). GitHub recommends self-hosted runners only for private repositories, because a fork of a public repository can run code on the runner's machine through a pull request ([GitHub Docs, add self-hosted runners](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners)).
 
 ## Decision Drivers
 
@@ -52,7 +52,7 @@ Every action, including first-party `actions/*`, is referenced by its **full-len
 - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 ```
 
-- A tag such as `@v5` is a movable pointer: the maintainer moves it to each new release, and an attacker who compromises the action's repository can move it to malicious code (the `tj-actions/changed-files` incident, CVE-2025-30066, March 2025, printed runner secrets to public logs this way). A commit SHA identifies content and cannot be moved; GitHub documents SHA pinning as the only way to use an action as an immutable release.
+- A tag such as `@v5` is a movable pointer: the maintainer moves it to each new release, and an attacker who compromises the action's repository can move it to malicious code (the `tj-actions/changed-files` incident, CVE-2025-30066, March 2025, printed runner secrets to public logs this way). A commit SHA identifies content and cannot be moved; GitHub's [secure use reference](https://docs.github.com/en/actions/reference/security/secure-use) recommends pinning to a full-length commit SHA. Since 2026-10-14 the same page names [workflow dependency lockfiles](https://docs.github.com/en/actions/concepts/security/workflow-dependency-lockfiles) (public preview) as the stronger option that supersedes per-file SHA pinning; see *More Information*.
 - Updates arrive as Dependabot pull requests (`github-actions` ecosystem, weekly, prefix `ci(deps)`), which change the SHA and the version comment together. A major-version upgrade is a separate, reviewed pull request.
 - The repository's *Allowed actions and reusable workflows* policy has **Require actions to be pinned to a full-length commit SHA** enabled, so a workflow that references a tag or branch fails.
 - The SHA is taken from the action's own repository (`git ls-remote --tags https://github.com/<owner>/<repo>`), never from a fork.
@@ -77,7 +77,7 @@ Every action, including first-party `actions/*`, is referenced by its **full-len
 
 ### Self-hosted runners
 - Good, because they offer private network access and faster cached builds.
-- Bad, because they are a code-execution vector for public repositories (Microsoft: never use with public repositories).
+- Bad, because they are a code-execution vector for public repositories; GitHub recommends them only for private repositories.
 
 ### Azure Pipelines
 - Good, because it has a mature release model.
@@ -87,4 +87,10 @@ Every action, including first-party `actions/*`, is referenced by its **full-len
 
 - GitHub changelog, Actions policy supports blocking and SHA pinning (2025-08-15): https://github.blog/changelog/2025-08-15-github-actions-policy-now-supports-blocking-and-sha-pinning-actions/
 - GitHub Advisory GHSA-mrrh-fwg8-r2c3 (tj-actions/changed-files): https://github.com/advisories/GHSA-mrrh-fwg8-r2c3
-- Microsoft Learn, Explore runners — security considerations: https://learn.microsoft.com/training/modules/introduction-to-github-actions/8-explore-runners
+- GitHub Docs, add self-hosted runners (recommendation for private repositories only): https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners
+- GitHub Docs, secure use reference (SHA pinning, lockfiles): https://docs.github.com/en/actions/reference/security/secure-use
+- GitHub Docs, workflow dependency lockfiles (`.github/workflows/actions.lock`, public preview): https://docs.github.com/en/actions/concepts/security/workflow-dependency-lockfiles
+- GitHub changelog, workflow lockfiles in public preview (2026-10-14): https://github.blog/changelog/2026-10-14-github-actions-workflow-lockfiles-in-public-preview/
+- Microsoft Learn, Explore runners — security considerations (secondary): https://learn.microsoft.com/training/modules/introduction-to-github-actions/8-explore-runners
+- Review trigger: workflow dependency lockfiles reach general availability. Then decide whether the lockfile replaces SHA pinning in workflow files; until then, SHA pinning stays.
+- Sources checked 2026-11-04.

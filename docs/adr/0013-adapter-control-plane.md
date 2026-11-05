@@ -33,13 +33,14 @@ An administrator must be able to see whether each adapter is healthy, stop and s
 
 - Each adapter is one timer-triggered function in `func-signallog-adapters` ([0006](0006-compute-hosting.md)).
 - Stop/start sets the app setting `AzureWebJobs.<FunctionName>.Disabled` to `true`/`false` through Azure Resource Manager. The admin API's managed identity has a custom role limited to writing app settings on that one function app.
-- Changing app settings restarts the function app. This is acceptable for an explicit operator action and is shown in the UI as "applying…".
+- Changing app settings restarts the function app by default on every hosting plan; Flex Consumption can apply them without downtime when its site update strategy is set to rolling updates ([disable a function](https://learn.microsoft.com/azure/azure-functions/disable-function), [site updates](https://learn.microsoft.com/azure/azure-functions/flex-consumption-site-updates)). A restart is acceptable for an explicit operator action and is shown in the UI as "applying…".
+- Function names must not contain a hyphen: on Linux, functions with a hyphen in the name cannot be disabled this way ([disable a function, considerations](https://learn.microsoft.com/azure/azure-functions/disable-function#considerations)). Flex Consumption runs on Linux ([0006](0006-compute-hosting.md)).
 
 ### Application level — pause, parameters, fallback
 
 - Commands (`Pause`, `Resume`, `SetPollingInterval`, `ForceFallback`) are published to `adapter-commands` with an `adapterId` property; each adapter's subscription filters on it ([0009](0009-event-driven-ingestion.md)). Adapters check their subscription at the start of each timer run.
 - Resilience parameters live in Azure App Configuration (free tier) under `adapters:<adapterId>:resilience:*` and are read through `IOptionsMonitor`, so changes apply on the next run without restart.
-- Resilience is implemented with `Microsoft.Extensions.Http.Resilience` (Polly v8): retry with exponential backoff and jitter, circuit breaker, timeout, and a fallback source where configured.
+- Resilience is implemented with `Microsoft.Extensions.Http.Resilience` (Polly v8): retry with [exponential backoff and jitter](../standards/concepts-and-sources.md#backoff-jitter), [circuit breaker](../standards/concepts-and-sources.md#circuit-breaker), timeout, and a fallback source where configured.
 
 ### Health model
 
@@ -54,7 +55,8 @@ The UI shows the three side by side; an adapter can be "running" while data is s
 ### Consequences
 
 - Good, because the Azure resource stays the source of truth for running state.
-- Good, because tuning happens at runtime and is auditable (App Configuration history, command messages).
+- Good, because tuning happens at runtime and is auditable (App Configuration history, kept 7 days on the Free tier; command messages).
+- Risk: the App Configuration Free tier allows 1,000 requests per day per store and returns HTTP 429 until midnight UTC once exhausted ([tiers and quotas](https://learn.microsoft.com/azure/azure-app-configuration/faq#which-app-configuration-tier-should-i-use)). Mitigation: the configuration provider's refresh interval is set so that all adapter apps together stay below the quota (for example, one sentinel check per app every 5 minutes is 288 requests per day per app); exhaustion degrades to the last loaded values, not to a failure.
 - Bad, because there are two control paths to understand; documented in the "Adapter operations" runbook.
 
 ### Confirmation
@@ -75,3 +77,12 @@ The UI shows the three side by side; an adapter can be "running" while data is s
 ### Redeploy
 - Good, because there is nothing to build.
 - Bad, because it fails D2 and D3.
+
+## More Information
+
+Sources (checked 2026-11-04):
+
+- Disable functions with `AzureWebJobs.<FUNCTION_NAME>.Disabled`: https://learn.microsoft.com/azure/azure-functions/disable-function
+- Flex Consumption site updates (rolling updates): https://learn.microsoft.com/azure/azure-functions/flex-consumption-site-updates
+- App Configuration tiers, quotas and revision history: https://learn.microsoft.com/azure/azure-app-configuration/faq#which-app-configuration-tier-should-i-use
+- HTTP resilience with `Microsoft.Extensions.Http.Resilience`: https://learn.microsoft.com/dotnet/core/resilience/http-resilience

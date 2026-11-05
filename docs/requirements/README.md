@@ -10,8 +10,8 @@ This folder holds SignalLog's quality requirements and business rules. Functiona
 ## How NFRs are written
 
 - **Identifier:** `NFR-<AREA>-<NN>`. The identifier never changes once an ADR references it; a retired NFR keeps its number with status `Retired`.
-- **Areas:** `COST`, `PERF`, `SEC`, `REL` (reliability), `OPS` (operability), `MNT` (maintainability), `DATA`, `LEGAL`, `GOV` (governance), `DOC`, `DEMO`, `DEL` (delivery). Each maps to an ISO/IEC 25010 quality characteristic or an Azure Well-Architected Framework pillar, given in the catalogue.
-- **Scenario first:** each NFR states a quality-attribute scenario (stimulus, environment, expected response) before its target, so that the target can be tested.
+- **Areas:** `COST`, `PERF`, `SEC`, `REL` (reliability), `OPS` (operability), `MNT` (maintainability), `DATA`, `LEGAL`, `GOV` (governance), `DOC`, `DEMO`, `DEL` (delivery). Each maps to an [ISO/IEC 25010](https://www.iso.org/standard/78176.html) quality characteristic or an [Azure Well-Architected Framework](https://learn.microsoft.com/azure/well-architected/) pillar, given in the catalogue.
+- **Scenario first:** each NFR states a [quality-attribute scenario](../standards/concepts-and-sources.md#quality-attribute-scenario) (stimulus, environment, expected response) before its target, so that the target can be tested.
 - **Measurable target:** a number with a unit and a percentile where it applies, or a binary rule that a check can evaluate.
 - **Verification:** how the target is proven — a unit or integration test, a CI check, an alert, a periodic review — and when.
 - **Traceability:** each NFR lists the ADRs that address it; each ADR lists the NFRs in its *Traces to* field. Features in Azure Boards reference NFRs by identifier.

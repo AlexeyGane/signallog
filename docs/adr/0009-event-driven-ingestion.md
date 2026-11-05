@@ -42,7 +42,7 @@ Adapters produce price ticks independently and at different rates. Persistence, 
 
 ### Delivery semantics
 
-- **At-least-once.** Consumers are idempotent: the `eventId` is the Cosmos DB document id ([0008](0008-data-storage.md)).
+- **At-least-once.** Consumers are idempotent ([idempotent receiver](../standards/concepts-and-sources.md#eip)): the `eventId` is the Cosmos DB document id ([0008](0008-data-storage.md)).
 - **Duplicate detection** on `price-ticks` and `market-status` with `MessageId = eventId` and a 10-minute window, which removes most producer-side retry duplicates before they reach consumers.
 - **Ordering is not relied upon.** `latest-prices` is updated only when the incoming `eventTimeUtc` is newer. Sessions are therefore not used, which keeps consumers simple and parallel.
 - **Dead-lettering** after the maximum delivery count; a DLQ message raises an alert ([0007](0007-observability.md)) and is reprocessed by a runbook after the cause is fixed.
@@ -71,7 +71,7 @@ Adapters produce price ticks independently and at different rates. Persistence, 
 
 ### Event Grid
 - Good, because it is push-based and cheap per event.
-- Bad, because its model is event notification rather than a durable work queue per consumer; less natural for transactional ingestion.
+- Bad, because it has no duplicate detection and no transactions ([comparison](https://learn.microsoft.com/azure/service-bus-messaging/compare-messaging-services)), so every duplicate reaches consumers. *Corrected 2026-11-04: the earlier text said Event Grid offers only notifications, not a durable queue per consumer. Namespace topics do offer pull delivery with queue semantics: receive, acknowledge, release, reject, lock renewal, maximum delivery count and dead-lettering ([pull delivery](https://learn.microsoft.com/azure/event-grid/pull-delivery-overview)). The decision is unchanged, because duplicate detection is part of the delivery semantics above.*
 
 ### Event Hubs
 - Good, because it is built for high-throughput streams with replay.
@@ -80,3 +80,13 @@ Adapters produce price ticks independently and at different rates. Persistence, 
 ### Direct database writes
 - Good, because it is the simplest path.
 - Bad, because it couples producers to database availability and offers no fan-out.
+
+## More Information
+
+Sources (checked 2026-11-04):
+
+- Service Bus tiers: Basic supports queues only; Standard adds topics, subscriptions, sessions, transactions and duplicate detection: https://learn.microsoft.com/azure/service-bus-messaging/service-bus-premium-messaging#choosing-a-tier
+- Duplicate detection on `MessageId` within a configured window (not available on Basic): https://learn.microsoft.com/azure/service-bus-messaging/duplicate-detection
+- Dead-letter queues and maximum delivery count: https://learn.microsoft.com/azure/service-bus-messaging/service-bus-dead-letter-queues
+- Choose between Event Grid, Event Hubs and Service Bus: https://learn.microsoft.com/azure/service-bus-messaging/compare-messaging-services
+- Event Grid namespace topics, pull delivery: https://learn.microsoft.com/azure/event-grid/pull-delivery-overview

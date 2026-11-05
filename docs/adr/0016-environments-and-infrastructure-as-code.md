@@ -48,7 +48,7 @@ Every Azure resource, role assignment and alert must be reproducible from the re
 
 ### Consequences
 
-- Good, because it is first-party, has day-zero support for new resource types and no state file to manage.
+- Good, because it is first-party, supports new resource types and API versions as soon as they are published, and keeps no state file ([Bicep overview](https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview), [Terraform and Bicep compared](https://learn.microsoft.com/azure/developer/terraform/comparing-terraform-and-bicep)).
 - Good, because what-if in PRs makes infrastructure changes reviewable like code.
 - Bad, because the skills are less portable than Terraform; acceptable given D3.
 
@@ -63,9 +63,20 @@ Every Azure resource, role assignment and alert must be reproducible from the re
 - Bad, because it is Azure-only.
 
 ### Terraform
-- Good, because it is multi-cloud and an industry standard.
+- Good, because it is multi-cloud and widely used (author's assessment); its AzAPI provider also reaches new Azure features immediately.
 - Bad, because a state backend must be secured and maintained; multi-cloud is not a requirement.
 
 ### Portal + export
 - Good, because it is fast to start.
 - Bad, because it is not reviewable or repeatable.
+
+## More Information
+
+Sources (checked 2026-11-04):
+
+- What is Bicep (support for all resource types and API versions): https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview
+- Comparing Terraform and Bicep (state, Azure coverage, what-if versus plan): https://learn.microsoft.com/azure/developer/terraform/comparing-terraform-and-bicep
+- Bicep what-if: https://learn.microsoft.com/azure/azure-resource-manager/bicep/deploy-what-if
+- Deployment stacks: https://learn.microsoft.com/azure/azure-resource-manager/bicep/deployment-stacks
+- Azure Verified Modules: https://azure.github.io/Azure-Verified-Modules/
+- Cloud Adoption Framework, resource abbreviations: https://learn.microsoft.com/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations

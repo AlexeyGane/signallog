@@ -60,7 +60,7 @@ Producers (adapters) and consumers (ingestion, live push, alerts) are deployed i
 - The instrument identifier format is illustrative; the authoritative format is defined in [0014](0014-instrument-domain-model.md).
 - **Event types.** `signallog.price.tick.v1` (above) and `signallog.market.status.v1` ([0019](0019-market-status-events.md)). Every type follows the envelope rules in this ADR and has its own JSON Schema; a new type is added by its own ADR.
 
-### Enforcement (architecture fitness function)
+### Enforcement ([architectural fitness function](../standards/concepts-and-sources.md#fitness-function))
 
 The identifier rules are enforced by the compiler, not by convention, using the Roslyn analyzer package `Microsoft.CodeAnalysis.BannedApiAnalyzers` referenced from `Directory.Build.props` for every project. Entries in the repository-wide `BannedSymbols.txt`:
 
@@ -105,3 +105,13 @@ M:System.Guid.NewGuid;Event ids are UUIDv7. Use Guid.CreateVersion7() — ADR 00
 ### Protobuf + registry
 - Good, because it is compact and strongly typed.
 - Bad, because there is no free managed registry here and APIM cannot validate it natively.
+
+## More Information
+
+Sources (checked 2026-11-04):
+
+- CloudEvents 1.0 specification: https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md
+- CloudEvents distributed tracing extension (`traceparent`): https://github.com/cloudevents/spec/blob/main/cloudevents/extensions/distributed-tracing.md
+- RFC 9562, Universally Unique IDentifiers (UUIDv7 layout and byte order): https://www.rfc-editor.org/rfc/rfc9562
+- `Guid.CreateVersion7` (.NET 9 and later): https://learn.microsoft.com/dotnet/api/system.guid.createversion7
+- BannedApiAnalyzers (`RS0030`, `BannedSymbols.txt`): https://github.com/dotnet/roslyn-analyzers/blob/main/src/Microsoft.CodeAnalysis.BannedApiAnalyzers/BannedApiAnalyzers.Help.md
