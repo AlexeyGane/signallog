@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed |
+| Status | Accepted 2026-11-05 |
 | Date | 2026-11-02 |
 | Deciders | Solution Architect, Key Developer *(both roles held by one person — see README)* |
 | Supersedes | — |

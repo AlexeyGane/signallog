@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed (expands original ADR-008, Accepted) |
+| Status | Accepted 2026-11-05 (expands original ADR-008) |
 | Date | 2026-10-18 |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Supersedes | ADR-008 (original one-line version) |

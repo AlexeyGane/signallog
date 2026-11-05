@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed |
+| Status | Accepted 2026-11-05 |
 | Date | 2026-10-18 |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Related | [0005](0005-identity-and-access.md), [0006](0006-compute-hosting.md), [0007](0007-observability.md), [0009](0009-event-driven-ingestion.md), [0015](0015-ui-and-real-time-push.md) |
