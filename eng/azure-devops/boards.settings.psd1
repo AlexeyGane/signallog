@@ -40,9 +40,9 @@
             @{ Name = 'Ready'; Type = 'inProgress'; State = 'New'; Limit = 3; Split = $false
                Description = 'Definition of Ready: acceptance criteria written; related ADR/NFR linked; small enough to finish within 2 working days.' }
             @{ Name = 'In Progress'; Type = 'inProgress'; State = 'Active'; Limit = 2; Split = $true
-               Description = 'Branch <type>/AB<id>-<description> from main. Done when tests and docs are updated and a pull request is open.' }
+               Description = 'Work item Active, branch <type>/AB<id>-<description> from main. Done when the change is implemented, checked and the evidence comment is in the work item.' }
             @{ Name = 'Review'; Type = 'inProgress'; State = 'Resolved'; Limit = 2; Split = $false
-               Description = 'Pull request title has AB#<id>; CI green; self-review checklist complete. Done when squash-merged.' }
+               Description = 'Pull request open with AB#<id> in title and description; CI green; every file Viewed. Done when squash-merged, deployed, the result is recorded in the work item and the owner closes it by hand.' }
             @{ Name = 'Done'; Type = 'outgoing'; State = 'Closed'; Limit = 0; Split = $false
                Description = '' }
         )
@@ -159,6 +159,37 @@
                             Area               = 'Architecture'
                             Tags               = 'ADR-0020; NFR-DOC-01'
                             AcceptanceCriteria = 'The cover note is generalised beyond one reader and published in English as an unlisted mirror of the Russian page, under the rules for unlisted pages and mirrors in the documentation standard.'
+                        }
+                    )
+                }
+                @{
+                    Type        = 'Feature'
+                    Title       = 'Change workflow'
+                    Area        = 'Platform'
+                    Tags        = 'ADR-0002; ADR-0003; ADR-0004'
+                    Description = 'Every change starts as a work item on the board and ends when its owner closes it by hand: implementation, evidence in the work item, green pull request, review with every file marked Viewed, squash merge, deployment and the result recorded in the work item.'
+                    Links       = @('https://github.com/AlexeyGane/signallog/blob/main/docs/standards/change-workflow.md')
+                    Children    = @(
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Publish the change workflow standard'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0002; ADR-0003'
+                            AcceptanceCriteria = 'docs/standards/change-workflow.md (English) describes the lifecycle, conventions, PR description, work item rules, review gate and safeguards, is in the site navigation and linked from the branching standard; the pull request template has What / Acceptance criteria / Checks sections with AB# in the description; board column descriptions match the workflow; strict site build passes.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Extract shared change functions into a PowerShell module'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0003; ADR-0004'
+                            AcceptanceCriteria = 'eng/scripts/SignalLog.Change.psm1 holds the shared steps (work item create and state, evidence and result comments, blob checks, signed commit, pull request, checks, review gate, merge wait, deployment wait, result checks); a change script contains only its parameters and result checks; the module parses and its tests pass.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Require all files viewed before merging to main'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0002; ADR-0004'
+                            AcceptanceCriteria = 'A ruleset on main requires a pull request, allows squash merges only and requires the CI checks and the review/all-files-viewed status; the review gate sets that status only when every file of the pull request is Viewed by the owner; a new push resets it.'
                         }
                     )
                 }
