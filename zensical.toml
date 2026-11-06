@@ -95,3 +95,6 @@ custom_fences = [
 # Task lists ("- [x]") render as checkboxes, as they do on GitHub.
 [project.markdown_extensions.pymdownx.tasklist]
 custom_checkbox = true
+
+# Explicit heading ids ("## Резюме {#summary}"): stable anchors for pages whose headings are not in English.
+[project.markdown_extensions.attr_list]
