@@ -22,6 +22,9 @@ function Initialize-ChangeContext {
     <#
     .SYNOPSIS
         Sets the repository, board and site the module works with, and gets an Azure DevOps token.
+    .PARAMETER GitHubOnly
+        For GitHub-only steps (the review gate of a pull request no change script created, for example from
+        Dependabot): no staging folder and no Azure DevOps token are needed.
     #>
     [CmdletBinding()]
     param(
@@ -29,12 +32,14 @@ function Initialize-ChangeContext {
         [string] $Organization = 'alexeygane',
         [string] $Project = 'SignalLog',
         [string] $SiteUrl = 'https://alexeygane.github.io/signallog',
-        [Parameter(Mandatory)] [string] $Staging,
+        [string] $Staging,
         [string] $Gate = 'review/all-files-viewed',
+        [switch] $GitHubOnly,
         # For tests only: skips az
         [string] $Token
     )
-    if (-not $Token) {
+    if (-not $GitHubOnly -and -not $Staging) { throw 'Staging is required unless -GitHubOnly is given.' }
+    if (-not $Token -and -not $GitHubOnly) {
         $Token = Invoke-Az @('account', 'get-access-token', '--resource', '499b84ac-1321-427f-aa17-267ca6975798', '--query', 'accessToken', '--output', 'tsv')
         if (-not $Token) { throw 'No Azure CLI token: run az login and start the script again.' }
     }
@@ -48,7 +53,7 @@ function Initialize-ChangeContext {
         SiteUrl      = $SiteUrl.TrimEnd('/')
         Staging      = $Staging
         Gate         = $Gate
-        Headers      = @{ Authorization = "Bearer $Token" }
+        Headers      = $(if ($Token) { @{ Authorization = "Bearer $Token" } } else { @{} })
     }
     return $script:Ctx
 }

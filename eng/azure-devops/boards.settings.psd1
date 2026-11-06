@@ -160,6 +160,13 @@
                             Tags               = 'ADR-0020; NFR-DOC-01'
                             AcceptanceCriteria = 'The cover note is generalised beyond one reader and published in English as an unlisted mirror of the Russian page, under the rules for unlisted pages and mirrors in the documentation standard.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Update the cover note'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0020; NFR-DOC-01'
+                            AcceptanceCriteria = 'The cover note at /note/ reflects the current state of the project and is ready to be sent to its reader (21 ADRs including 0020; CodeQL shown as planned, not as done; the change workflow standard referenced); it has a clickable table of contents with stable anchors (attr_list enabled in zensical.toml, no other page changes); every link resolves and the strict site build passes; it stays unlisted (not in nav, search or sitemap.xml, noindex); Fun facts gain two stories in English and Russian with primary sources: the fitness function and the tj-actions/changed-files tag incident; the repository file is the source of the note and the Claude document copy points to the site as the current version.'
+                        }
                     )
                 }
                 @{
@@ -189,7 +196,7 @@
                             Title              = 'Require all files viewed before merging to main'
                             Area               = 'Platform'
                             Tags               = 'ADR-0002; ADR-0004'
-                            AcceptanceCriteria = 'A ruleset on main requires a pull request, allows squash merges only and requires the CI checks and the review/all-files-viewed status; the review gate sets that status only when every file of the pull request is Viewed by the owner; a new push resets it.'
+                            AcceptanceCriteria = 'A ruleset on main requires a pull request, allows squash merges only and requires the CI checks and the review/all-files-viewed status; the review gate sets that status only when every file of the pull request is Viewed by the owner; a new push resets it.<br><br>GitHub settings as code: the main-protection ruleset and the repository merge settings (squash only, delete_branch_on_merge = true, which is today switched on by hand) are described in the repository and applied by one idempotent script under eng/github.<br><br>The settings script has a drift check mode that applies nothing and lists every difference between the repository description and GitHub, with a non-zero exit code when there is one.<br><br>The ruleset requires the status checks pr-title, build (ci.yml) and review/all-files-viewed; check names are unique across workflows: the job build in docs.yml is renamed site.<br><br>The meaning of require_extra_approval_for_unattributed_changes in the ruleset is found in GitHub documentation and the chosen value is recorded with its source and the date checked.<br><br>The header comment of .github/workflows/ci.yml names the required checks as they are actually configured.<br><br>Section 9 (Enforcement) of docs/standards/branching-and-release.md matches the configuration: the PR title check is in place (no longer planned), the required checks and the review gate are listed, and it links the change workflow standard.<br><br>eng/azure-devops/boards.settings.psd1 lists the User Story "Update the cover note" (AB#19) under the Feature "Documentation site" with its tags and acceptance criteria as on the board, so the board settings describe every work item that exists.'
                         }
                     )
                 }

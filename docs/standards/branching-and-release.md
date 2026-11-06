@@ -108,10 +108,15 @@ Work that cannot be completed within the branch lifetime is merged **disabled**,
 
 ## 9. Enforcement
 
+The ruleset and the repository settings are kept as code in [`eng/github/repository.settings.psd1`](https://github.com/AlexeyGane/signallog/blob/main/eng/github/repository.settings.psd1) and checked for drift with `eng/github/Initialize-GitHubSettings.ps1 -Check` ([ADR 0002, revision 2](../adr/0002-source-control-platform.md#ruleset-on-main-revision-2)).
+
 | Rule | Enforced by |
 |---|---|
 | No direct pushes, no force pushes, no deletion of `main` | Ruleset `main-protection` |
 | Linear history, squash only | Ruleset + repository merge settings |
-| PR title format and `AB#` | `ci.yml` PR-title lint (planned, ADR 0004) |
+| PR title format and `AB#` | Required check `pr-title` (`ci.yml`) |
+| Build, analyzers, tests, format, fitness functions | Required check `build` (`ci.yml`) |
+| Every changed file read before the merge | Required status `review/all-files-viewed`, set by the review gate ([change workflow](change-workflow.md#5-review-gate-every-file-viewed)) |
+| Work item, evidence, merge and closure by the owner | [Change workflow](change-workflow.md) and its change scripts |
 | Branch name format | Not enforced automatically; checked in self-review |
 | Branch age ≤ 2 days | Visible on the Scrumban board (story cycle time) |

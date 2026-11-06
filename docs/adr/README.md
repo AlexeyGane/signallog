@@ -31,7 +31,7 @@ Tables written before 2026-11-04 (ADR 0001, 0003, 0008) carry a note that they p
 |---|---|---|---|
 | [0000](0000-cost-optimization-strategy.md) | Cost optimization strategy and budget envelope | Proposed (revision) | ADR-000 |
 | [0001](0001-documentation-platform.md) | Documentation platform | Superseded by 0020 | ADR-001 |
-| [0002](0002-source-control-platform.md) | Source control platform | Accepted | ADR-002 |
+| [0002](0002-source-control-platform.md) | Source control platform | Accepted (revision 2) | ADR-002 |
 | [0003](0003-application-lifecycle-management.md) | Application lifecycle management | Accepted (amended) | ADR-003 |
 | [0004](0004-ci-cd-platform.md) | CI/CD platform | Accepted (revision) | ADR-004 |
 | [0005](0005-identity-and-access.md) | Identity and access model | Accepted (revision) | ADR-005 |
