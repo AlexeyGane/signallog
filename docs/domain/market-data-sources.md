@@ -85,12 +85,29 @@ Confirmations of existing decisions:
 
 | Venue | MIC | Relevance |
 |---|---|---|
-| ICE Futures Europe (London, FCA) | `IFEU` | Brent, JKM in the starter set |
+| ICE Futures Europe (London, FCA) | `IFEU` | Brent, JKM in the starter set; also lists a TTF mirror (`TFN`), not in the starter set |
 | ICE Endex derivatives (Amsterdam, AFM) | `NDEX` | TTF in the starter set |
 | ICE Endex spot | `NDXS` | Within-day and spot gas; out of scope ([tenors](tenors-and-delivery-periods.md#7-out-of-scope-for-now)) |
 | European Energy Exchange | `XEEE` | THE gas month in the starter set |
 
-**One hub, two venues.** In 2023 ICE listed TTF futures on ICE Futures Europe in parallel with ICE Endex, so that a market outside the EU's Market Correction Mechanism existed. The mechanism ended on 31 January 2025 without ever being triggered. Whether the London TTF contracts are still listed was not checked. Either way, they would be different instruments (`IFEU.<code>.<period>`) from ICE Endex TTF (`NDEX.TFM.<period>`).
+**One hub, two venues.** On 2023-02-20 ICE Futures Europe launched Dutch TTF natural gas futures and options in London. ICE announced them as a mirror of the ICE Endex contracts that would not be subject to the EU's Market Correction Mechanism (MCM) and its price cap; ICE Endex itself changed its rulebook to apply the mechanism from 2023-02-15. The mechanism ended on 31 January 2025 without ever being triggered. The London futures are still in ICE's product guide (checked 2026-11-06) under the code `TFN`.
+
+The two contracts are specified the same way; they differ in venue, regulator, MIC and code (ICE product pages, checked 2026-11-06):
+
+| Field | ICE Endex | ICE Futures Europe |
+|---|---|---|
+| Venue, regulator, MIC | Amsterdam, AFM, `NDEX` | London, FCA, `IFEU` |
+| Code | `TFM` | `TFN` |
+| Contract size | 1 MW × hours of delivery (23, 24 or 25 per day) | same |
+| Quote, tick | EUR/MWh, 0.005 | same |
+| Minimum size | 5 lots on screen; 1 lot for EFP, EFS and blocks | same |
+| Delivery | physical, TTF Virtual Trading Point (Gasunie Transport Services) | same |
+| Trading hours, London time | 00:50–22:00 | same |
+| Last trading day | 18:00 CET, two UK business days before the delivery period | close of business, two UK business days before the delivery period |
+| Listing cycle | up to 156 consecutive months, plus quarter, season and calendar strips | same |
+| Clearing | ICE Clear Europe | same |
+
+They are therefore different instruments: `NDEX.TFM.<period>` and `IFEU.TFN.<period>`. A price from one venue is never stored under the other, even though both settle at the same hub. ICE describes ICE Endex as the most liquid venue for TTF futures and options; how much trades on `TFN` today was not checked (section 6). The starter set uses ICE Endex `TFM`.
 
 **Nasdaq Commodities** is no longer a relevant venue: its European power business moved to EEX, and its Nordic power futures were acquired by Euronext.
 
@@ -110,7 +127,7 @@ Former employer data seen by the project author (volume forecasts and deal price
 | May statistics derived from Databento historical ICE data be published? | Calibration of replay from real TTF and Brent history | Databento terms of service and ICE data policies |
 | Do ICE licence fees apply to historical downloads? | Cost of one-off calibration | Databento support, ICE market data fee schedule |
 | Terms of the EIA Brent spot series, including whether EIA credits a third-party vendor as the source of its spot prices | Planned calibration source for Brent | EIA copyright and reuse page; series notes |
-| Are London TTF futures on ICE Futures Europe still listed? | Avoid confusing two TTF venues | ICE product guide |
+| How much trades on ICE Futures Europe TTF (`TFN`) compared with ICE Endex (`TFM`)? | Whether `TFN` could ever be a useful second TTF source; it is listed (section 4) | ICE Report Center daily volumes and open interest |
 
 ## Sources
 
@@ -127,6 +144,10 @@ Former employer data seen by the project author (volume forecasts and deal price
 - EPEX SPOT, sFTP specifications (2020-07) — https://www.epexspot.com/sites/default/files/download_center_files/SFTP_specifications_2020-07.pdf
 - ICE Consolidated Feed fact sheet — https://www.ice.com/publicdocs/ICE_Consolidated_Feed_FactSheet.pdf
 - ICE Endex, regulation — https://www.ice.com/endex/regulation
+- ICE, ICE Futures Europe Dutch TTF Natural Gas Futures (`TFN`) — https://www.ice.com/products/82843860/ICE-Futures-Europe-Dutch-TTF-Natural-Gas-Futures (checked 2026-11-06)
+- ICE, Dutch TTF Natural Gas Futures (`TFM`, ICE Endex) — https://www.ice.com/products/27996665/Dutch-TTF-Gas-Futures (checked 2026-11-06)
+- ICE, ICE announces plans to implement EU Market Correction Mechanism and related price cap on TTF natural gas (2023-01-27) — https://ir.theice.com/press/news-details/2023/ICE-Announces-Plans-to-Implement-EU-Market-Correction-Mechanism-and-Related-Price-Cap-on-TTF-Natural-Gas/default.aspx (checked 2026-11-06)
+- S&P Global Commodity Insights, ICE launches new TTF gas futures, options market in London as planned (2023-02-20) — https://www.spglobal.com/energy/en/news-research/latest-news/natural-gas/022023-ice-launches-new-ttf-gas-futures-options-market-in-london-as-planned (checked 2026-11-06)
 - ACER, 31 January 2025 marks the final day of the MCM — https://www.acer.europa.eu/news-and-events/news/31-january-2025-marks-final-day-market-correction-mechanism-mcm (checked 2026-11-03)
 - Mondo Visione, EEX and Nasdaq Commodities announce transfer of Nasdaq's European power business (2023) — https://mondovisione.com/media-and-resources/news/eex-and-nasdaq-commodities-announce-intention-to-transfer-nasdaqs-european-powe-2023620/
 - FOW, Euronext completes Nasdaq Nordic futures acquisition — https://www.fow.com/insights/euronext-completes-nasdaq-nordic-futures-acquisition

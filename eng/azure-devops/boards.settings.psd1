@@ -193,6 +193,23 @@
                         }
                     )
                 }
+                @{
+                    Type        = 'Feature'
+                    Title       = 'Domain knowledge base'
+                    Area        = 'Architecture'
+                    Tags        = 'ADR-0011; ADR-0014; ADR-0017'
+                    Description = 'Domain pages under docs/domain (glossary, model, time and delivery, tenors, market data sources, market conventions) stay accurate: every fact has a primary source with the date checked, inferences are marked, open questions are tracked and closed.'
+                    Links       = @('https://github.com/AlexeyGane/signallog/tree/main/docs/domain')
+                    Children    = @(
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Resolve the London TTF listing question'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0011; ADR-0014'
+                            AcceptanceCriteria = 'docs/domain/market-data-sources.md states, with ICE as the source and the date checked, that ICE Futures Europe launched Dutch TTF futures (IFEU, code TFN) on 2023-02-20 as a mirror of ICE Endex outside the EU Market Correction Mechanism, and what ICE shows for the contract today; the open question is closed or narrowed to what remains unknown (for example, liquidity); the instrument identifiers for the two venues stay distinct; strict site build passes.'
+                        }
+                    )
+                }
             )
         }
     )
