@@ -72,7 +72,7 @@ The [ubiquitous language](../standards/concepts-and-sources.md#ubiquitous-langua
 | **Delivery period** | The span covered by a contract: a day, a month, a quarter, a season or a year, made of delivery days. |
 | **Delivery slot** (`DeliverySlot`) | One period of delivery enumerated in UTC, with its local start time for labelling. The unit in which volumes are computed. |
 | **Settlement period / MTU** | Market Time Unit: the smallest period for which a market clears a price. 60, 30 or 15 minutes. The European day-ahead auction uses 15 minutes from delivery 2025-10-01; GB uses 30 minutes. |
-| **Trading session** (`TradingSession`) | The hours during which a product can be traded, defined in local time of an anchor zone, for example 20:00–18:00 New York time for ICE energy futures. |
+| **Trading session** (`TradingSession`) | The hours during which a product can be traded, defined in local time of an anchor zone, for example 20:00–18:00 New York time for ICE Brent futures and 00:50–22:00 London time for ICE TTF and JKM futures ([anchor zones](market-conventions.md#11-session-anchor-zones)). |
 | **Trading day** (`LocalDate`) | The business date a session belongs to. An ICE session opening on Sunday evening belongs to Monday's trading day. |
 | **Market convention** (`MarketConvention`) | Versioned reference data describing how a market divides time: zone, delivery-day start, period length, label scheme, windows. |
 | **Window** | A named subset of periods in local time: Base (all periods), Peak (08:00–20:00, weekdays for monthly products), Off-peak. |

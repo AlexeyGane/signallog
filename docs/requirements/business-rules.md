@@ -65,13 +65,13 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 - **Example (Europe/Berlin):** 2026-03-29 02:30 does not exist → 03:30 CEST (`2026-03-29T01:30Z`); 2026-10-25 02:30 occurs twice → the first, 02:30 CEST (`2026-10-25T00:30Z`).
 - **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §2.
 - **Verified by:** unit tests on both examples.
-- **Status:** Agreed. All boundaries used today (06:00, 08:00, 18:00, 20:00, 20:50, 00:00) lie outside the transition window; the rule is a safety net for future ones.
+- **Status:** Agreed. All boundaries used today (06:00, 08:00, 18:00, 20:00, 22:00, 00:00, 00:50) lie outside the transition window; the rule is a safety net for future ones.
 
 <a id="br-time-04"></a>
 #### BR-TIME-04 — Local rules are zone rules, resolved per date
 
 - **Rule:** a rule stated in local time (session, delivery-day start, peak window) is stored as a local time plus an IANA zone and resolved to UTC only for a specific date. A fixed offset is never stored as a rule; "CET" in exchange documents means the local time of the zone, CET in winter and CEST in summer.
-- **Example:** an ICE session opening at 20:00 New York time is 01:00 UTC in winter and 00:00 UTC in summer; during weeks when US and EU clocks change on different dates it moves by one hour relative to London, which is expected.
+- **Example:** the ICE Brent session opening at 20:00 New York time is 01:00 UTC in winter and 00:00 UTC in summer; during weeks when US and UK clocks change on different dates it moves by one hour relative to London, while the London-anchored TTF session moves relative to New York; both are expected ([anchor zones](../domain/market-conventions.md#11-session-anchor-zones)).
 - **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §1 and §4.
 - **Verified by:** unit tests of session resolution in the US/EU mismatch weeks.
 - **Status:** Agreed.
@@ -80,7 +80,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 #### BR-TIME-05 — Trading day
 
 - **Rule:** a tick belongs to the trading day of the session that contains its venue event time, not to its UTC date. Daily bars are keyed by instrument and trading date. A tick outside every session is flagged, not silently assigned.
-- **Example:** an ICE session opening on Sunday 20:00 New York time belongs to Monday's trading day; a bar on a transition day covers 21 or 23 hours of a 22-hour session, which is correct.
+- **Example:** an ICE Brent session opening on Sunday 20:00 New York time belongs to Monday's trading day; a bar on a transition day covers 21 or 23 hours of a 22-hour session, which is correct.
 - **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §4; [domain model](../domain/model.md#invariants), invariant 5.
 - **Verified by:** unit tests of trading-day assignment for Sunday sessions and transition days.
 - **Status:** Agreed.
