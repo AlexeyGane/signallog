@@ -100,13 +100,31 @@ Every change is applied on the owner's machine by one script. The script never m
 3. **Baseline.** Each file the change touches must have, on `main`, the git blob id the change was verified against; a new file must be absent.
 4. **Files and evidence.** Staged files are copied in; the evidence comment and screenshots go into the work item.
 5. **Commit and pull request.** The staged blob ids are checked again, the commit is signed (an unsigned commit stops the script), pushed, and the pull request is created; the work item moves to Resolved.
-6. **CI.** `gh pr checks --watch --fail-fast`; a red check stops the script.
+6. **CI.** The script polls `gh pr checks` until every check has finished. A run cancelled by a newer run of the same check does not count: the Azure Boards app edits the pull request description right after it is created, which starts a new run and cancels the first. A red check stops the script.
 7. **Review.** The pull request opens in the browser; the review gate (section 5) follows the Viewed marks.
 8. **Merge.** The owner merges; the script waits for the pull request to be `MERGED` and stops if it is closed unmerged.
-9. **Deployment and result.** The workflow run for the merge commit is watched to the end; the published result is checked against the acceptance criteria; the result comment goes into the work item.
+9. **Deployment and result.** The script waits until the workflow run for the merge commit appears, then watches it to the end; the published result is checked against the acceptance criteria; the result comment goes into the work item.
 10. **Clean-up.** The staging folder is removed.
 
-Shared steps live in one tested PowerShell module, so that a change script holds only its parameters and its result checks.
+The steps live in one PowerShell module, [`eng/scripts/SignalLog.Change.psm1`](https://github.com/AlexeyGane/signallog/blob/main/eng/scripts/SignalLog.Change.psm1), tested with Pester in CI ([tests](https://github.com/AlexeyGane/signallog/tree/main/eng/scripts/tests)). A change script holds only what is specific to the change: the work item, the branch and title, the files with their blob ids, the evidence, the texts of the commit and the pull request, and the result checks.
+
+```powershell
+Import-Module ./eng/scripts/SignalLog.Change.psm1
+Initialize-ChangeContext -Staging 'D:\src\_staging\example' | Out-Null
+Invoke-Change @{
+    Story        = 42
+    Branch       = 'docs/AB{id}-example'
+    Title        = 'docs(domain): example change AB#{id}'
+    Files        = [ordered]@{ 'docs/domain/glossary.md' = @('<blob before>', '<blob after>') }
+    Evidence     = @{ Items = '<li><b>Criterion:</b> how it was checked.</li>'; Images = @('page.png') }
+    CommitBody   = 'Why the change was made, wrapped at about 72 characters.'
+    PrBody       = "## What`n`n- ...`n`nWork item: AB#{id}`n`n## Acceptance criteria`n`n- [x] ...`n`n## Checks`n`n- Evidence: {evidence}"
+    Published    = 'https://alexeygane.github.io/signallog/domain/glossary/'
+    ResultChecks = { [ordered]@{ 'page opens' = { (Invoke-WebRequest 'https://alexeygane.github.io/signallog/domain/glossary/').StatusCode -eq 200 } } }
+}
+```
+
+`{id}` becomes the work item id and `{evidence}` the link to it. Instead of `Story`, a change can name `StoryItem` (and `FeatureItem` with `EpicId`) to find or create the work item first. `Workflow` names the workflow that deploys the merge (default `docs.yml`; `$null` when nothing deploys).
 
 ## 7. Safeguards
 
