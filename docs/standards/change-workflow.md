@@ -84,12 +84,18 @@ A commit message body is wrapped at about 72 characters and its subject kept to 
 
 A pull request is merged only after the owner has marked every changed file as Viewed. GitHub does not let authors approve their own pull requests and has no built-in rule for viewed files, so the gate has two parts:
 
-- **On GitHub:** a ruleset on `main` requires a pull request, allows squash merges only ([merge method rule](https://github.blog/changelog/2024-12-04-pull-request-merge-method-rule-public-preview)) and requires the CI checks and the commit status `review/all-files-viewed`. Until that status is green, the merge button stays disabled.
+- **On GitHub:** the ruleset `main-protection` requires a pull request, allows squash merges only ([merge method rule](https://github.blog/changelog/2024-12-04-pull-request-merge-method-rule-public-preview)) and requires the CI checks `pr-title` and `build` and the commit status `review/all-files-viewed` ([ADR 0002, revision 2](../adr/0002-source-control-platform.md#ruleset-on-main-revision-2)). Until that status is green, the merge button stays disabled.
 - **On the owner's machine:** the change script asks GitHub, as the owner, for the `viewerViewedState` of every file in the pull request (GraphQL; values `VIEWED`, `UNVIEWED`, `DISMISSED`). It keeps the status `review/all-files-viewed` at *pending* with a count ("3 of 5 files viewed") and sets it to *success* on the head commit once every file is `VIEWED`.
 
 A new push creates a new head commit without the status, so the gate closes again; files changed since they were viewed lose their Viewed mark and must be read again. The status can be set by anyone with write access, which in a single-owner repository is the owner: the gate guards against forgetting a file, not against deliberate bypass.
 
-The ruleset part is introduced by its own work item; until it is in place, the script sets the status and the owner keeps to the rule.
+A pull request that no change script created, for example a Dependabot update, has nobody keeping the status; the owner runs the gate for it alone:
+
+```powershell
+./eng/github/Watch-ReviewGate.ps1 -Number 25
+```
+
+The ruleset itself is kept as code in [`eng/github/repository.settings.psd1`](https://github.com/AlexeyGane/signallog/blob/main/eng/github/repository.settings.psd1); `./eng/github/Initialize-GitHubSettings.ps1 -Check` lists every difference between that file and GitHub without changing anything, and without `-Check` the script applies the file.
 
 ## 6. Change script
 

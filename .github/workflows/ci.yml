@@ -1,5 +1,6 @@
-# ADR 0004 — continuous integration. Required status checks for the main-protection ruleset:
-# "ci / pr-title" and "ci / build".
+# ADR 0004 — continuous integration. The main-protection ruleset (eng/github/repository.settings.psd1,
+# ADR 0002 revision 2) requires the checks of the jobs pr-title and build below, and the commit status
+# review/all-files-viewed set by the owner's review gate. Job names are unique across workflows.
 name: ci
 
 on:
@@ -67,11 +68,11 @@ jobs:
         shell: pwsh
         run: ./eng/Test-BannedApi.ps1
 
-      - name: Change workflow module tests (Pester 5)
+      - name: PowerShell tooling tests (Pester 5)
         shell: pwsh
         run: |
           if (-not (Get-Module -ListAvailable -Name Pester | Where-Object { $_.Version.Major -eq 5 })) {
             Install-PSResource -Name Pester -Version '[5.5,6.0)' -TrustRepository -Quiet
           }
           Import-Module -Name Pester -MinimumVersion 5.5 -MaximumVersion 5.99.99
-          Invoke-Pester -Path eng/scripts/tests -CI -Output Detailed
+          Invoke-Pester -Path eng/scripts/tests, eng/github/tests -CI -Output Detailed

@@ -3,6 +3,8 @@
 # Run: Invoke-Pester -Path eng/scripts/tests -Output Detailed
 
 BeforeAll {
+    # A copy loaded from another path (for example main while testing a staged change) makes Mock -ModuleName ambiguous
+    Get-Module -Name SignalLog.Change | Remove-Module -Force
     $modulePath = Join-Path -Path (Split-Path -Parent $PSScriptRoot) -ChildPath 'SignalLog.Change.psm1'
     Import-Module $modulePath -Force
     Initialize-ChangeContext -Staging (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'signallog-change-tests') -Token 'test-token' | Out-Null
@@ -24,6 +26,19 @@ Describe 'Module' {
         $commands | Should -Contain 'Invoke-Change'
         $commands | Should -Not -Contain 'Invoke-Gh'
         $commands | Should -Not -Contain 'Invoke-Git'
+    }
+
+    It 'needs neither a staging folder nor a token with -GitHubOnly' {
+        Mock -ModuleName SignalLog.Change Invoke-Az { throw 'az must not be called' }
+        $ctx = Initialize-ChangeContext -GitHubOnly
+        $ctx.Repository | Should -Be 'AlexeyGane/signallog'
+        $ctx.Headers.Count | Should -Be 0
+        Initialize-ChangeContext -Staging (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'signallog-change-tests') -Token 'test-token' | Out-Null
+    }
+
+    It 'requires a staging folder for a full change' {
+        { Initialize-ChangeContext -Token 'x' } | Should -Throw '*Staging*'
+        Initialize-ChangeContext -Staging (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'signallog-change-tests') -Token 'test-token' | Out-Null
     }
 
     It 'builds the context from the repository name' {
