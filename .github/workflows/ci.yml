@@ -66,3 +66,12 @@ jobs:
       - name: Banned API fitness function (ADR 0012, ADR 0017)
         shell: pwsh
         run: ./eng/Test-BannedApi.ps1
+
+      - name: Change workflow module tests (Pester 5)
+        shell: pwsh
+        run: |
+          if (-not (Get-Module -ListAvailable -Name Pester | Where-Object { $_.Version.Major -eq 5 })) {
+            Install-PSResource -Name Pester -Version '[5.5,6.0)' -TrustRepository -Quiet
+          }
+          Import-Module -Name Pester -MinimumVersion 5.5 -MaximumVersion 5.99.99
+          Invoke-Pester -Path eng/scripts/tests -CI -Output Detailed
