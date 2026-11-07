@@ -239,3 +239,52 @@ Describe 'Wait-Deployment' {
         { Wait-Deployment -Sha 'abc' 6>$null } | Should -Throw '*failed*'
     }
 }
+
+Describe 'Azure DevOps token' {
+    BeforeEach {
+        $global:SignalLogTokenCount = 0
+        Mock -ModuleName SignalLog.Change Invoke-Az { $global:SignalLogTokenCount++; "token-$global:SignalLogTokenCount" }
+        $ctx = Initialize-ChangeContext -Staging 'S'
+    }
+    AfterEach {
+        Remove-Variable -Name SignalLogTokenCount, SignalLogRequestCount -Scope Global -ErrorAction SilentlyContinue
+        Initialize-ChangeContext -Staging (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'signallog-change-tests') -Token 'test-token' | Out-Null
+    }
+
+    It 'is taken from the Azure CLI at start' {
+        $ctx.TokenFromAz | Should -BeTrue
+        $ctx.Headers.Authorization | Should -Be 'Bearer token-1'
+    }
+    It 'is renewed before a request when it is older than 30 minutes' {
+        Mock -ModuleName SignalLog.Change Invoke-BoardRequest { [pscustomobject]@{ id = 7; auth = $Request.Headers.Authorization } }
+        $ctx.TokenTaken = (Get-Date).AddMinutes(-31)
+        $item = Get-BoardItem -Id 7 6>$null
+        $item.auth | Should -Be 'Bearer token-2'
+        $global:SignalLogTokenCount | Should -Be 2
+    }
+    It 'is kept while it is fresh' {
+        Mock -ModuleName SignalLog.Change Invoke-BoardRequest { [pscustomobject]@{ id = 7 } }
+        Get-BoardItem -Id 7 | Out-Null
+        $global:SignalLogTokenCount | Should -Be 1
+    }
+    It 'is renewed and the request repeated once when Azure DevOps answers with a sign-in page' {
+        $global:SignalLogRequestCount = 0
+        Mock -ModuleName SignalLog.Change Invoke-BoardRequest {
+            $global:SignalLogRequestCount++
+            if ($global:SignalLogRequestCount -eq 1) { '<html>Sign in</html>' } else { [pscustomobject]@{ comments = @(); auth = $Request.Headers.Authorization } }
+        }
+        $answer = & (Get-Module SignalLog.Change) { Invoke-BoardApi -Path 'wit/workItems/22/comments' } 6>$null
+        $answer.auth | Should -Be 'Bearer token-2'
+        $global:SignalLogRequestCount | Should -Be 2
+    }
+    It 'throws a clear error when the page comes back again' {
+        Mock -ModuleName SignalLog.Change Invoke-BoardRequest { '<html>Sign in</html>' }
+        { Test-BoardComment -Id 22 -Marker '[result AB#22]' 6>$null } | Should -Throw '*page instead of JSON*'
+    }
+    It 'is never replaced when it was given for tests' {
+        Initialize-ChangeContext -Staging 'S' -Token 'fixed' | Out-Null
+        Mock -ModuleName SignalLog.Change Invoke-BoardRequest { '<html>Sign in</html>' }
+        { Get-BoardItem -Id 1 } | Should -Throw '*page instead of JSON*'
+        $global:SignalLogTokenCount | Should -Be 1 -Because 'only the start-up context of BeforeEach asked az'
+    }
+}
