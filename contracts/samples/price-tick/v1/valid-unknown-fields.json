@@ -1,0 +1,20 @@
+{
+  "specversion": "1.0",
+  "id": "01a1b54a-366c-7c2e-9a41-5f0e8c2a7b1a",
+  "source": "/adapters/replay",
+  "type": "signallog.price.tick.v1",
+  "time": "2026-11-07T09:15:02.124Z",
+  "dataschema": "https://raw.githubusercontent.com/AlexeyGane/signallog/main/contracts/schemas/price-tick/v1.json",
+  "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+  "partitionkey": "NDEX.TFM.2026-12",
+  "data": {
+    "instrumentId": "IFEU.BRN.2027-01",
+    "price": 64.37,
+    "currency": "USD",
+    "unit": "bbl",
+    "priceType": "SETTLE",
+    "eventTimeUtc": "2026-11-06T19:30:00Z",
+    "sourceKind": "REPLAY",
+    "openInterest": 12345
+  }
+}

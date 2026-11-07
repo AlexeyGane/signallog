@@ -129,7 +129,7 @@ classDiagram
 
 | Element | Where | Notes |
 |---|---|---|
-| `PriceTick` | Service Bus `price-ticks`, Cosmos DB `price-ticks` | CloudEvents envelope, UUIDv7 `eventId`, UTC timestamps (ADR 0012) |
+| `PriceTick` | Service Bus `price-ticks`, Cosmos DB `price-ticks` | CloudEvents envelope, UUIDv7 `eventId`, UTC timestamps (ADR 0012); schema [`contracts/schemas/price-tick/v1.json`](https://github.com/AlexeyGane/signallog/blob/main/contracts/schemas/price-tick/v1.json), .NET types in `SignalLog.Contracts` |
 
 ### Computed (never stored as source of truth)
 

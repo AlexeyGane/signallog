@@ -404,6 +404,7 @@ Feature — узел связи: он вытекает из Epic, обоснов
 
 - [x] Решение .NET 10 из девяти проектов: контракты, домен, адаптеры, функции, веб-интерфейс, тесты
 - [x] Генерация идентификаторов событий UUIDv7 с тестами
+- [x] Контракт `PriceTick` v1: [JSON Schema](https://github.com/AlexeyGane/signallog/blob/main/contracts/schemas/price-tick/v1.json) конверта CloudEvents и данных, типы C#, контрактные тесты в CI
 - [x] CI: сборка, тесты, формат, fitness function запрещённых API, проверка PR, Actions по SHA, анализ кода CodeQL
 - [x] [21 ADR](adr/README.md), [каталог из 24 NFR](requirements/nfr.md), [шесть страниц доменной базы знаний](domain/README.md), [стандарт ветвления](standards/branching-and-release.md)
 - [x] Скрипт настройки Azure Boards через REST API
@@ -415,7 +416,7 @@ Feature — узел связи: он вытекает из Epic, обоснов
 **Далее:**
 
 - [ ] Replay-адаптер: справочник инструментов, параметры калибровки, генератор с сессиями и сбоями
-- [ ] Контракт `PriceTick` и статуса рынка: JSON Schema, контрактные тесты
+- [ ] Контракт статуса рынка ([ADR 0019](adr/0019-market-status-events.md)): JSON Schema, контрактные тесты
 - [ ] [Доменная модель](domain/model.md) на NodaTime с тестами из таблиц [ADR 0014](adr/0014-instrument-domain-model.md) и [0017](adr/0017-time-and-timezones.md)
 - [ ] Инфраструктура на Bicep, деплой через OIDC
 - [ ] Калибровка порогов задержки и свежести по [ADR 0018](adr/0018-latency-and-freshness-targets.md)

@@ -1,0 +1,19 @@
+{
+  "specversion": "1.0",
+  "id": "01a1b54a-366b-7c2e-9a41-5f0e8c2a7b19",
+  "source": "/adapters/replay",
+  "type": "signallog.price.tick.v1",
+  "time": "2026-11-07T09:15:02.123Z",
+  "datacontenttype": "application/json",
+  "dataschema": "https://raw.githubusercontent.com/AlexeyGane/signallog/main/contracts/schemas/price-tick/v1.json",
+  "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+  "data": {
+    "instrumentId": "NDEX.TFM.2026-12",
+    "price": 38.415,
+    "currency": "EUR",
+    "unit": "MWh",
+    "priceType": "LAST",
+    "eventTimeUtc": "2026-11-07T09:15:02.000Z",
+    "sourceKind": "REPLAY"
+  }
+}
