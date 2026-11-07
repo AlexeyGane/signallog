@@ -4,13 +4,13 @@ How exchanges divide time: trading sessions, settlement periods, peak windows an
 
 ## 1. Instruments in the starter set
 
-Source of truth: `contracts/reference/instruments.json` (added with the replay adapter). Checked 2026-10-30.
+Source of truth: `contracts/reference/instruments.json` (added with the replay adapter). Checked 2026-10-30; sessions rechecked 2026-11-07 (section 1.1).
 
 | Product | MIC | Code | Quote | Tick | Contract size | Settlement | Session (anchor zone) |
 |---|---|---|---|---|---|---|---|
-| Brent Crude Futures | IFEU | `BRN` | USD/bbl | 0.01 | 1,000 bbl | EFP, optional cash vs ICE Brent Index | 20:00–18:00 New York (inferred anchor) |
-| Dutch TTF Natural Gas Futures | NDEX | `TFM` | EUR/MWh | 0.005 | 1 MW × hours of delivery | physical, TTF | 20:50–18:00 New York (inferred anchor) |
-| JKM LNG (Platts) Futures | IFEU | `JKM` | USD/MMBtu | 0.001 | 10,000 MMBtu | cash vs Platts JKM average | 20:50–18:00 New York (inferred anchor) |
+| Brent Crude Futures | IFEU | `BRN` | USD/bbl | 0.01 | 1,000 bbl | EFP, optional cash vs ICE Brent Index | 20:00–18:00 New York (**Inferred** anchor, section 1.1) |
+| Dutch TTF Natural Gas Futures | NDEX | `TFM` | EUR/MWh | 0.005 | 1 MW × hours of delivery | physical, TTF | 00:50–22:00 London (**Inferred** anchor, section 1.1) |
+| JKM LNG (Platts) Futures | IFEU | `JKM` | USD/MMBtu | 0.001 | 10,000 MMBtu | cash vs Platts JKM average | 00:50–22:00 London (**Inferred** anchor, section 1.1) |
 | EEX THE Natural Gas Month Futures | XEEE | `G0BM` | EUR/MWh | 0.005 | 1 MW × hours of delivery | physical, THE | 08:00–18:00 Berlin (**unverified**) |
 
 Last trading day rules:
@@ -19,6 +19,20 @@ Last trading day rules:
 - **TTF:** 18:00 CET two UK business days before the first day of the delivery month.
 - **JKM:** 15th calendar day of the month before the contract month, or the preceding business day.
 - **THE month:** second exchange day before the first delivery day.
+
+### 1.1 Session anchor zones
+
+ICE product pages give each session in New York, London and Singapore time without naming the zone it is defined in. Twice a year US and UK clocks change on different dates; in those weeks only the anchor column keeps its value. The pages were read on 2026-10-30, when London was already on GMT and New York still on EDT (four hours apart), and on 2026-11-07, when both were on standard time (five hours apart):
+
+| Product | New York, 2026-10-30 | New York, 2026-11-07 | London, 2026-11-07 | Column that stayed fixed |
+|---|---|---|---|---|
+| Brent (`BRN`) | 20:00–18:00 | 20:00–18:00 | 01:00–23:00 | New York |
+| TTF (`TFM`) | 20:50–18:00 | 19:50–17:00 | 00:50–22:00 | London |
+| JKM (`JKM`) | 20:50–18:00 | 19:50–17:00 | 00:50–22:00 | London |
+
+A London-anchored 00:50 open is 20:50 in New York while the clocks are four hours apart and 19:50 when they are five hours apart, which is what the TTF and JKM pages showed; the Brent open stayed at 20:00 New York. **Inferred:** Brent is anchored to New York, TTF and JKM to London, because ICE does not state the anchor. The record of 2026-10-30 had all three in New York time; the TTF and JKM rows were wrong. London and Amsterdam change clocks on the same dates, so for TTF the two zones cannot be told apart; London is used because ICE publishes London times.
+
+The pages state the Sunday open in different zones: Brent at 23:00 London (pre-open 22:00), TTF and JKM at 17:50 ET (pre-open 17:40). Both are recorded as published; which zone a Sunday open follows in a mismatch week is an open question (section 5).
 
 ## 2. Power markets: settlement periods and labels
 
@@ -104,7 +118,7 @@ A market convention is reference data with effective-dated versions (ADR 0017, s
 
 | Question | Why it matters | Where to look |
 |---|---|---|
-| ICE session anchor zone (New York?) | Session boundaries during US/EU mismatch weeks | ICE trading-hours notices around DST changes |
+| Confirm the inferred session anchors (section 1.1) and the zone of the Sunday opens | Session boundaries and staleness alerts during US/UK mismatch weeks | ICE product pages between 2027-03-14 and 2027-03-28, when US clocks have changed and UK clocks have not; ICE trading-hours notices |
 | EEX continuous trading hours for gas futures | Staleness alerts for `G0BM` | EEX trading-hours document (chart not machine-readable) |
 | Current EEX product code list | `G0BM` comes from a 2021 ECC circular | EEX product list |
 | Quarter-hour labels on the long day (EPEX) | Report labels if power is added | EPEX SPOT sFTP file specifications |
@@ -113,12 +127,12 @@ A market convention is reference data with effective-dated versions (ADR 0017, s
 
 ## Sources
 
-- ICE, Brent Crude Futures — https://www.ice.com/products/219/Brent-Crude-Futures (checked 2026-10-30)
-- ICE, Dutch TTF Natural Gas Futures — https://www.ice.com/products/27996665/Dutch-TTF-Gas-Futures (checked 2026-10-30)
+- ICE, Brent Crude Futures — https://www.ice.com/products/219/Brent-Crude-Futures (checked 2026-10-30 and 2026-11-07)
+- ICE, Dutch TTF Natural Gas Futures — https://www.ice.com/products/27996665/Dutch-TTF-Gas-Futures (checked 2026-10-30 and 2026-11-07)
 - S&P Global Commodity Insights, JKM (Japan Korea Marker) price explained — https://www.spglobal.com/energy/en/pricing-benchmarks/assessments/lng/jkm-japan-korea-marker-gas-price-explained (checked 2026-11-04)
 - Trading Hub Europe, press release on the start of the THE market area (2021-10-01) — https://www.tradinghub.eu/Portals/0/DLC%20Presse/20211001_Press%20Release.pdf (checked 2026-11-04)
 - ICE, Dutch TTF Natural Gas Daily Futures, contract specification (TTF Virtual Trading Point, GTS) — https://www.ice.com/api/productguide/spec/45436633/pdf (checked 2026-11-01)
-- ICE, JKM LNG (Platts) Future — https://www.ice.com/products/6753280/JKM-LNG-PLATTS-Future (checked 2026-10-30)
+- ICE, JKM LNG (Platts) Future — https://www.ice.com/products/6753280/JKM-LNG-PLATTS-Future (checked 2026-10-30 and 2026-11-07)
 - EEX Contract Specifications 0105a — https://www.eex.com/fileadmin/EEX/Downloads/Rules/Contract_Specifications/20261002_EEX_Contract_Spezifications_0105a_E_FINAL.pdf
 - ECC Clearing Circular 13/2021 (THE product codes) — https://www.ecc.de/fileadmin/Global/News/ECC/ECC_Circulars/2021/20210324_ECC_Clearing_Circular_No._13_Further_information_related_to_German_Gas_Market_Merger_on_1_October_2021.pdf
 - EPEX SPOT, 15-minute products live on day-ahead markets — https://www.epexspot.com/en/news/15-minute-products-live-epex-spot-day-ahead-markets (checked 2026-11-01)

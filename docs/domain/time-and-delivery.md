@@ -53,7 +53,7 @@ new LocalDateTime(2026, 3, 29, 2, 30).InZoneLeniently(berlin).ToInstant();  // 2
 new LocalDateTime(2026, 10, 25, 2, 30).InZoneStrictly(berlin);              // throws AmbiguousTimeException
 ```
 
-None of SignalLog's current boundaries (06:00, 08:00, 18:00, 20:00, 20:50, 00:00) fall into a transition window; the policy is a safety net for future rules.
+None of SignalLog's current boundaries (06:00, 08:00, 18:00, 20:00, 22:00, 00:00, 00:50) fall into a transition window; the policy is a safety net for future rules.
 
 ## 4. Delivery volume — BR-TIME-01
 
@@ -120,7 +120,8 @@ No slot starts at local 02:00 → **0 MWh**: the hour did not exist. The day tot
 ## 5. Trading sessions and trading days
 
 - Sessions are stored as local times in an anchor zone and resolved per trading date.
-- ICE energy futures list their session as 20:00 (or 20:50) to 18:00 New York time, next day. **Inferred:** the anchor zone is New York, because on 2026-10-30, when London had already changed and New York had not, ICE showed London times one hour earlier than usual. To be confirmed.
+- ICE sessions do not share one anchor zone. **Inferred** from ICE product pages read on 2026-10-30 and 2026-11-07: Brent is anchored to New York (20:00–18:00, next day), TTF and JKM to London (00:50–22:00). Evidence and the open check are in [market conventions](market-conventions.md#11-session-anchor-zones). The earlier inference that all ICE energy sessions follow New York time held for Brent only.
+- In the weeks when US and UK clocks change on different dates, a New York-anchored session moves by one hour against London and a London-anchored one against New York.
 - The 22-hour Brent session (20:00–18:00 New York) lasts 21 or 23 hours on a transition night.
 - A tick belongs to the trading day of the session containing it: Sunday 22:30 New York time belongs to Monday.
 - Daily bars are keyed by trading day, not by UTC date.

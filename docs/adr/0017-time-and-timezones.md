@@ -2,8 +2,8 @@
 
 | Field | Value |
 |---|---|
-| Status | Accepted 2026-11-05 (revision 2) |
-| Date | 2026-11-01 (revision 1: 2026-10-18) |
+| Status | Accepted 2026-11-07 (revision 3) |
+| Date | 2026-11-01 (revision 1: 2026-10-18; revision 3: 2026-11-07) |
 | Deciders | Solution Architect, Key Developer *(one person, see README)* |
 | Related | [0007](0007-observability.md), [0008](0008-data-storage.md), [0012](0012-message-contract-and-versioning.md), [0013](0013-adapter-control-plane.md), [0014](0014-instrument-domain-model.md) |
 | Domain documentation | [Time and delivery](../domain/time-and-delivery.md), [Market conventions](../domain/market-conventions.md), [Glossary](../domain/glossary.md) |
@@ -11,7 +11,9 @@
 
 ## Context and Problem Statement
 
-Venues in London, Amsterdam and Leipzig, and the ICE trading platform whose sessions follow New York time, all have their own daylight-saving transitions. Users may sit in any timezone. Staleness alerts must fire only while a market is open. Delivery products (gas, power) are defined in local time, so a delivery day lasts 23, 24 or 25 hours, and market reports (EPEX, GB settlement) label periods by local time. Mixing local and UTC times, or storing `DateTime` without an offset, leads to off-by-one-hour bugs twice a year; resolving local times differently on different hosts leads to results that cannot be reproduced.
+Venues in London, Amsterdam and Leipzig, and the ICE trading platform, whose sessions follow New York time for some products and London time for others, all have their own daylight-saving transitions. Users may sit in any timezone. Staleness alerts must fire only while a market is open. Delivery products (gas, power) are defined in local time, so a delivery day lasts 23, 24 or 25 hours, and market reports (EPEX, GB settlement) label periods by local time. Mixing local and UTC times, or storing `DateTime` without an offset, leads to off-by-one-hour bugs twice a year; resolving local times differently on different hosts leads to results that cannot be reproduced.
+
+Revision 3 (2026-11-07) corrects facts, not decisions: ICE sessions do not all follow New York time. Brent is anchored to New York, TTF and JKM to London (**Inferred** from ICE product pages, [market conventions](../domain/market-conventions.md#11-session-anchor-zones)). The context sentence above, the list of session boundaries in section 2 and the examples in section 4 now say which product they mean (the TTF and JKM boundaries 00:50 and 22:00 London replace 20:50 New York, still outside every transition window); the rule that a session is a local time plus a zone is unchanged.
 
 Revision 2 records the decisions taken on 2026-11-01: delivery-volume rule, local-time resolution policy, market periods and windows as versioned reference data, read-time projections, and the choice of NodaTime.
 
@@ -56,7 +58,7 @@ When a local rule is resolved for a date, the local time may not exist (spring-f
 | Gap | 2026-03-29 02:30 does not exist | shifted forward by the gap: 03:30 CEST = `2026-03-29T01:30Z` |
 | Overlap | 2026-10-25 02:30 occurs twice | the **earlier** occurrence: 02:30 CEST = `2026-10-25T00:30Z` |
 
-All boundaries used by SignalLog (06:00, 08:00, 18:00, 20:00, 20:50, 00:00) lie outside the transition window, so the policy is a safety net; it is fixed here so that any future rule inside the window behaves predictably. Code that must not accept an ambiguous time uses `InZoneStrictly`.
+All boundaries used by SignalLog (06:00, 08:00, 18:00, 20:00, 22:00, 00:00, 00:50) lie outside the transition window, so the policy is a safety net; it is fixed here so that any future rule inside the window behaves predictably. Code that must not accept an ambiguous time uses `InZoneStrictly`.
 
 ### 3. Delivery volume — business rule BR-TIME-01
 
@@ -76,9 +78,9 @@ This and the other time rules of this ADR are catalogued as BR-TIME-01 … BR-TI
 
 ### 4. Trading day
 
-- A tick belongs to the **trading day of its session**, not to its UTC date. An ICE session opening on Sunday 20:00 New York time belongs to Monday's trading day.
+- A tick belongs to the **trading day of its session**, not to its UTC date. An ICE Brent session opening on Sunday 20:00 New York time belongs to Monday's trading day.
 - Daily OHLC bars ([0008](0008-data-storage.md)) are keyed by `instrumentId + tradingDate`. A bar on a transition day covers 21 or 23 hours of a 22-hour session; that is correct, not an anomaly.
-- Session open and close are resolved to UTC per trading date. During the weeks when US and EU clocks change on different dates, ICE sessions move by one hour relative to London; this is expected behaviour, not an error.
+- Session open and close are resolved to UTC per trading date. During the weeks when US and UK clocks change on different dates, a New York-anchored session (Brent) moves by one hour relative to London and a London-anchored one (TTF, JKM) relative to New York; this is expected behaviour, not an error (revision 3).
 
 ### 5. Market periods and windows are versioned reference data
 

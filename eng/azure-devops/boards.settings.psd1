@@ -215,6 +215,13 @@
                             Tags               = 'ADR-0011; ADR-0014'
                             AcceptanceCriteria = 'docs/domain/market-data-sources.md states, with ICE as the source and the date checked, that ICE Futures Europe launched Dutch TTF futures (IFEU, code TFN) on 2023-02-20 as a mirror of ICE Endex outside the EU Market Correction Mechanism, and what ICE shows for the contract today; the open question is closed or narrowed to what remains unknown (for example, liquidity); the instrument identifiers for the two venues stay distinct; strict site build passes.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Correct the session anchor zone of ICE futures'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0017'
+                            AcceptanceCriteria = 'docs/domain/market-conventions.md gives the TTF (NDEX TFM) session in the zone ICE anchors it to, with an ICE source and the date checked, instead of "20:50-18:00 New York (inferred anchor)": on 2026-11-06 ICE shows 00:50-22:00 London and 19:50-17:00 New York, an hour earlier in New York than on 2026-10-30, so the anchor is European, not New York; the Brent and JKM rows are checked the same way and confirmed or corrected; the New York inference in docs/domain/time-and-delivery.md, the glossary example and the open question on the anchor zone are corrected or closed; an example in an ADR or business rule that turns out wrong is changed by a numbered revision, not rewritten; strict site build passes.'
+                        }
                     )
                 }
             )
