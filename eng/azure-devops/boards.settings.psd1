@@ -231,6 +231,23 @@
                         }
                     )
                 }
+                @{
+                    Type        = 'Feature'
+                    Title       = 'Supply chain security'
+                    Area        = 'Platform'
+                    Tags        = 'ADR-0002; ADR-0004; NFR-SEC-03'
+                    Description = 'Dependencies, actions and code are checked before they reach main: Dependabot, NuGet audit, secret scanning with push protection, actions pinned by SHA and CodeQL code scanning.'
+                    Links       = @('https://github.com/AlexeyGane/signallog/blob/main/docs/requirements/nfr.md#nfr-sec-03')
+                    Children    = @(
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Run CodeQL code scanning'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0004; NFR-SEC-03'
+                            AcceptanceCriteria = '.github/workflows/codeql.yml analyses C# (build mode none) and the GitHub Actions workflows with the security-extended query suite on every pull request, on push to main and weekly; actions are pinned by full commit SHA to a release at least two weeks old; the job names are unique across workflows; GitHub default setup for code scanning is off; the first analysis on main uploads results to code scanning; the cover note no longer shows CodeQL as planned.'
+                        }
+                    )
+                }
             )
         }
     )
