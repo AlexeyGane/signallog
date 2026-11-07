@@ -156,7 +156,7 @@ flowchart TB
 | Время | NodaTime, TimeProvider | Корректные часовые пояса и тестируемое время | [0017](adr/0017-time-and-timezones.md) |
 | Тесты | xUnit v3 на Microsoft.Testing.Platform | Современный запуск тестов в .NET 10 | — |
 | Качество кода | Roslyn-анализаторы, BannedApiAnalyzers, dotnet format | Предупреждения — ошибки, запрещённые API блокируют сборку | [0012](adr/0012-message-contract-and-versioning.md), [0017](adr/0017-time-and-timezones.md) |
-| Код и CI/CD (Continuous Integration / Continuous Delivery) | GitHub, GitHub Actions | Публичный репозиторий, Dependabot, secret scanning, деплой через OIDC; анализ кода CodeQL запланирован | [0002](adr/0002-source-control-platform.md), [0004](adr/0004-ci-cd-platform.md) |
+| Код и CI/CD (Continuous Integration / Continuous Delivery) | GitHub, GitHub Actions | Публичный репозиторий, Dependabot, secret scanning, анализ кода CodeQL, деплой через OIDC | [0002](adr/0002-source-control-platform.md), [0004](adr/0004-ci-cd-platform.md) |
 | Управление задачами | Azure Boards (Scrumban) | Иерархия Epic → Feature → Story, лимиты незавершённой работы (WIP, Work In Progress), связь с GitHub | [0003](adr/0003-application-lifecycle-management.md) |
 | Документация | Markdown, Mermaid, Zensical, GitHub Pages | Документация как код, бесплатная публикация, строгая проверка ссылок | [0020](adr/0020-documentation-site.md) |
 
@@ -188,12 +188,16 @@ flowchart TB
 4. Архитектурная fitness function: специальный проект-зонд содержит вызовы запрещённых API (`DateTime.Now`, `Guid.NewGuid` и др.), и CI проверяет, что каждая такая строка даёт ошибку компиляции. Так доказывается, что запрет действительно работает.
 5. Проверка заголовка PR.
 6. Для изменений документации — строгая сборка сайта: битая ссылка или якорь останавливают PR.
+7. Тесты PowerShell-скриптов процесса изменений и настроек GitHub (Pester).
+
+Сборка, проверка заголовка и гейт «каждый файл просмотрен» обязательны: без них правила защиты ветки `main` не дают влить PR. Сами настройки GitHub хранятся в репозитории как код, и скрипт сверяет их с тем, что реально включено на GitHub ([ADR 0002, ревизия 2](adr/0002-source-control-platform.md#ruleset-on-main-revision-2)).
 
 **Безопасность цепочки поставки:**
 
 - Dependabot для NuGet, GitHub Actions и Python-пакетов сайта документации.
 - Аудит уязвимостей NuGet (высокие и критические блокируют сборку).
 - Secret scanning и push protection.
+- Анализ кода CodeQL (набор правил security-extended) для C# и для самих workflow GitHub Actions — на каждом PR и раз в неделю; найденное попадает во вкладку Security репозитория.
 - Сторонние GitHub Actions подключаются не по тегу версии (`@v7`), а по полному хешу коммита (`@3d3c42e…`, SHA — Secure Hash Algorithm). Тег можно незаметно перенести на другой код, как в инциденте tj-actions/changed-files в марте 2025 года, а хеш всегда указывает на один и тот же, уже проверенный код.
 
 ## Архитектурные решения (ADR) {#adr}
@@ -400,12 +404,13 @@ Feature — узел связи: он вытекает из Epic, обоснов
 
 - [x] Решение .NET 10 из девяти проектов: контракты, домен, адаптеры, функции, веб-интерфейс, тесты
 - [x] Генерация идентификаторов событий UUIDv7 с тестами
-- [x] CI: сборка, тесты, формат, fitness function запрещённых API, проверка PR, Actions по SHA
+- [x] CI: сборка, тесты, формат, fitness function запрещённых API, проверка PR, Actions по SHA, анализ кода CodeQL
 - [x] [21 ADR](adr/README.md), [каталог из 24 NFR](requirements/nfr.md), [шесть страниц доменной базы знаний](domain/README.md), [стандарт ветвления](standards/branching-and-release.md)
 - [x] Скрипт настройки Azure Boards через REST API
 - [x] Подписка Azure с бюджетом и оповещениями, организация Azure DevOps, Boards настроены скриптом, GitHub подключён
 - [x] [Сайт документации](index.md) на GitHub Pages: Zensical, строгая проверка ссылок и якорей в CI
 - [x] [Стандарт процесса изменений](standards/change-workflow.md): задача до начала работы, доказательства в задаче, ревью с отметкой Viewed на каждом файле, закрытие вручную
+- [x] Настройки GitHub как код с проверкой расхождений; обязательные проверки и гейт просмотра файлов на `main`; общий PowerShell-модуль процесса изменений с тестами
 
 **Далее:**
 
