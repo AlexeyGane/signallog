@@ -16,6 +16,12 @@ Set-StrictMode -Version Latest
 
 $script:Ctx = $null
 
+# An Azure CLI access token lives about an hour; a change run can wait many hours for the owner's merge.
+# The token is taken again when it is older than this, and once more when Azure DevOps answers with a
+# sign-in page instead of JSON.
+$script:TokenMaxAgeMinutes = 30
+$script:TokenResource = '499b84ac-1321-427f-aa17-267ca6975798' # Azure DevOps
+
 # --- Context -------------------------------------------------------------------
 
 function Initialize-ChangeContext {
@@ -39,10 +45,8 @@ function Initialize-ChangeContext {
         [string] $Token
     )
     if (-not $GitHubOnly -and -not $Staging) { throw 'Staging is required unless -GitHubOnly is given.' }
-    if (-not $Token -and -not $GitHubOnly) {
-        $Token = Invoke-Az @('account', 'get-access-token', '--resource', '499b84ac-1321-427f-aa17-267ca6975798', '--query', 'accessToken', '--output', 'tsv')
-        if (-not $Token) { throw 'No Azure CLI token: run az login and start the script again.' }
-    }
+    $fromAz = -not $Token -and -not $GitHubOnly
+    if ($fromAz) { $Token = Get-AzDevOpsToken }
     $script:Ctx = [pscustomobject]@{
         Repository   = $Repository
         Owner        = $Repository.Split('/')[0]
@@ -54,8 +58,26 @@ function Initialize-ChangeContext {
         Staging      = $Staging
         Gate         = $Gate
         Headers      = $(if ($Token) { @{ Authorization = "Bearer $Token" } } else { @{} })
+        TokenFromAz  = $fromAz
+        TokenTaken   = Get-Date
     }
     return $script:Ctx
+}
+
+function Get-AzDevOpsToken {
+    $token = Invoke-Az @('account', 'get-access-token', '--resource', $script:TokenResource, '--query', 'accessToken', '--output', 'tsv')
+    if (-not $token) { throw 'No Azure CLI token: run az login and start the script again.' }
+    return ([string] @($token)[0]).Trim()
+}
+
+function Update-BoardToken {
+    <# Takes a new Azure DevOps token from the Azure CLI. A token given for tests is never replaced. #>
+    $ctx = Get-ChangeContext
+    if (-not $ctx.TokenFromAz) { return $false }
+    $ctx.Headers = @{ Authorization = "Bearer $(Get-AzDevOpsToken)" }
+    $ctx.TokenTaken = Get-Date
+    Write-Host '    ~ Azure DevOps token renewed' -ForegroundColor DarkGray
+    return $true
 }
 
 function Get-ChangeContext {
@@ -97,6 +119,7 @@ function Invoke-BoardApi {
         [string] $InFile
     )
     $ctx = Get-ChangeContext
+    if ($ctx.TokenFromAz -and ((Get-Date) - $ctx.TokenTaken).TotalMinutes -ge $script:TokenMaxAgeMinutes) { Update-BoardToken | Out-Null }
     $uri = if ($Path -like 'https://*') { $Path } else { "$($ctx.BaseUrl)/_apis/$Path" }
     $request = @{ Method = $Method; Uri = $uri; Headers = $ctx.Headers; ContentType = $ContentType }
     if ($InFile) { $request.InFile = $InFile }
@@ -104,7 +127,20 @@ function Invoke-BoardApi {
         $json = if ($Body -is [string]) { $Body } else { ConvertTo-Json -InputObject $Body -Depth 10 }
         $request.Body = [Text.Encoding]::UTF8.GetBytes($json)
     }
-    return Invoke-RestMethod @request
+    $response = Invoke-BoardRequest -Request $request
+    # With an expired or missing token Azure DevOps answers 203 with its sign-in page (HTML), not JSON
+    if ($response -is [string] -and (Update-BoardToken)) {
+        $request.Headers = $ctx.Headers
+        $response = Invoke-BoardRequest -Request $request
+    }
+    if ($response -is [string]) { throw "Azure DevOps answered $Method $uri with a page instead of JSON (expired or missing token?). Run az login and start the script again." }
+    return $response
+}
+
+function Invoke-BoardRequest {
+    # The only call to Invoke-RestMethod, so tests can replace the HTTP answer
+    param([Parameter(Mandatory)] [hashtable] $Request)
+    return Invoke-RestMethod @Request
 }
 
 # --- Pure helpers (tested) ------------------------------------------------------

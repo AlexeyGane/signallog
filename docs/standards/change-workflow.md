@@ -143,6 +143,7 @@ Invoke-Change @{
 | Unsigned commit | Commits without a verifiable author | Check `gpg.format`, `user.signingkey`, `gpg.ssh.allowedSignersFile` |
 | Red CI check | Merging something broken | Fix in the same branch and run the script again |
 | Not every file Viewed | Merging something unread | Finish the review; the status turns green by itself |
+| Azure DevOps token expires while the script waits for the merge | Evidence or result comments failing hours into a run | The module takes a new token when the old one is 30 minutes old, and once more if Azure DevOps answers with a sign-in page instead of JSON |
 | Result check fails after deployment | "Merged" taken for "works" | Wait for the Pages CDN and check by hand; the work item stays open |
 
 Two rules hold by the split of roles rather than by the script: nothing outside the owner's machine runs git commands that write to the owner's working copy, and credentials (`az login`, the signing key, `gh auth`) exist only on the owner's machine.
