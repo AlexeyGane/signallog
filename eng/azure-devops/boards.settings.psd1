@@ -81,6 +81,13 @@
                         }
                         @{
                             Type               = 'User Story'
+                            Title              = 'Define the PriceTick v1 contract'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0012; ADR-0014; ADR-0017; NFR-MNT-02'
+                            AcceptanceCriteria = 'contracts/schemas/price-tick/v1.json (JSON Schema 2020-12) describes the CloudEvents envelope and data of signallog.price.tick.v1 as in ADR 0012, with instrument ids as in ADR 0014 and UTC timestamps as in ADR 0017, and allows unknown fields; SignalLog.Contracts holds the envelope and data types, one set of serializer options (decimal as JSON number, enums upper-case, UTC with Z) and a producer helper that sets a UUIDv7 id, time, type, dataschema and traceparent; contract tests in CI show that produced events and the samples validate, that a consumer reads a sample with unknown fields, and that invalid messages are rejected by the schema and by the deserializer.'
+                        }
+                        @{
+                            Type               = 'User Story'
                             Title              = 'Replay adapter publishes a CloudEvents price tick'
                             Area               = 'Adapters'
                             Tags               = 'ADR-0011; ADR-0012'

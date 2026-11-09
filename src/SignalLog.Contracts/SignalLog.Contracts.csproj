@@ -1,3 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- CloudEvents envelope, payload types and identifier rules shared by producers and consumers (ADR 0012). No dependencies. -->
+  <!-- CloudEvents envelope, payload types and identifier rules shared by producers and consumers (ADR 0012). No dependencies.
+       JSON Schemas and samples live in contracts/ at the repository root. -->
 </Project>
