@@ -212,6 +212,13 @@
                             Tags               = 'ADR-0003'
                             AcceptanceCriteria = 'The change module takes a new Azure DevOps token from the Azure CLI when the current one is 30 minutes old and, once, when Azure DevOps answers with a sign-in page instead of JSON, then repeats the request; a second sign-in page stops the run with a clear message instead of property errors; a token given for tests is never replaced; Pester tests cover these cases and pass locally and in CI; the change workflow standard lists the safeguard.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Stop a resumed change run when the pull request does not carry the staged files'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0003'
+                            AcceptanceCriteria = 'When Invoke-Change finds the pull request of a change already open, it fetches the branch and, before it waits for CI and the merge, checks that every file of the change has its verified blob on the branch and that the branch changes no other file; any difference stops the run and lists the files; Pester tests cover a matching branch, an earlier blob, a missing file, an extra file, a failed fetch and the resumed Invoke-Change path, and pass locally and in CI; the change workflow standard describes the check.'
+                        }
                     )
                 }
                 @{
