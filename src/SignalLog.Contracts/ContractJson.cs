@@ -43,7 +43,9 @@ public sealed class UtcTimestampConverter : JsonConverter<DateTimeOffset>
         string? text = reader.GetString();
         if (text is null || !text.EndsWith('Z'))
         {
-            throw new JsonException($"Timestamps are UTC with a trailing Z (ADR 0017), got '{text}'.");
+            // A JSON null and an empty string read differently: "got null" and "got ''"
+            string got = text is null ? "null" : $"'{text}'";
+            throw new JsonException($"Timestamps are UTC with a trailing Z (ADR 0017), got {got}.");
         }
 
         return DateTimeOffset.Parse(text, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);

@@ -88,6 +88,13 @@
                         }
                         @{
                             Type               = 'User Story'
+                            Title              = 'Complete the PriceTick v1 contract with the review follow-ups'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0012; ADR-0017'
+                            AcceptanceCriteria = 'The timestamp error of ContractJson tells a JSON null, an empty string and a value without Z apart, and a contract test covers the three cases; contracts/README.md and the consumer test name the unknown fields of valid-unknown-fields.json (partitionkey, data.openInterest), and the test checks that they are present; Fun facts explain the term wire format used in the contract code, in English and Russian; the build and the contract tests pass locally and in CI.'
+                        }
+                        @{
+                            Type               = 'User Story'
                             Title              = 'Replay adapter publishes a CloudEvents price tick'
                             Area               = 'Adapters'
                             Tags               = 'ADR-0011; ADR-0012'

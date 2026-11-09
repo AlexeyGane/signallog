@@ -77,10 +77,17 @@ public sealed class PriceTickContractTests
         Assert.True(IsValid(ReadSample(sample)), sample);
     }
 
+    // valid-unknown-fields.json carries two fields that v1 does not define: the CloudEvents extension attribute
+    // "partitionkey" and data.openInterest. JSON has no comments, so they are named here and in contracts/README.md.
     [Fact]
     public void Consumer_reads_a_sample_with_unknown_fields()
     {
-        CloudEvent<PriceTickData>? read = JsonSerializer.Deserialize<CloudEvent<PriceTickData>>(ReadSample("valid-unknown-fields.json"), ContractJson.Options);
+        string json = ReadSample("valid-unknown-fields.json");
+        JsonNode sample = JsonNode.Parse(json)!;
+        Assert.NotNull(sample["partitionkey"]);
+        Assert.NotNull(sample["data"]!["openInterest"]);
+
+        CloudEvent<PriceTickData>? read = JsonSerializer.Deserialize<CloudEvent<PriceTickData>>(json, ContractJson.Options);
 
         Assert.NotNull(read);
         Assert.Equal("IFEU.BRN.2027-01", read.Data.InstrumentId);
@@ -128,6 +135,19 @@ public sealed class PriceTickContractTests
         string json = Mutate(ReadSample("valid-ttf-last.json"), path, value);
 
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CloudEvent<PriceTickData>>(json, ContractJson.Options));
+    }
+
+    [Theory]
+    [InlineData("null", "got null")]
+    [InlineData("\"\"", "got ''")]
+    [InlineData("\"2026-11-07T09:15:02\"", "got '2026-11-07T09:15:02'")]
+    public void Timestamp_error_tells_null_empty_and_missing_z_apart(string value, string expected)
+    {
+        string json = Mutate(ReadSample("valid-ttf-last.json"), "data.eventTimeUtc", value);
+
+        JsonException error = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CloudEvent<PriceTickData>>(json, ContractJson.Options));
+
+        Assert.Contains(expected, error.Message, StringComparison.Ordinal);
     }
 
     [Fact]
