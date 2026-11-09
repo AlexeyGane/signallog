@@ -332,6 +332,38 @@ function Test-StagedBlob {
     }
 }
 
+function Test-PullRequestHead {
+    <#
+    .SYNOPSIS
+        On a resumed run: the open pull request must carry exactly this change, with the blobs it was verified with.
+    .DESCRIPTION
+        A run that finds its pull request already open skips the commit and goes straight to the checks and the merge.
+        Without this check an earlier version of the change could be merged while the staged files had moved on
+        (AB#26: PR #29 carried the files of the first run; the review follow-ups prepared later never reached it).
+    #>
+    param([Parameter(Mandatory)] [string] $Branch, [Parameter(Mandatory)] [System.Collections.IDictionary] $Files)
+    $r = Invoke-Git @('fetch', '--quiet', 'origin', 'main', $Branch)
+    if ($r.ExitCode -ne 0) { throw "git fetch origin main $Branch failed: $($r.Output -join ' ')" }
+    $head = "origin/$Branch"
+    $problems = [System.Collections.Generic.List[string]]::new()
+    foreach ($path in $Files.Keys) {
+        $actual = Get-BlobId "${head}:$path"
+        $expected = $Files[$path][1]
+        if ($actual -ne $expected) {
+            $problems.Add("${path}: $(if ($actual) { $actual } else { 'absent' }) on the branch, $(if ($expected) { $expected } else { 'absent' }) in this change")
+        }
+    }
+    $r = Invoke-Git @('diff', '--name-only', "origin/main...$head")
+    if ($r.ExitCode -ne 0) { throw "git diff origin/main...$head failed: $($r.Output -join ' ')" }
+    foreach ($path in @($r.Output)) {
+        if ($path -and -not $Files.Contains([string] $path)) { $problems.Add("${path}: changed on the branch, not part of this change") }
+    }
+    if ($problems.Count -gt 0) {
+        throw "The open pull request on $Branch does not carry this change:`n  $($problems -join "`n  ")`nDo not merge it. Close the pull request and delete the branch, then run again, or put the difference into a new work item."
+    }
+    Write-ChangeOk "the pull request carries the $($Files.Count) files of this change"
+}
+
 function Update-MainBranch {
     foreach ($arguments in @(@('switch', 'main'), @('pull', '--prune'))) {
         $r = Invoke-Git $arguments
@@ -541,6 +573,7 @@ function Invoke-Change {
 
     $merged = Get-ChangePullRequest -Branch $branch -State merged
     $open = Get-ChangePullRequest -Branch $branch -State open
+    $resumed = [bool] $open
 
     if (-not $merged -and -not $open) {
         Write-ChangeStep '2. Base and baseline'
@@ -572,6 +605,10 @@ function Invoke-Change {
     }
 
     if (-not $merged) {
+        if ($resumed) {
+            Write-ChangeStep "4. Pull request #$open already open: does it carry this change?"
+            Test-PullRequestHead -Branch $branch -Files $files
+        }
         Write-ChangeStep "5. CI on PR #$open"
         Wait-PullRequestCheck -Number $open | Out-Null
         Write-ChangeStep '6. Review and merge (yours)'
@@ -622,6 +659,6 @@ Export-ModuleMember -Function @(
     'Initialize-ChangeContext', 'Get-ChangeContext', 'Invoke-Change',
     'Expand-ChangeText', 'Get-StagedSourcePath', 'Resolve-CheckRun', 'ConvertFrom-RunList', 'Get-ReviewGateDecision', 'Invoke-ResultCheck',
     'Find-BoardItem', 'New-BoardItem', 'Get-BoardItem', 'Set-BoardItemField', 'Set-BoardItemState', 'Test-BoardComment', 'Add-BoardComment', 'Add-BoardAttachment',
-    'Get-BlobId', 'Test-Baseline', 'Test-StagedBlob', 'Update-MainBranch', 'Reset-PreparedFile', 'Copy-StagedFile', 'New-SignedCommit',
+    'Get-BlobId', 'Test-Baseline', 'Test-StagedBlob', 'Test-PullRequestHead', 'Update-MainBranch', 'Reset-PreparedFile', 'Copy-StagedFile', 'New-SignedCommit',
     'Get-ChangePullRequest', 'New-ChangePullRequest', 'Wait-PullRequestCheck', 'Get-ReviewState', 'Set-ReviewGateStatus', 'Wait-ReviewAndMerge', 'Wait-Deployment'
 )

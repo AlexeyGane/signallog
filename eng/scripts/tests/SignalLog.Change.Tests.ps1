@@ -186,6 +186,105 @@ Describe 'Test-Baseline' {
     }
 }
 
+Describe 'Test-PullRequestHead' {
+    BeforeEach {
+        $files = [ordered]@{ 'a.md' = @('1111111111111111111111111111111111111111', '2222222222222222222222222222222222222222'); 'new.md' = @($null, '3333333333333333333333333333333333333333') }
+    }
+    It 'passes when the branch carries the staged blobs and nothing else' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'rev-parse' {
+                    switch ($Arguments[-1]) {
+                        'origin/feature/AB9-x:a.md' { [pscustomobject]@{ ExitCode = 0; Output = @('2222222222222222222222222222222222222222') } }
+                        'origin/feature/AB9-x:new.md' { [pscustomobject]@{ ExitCode = 0; Output = @('3333333333333333333333333333333333333333') } }
+                        default { [pscustomobject]@{ ExitCode = 1; Output = @() } }
+                    }
+                }
+                'diff' { [pscustomobject]@{ ExitCode = 0; Output = @('a.md', 'new.md') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        { Test-PullRequestHead -Branch 'feature/AB9-x' -Files $files 6>$null } | Should -Not -Throw
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'fetch' -and $Arguments -contains 'feature/AB9-x' } -Times 1
+    }
+    It 'throws and names the file when the branch carries an earlier version (regression: AB#26, PR #29)' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'rev-parse' {
+                    switch ($Arguments[-1]) {
+                        'origin/feature/AB9-x:a.md' { [pscustomobject]@{ ExitCode = 0; Output = @('4444444444444444444444444444444444444444') } }
+                        'origin/feature/AB9-x:new.md' { [pscustomobject]@{ ExitCode = 0; Output = @('3333333333333333333333333333333333333333') } }
+                        default { [pscustomobject]@{ ExitCode = 1; Output = @() } }
+                    }
+                }
+                'diff' { [pscustomobject]@{ ExitCode = 0; Output = @('a.md', 'new.md') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        { Test-PullRequestHead -Branch 'feature/AB9-x' -Files $files } | Should -Throw '*a.md: 4444444444444444444444444444444444444444 on the branch, 2222222222222222222222222222222222222222 in this change*'
+    }
+    It 'throws when a file of the change is missing on the branch' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'rev-parse' {
+                    if ($Arguments[-1] -eq 'origin/feature/AB9-x:a.md') { [pscustomobject]@{ ExitCode = 0; Output = @('2222222222222222222222222222222222222222') } }
+                    else { [pscustomobject]@{ ExitCode = 1; Output = @() } }
+                }
+                'diff' { [pscustomobject]@{ ExitCode = 0; Output = @('a.md') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        { Test-PullRequestHead -Branch 'feature/AB9-x' -Files $files } | Should -Throw '*new.md: absent on the branch*'
+    }
+    It 'throws when the branch changes a file outside the change' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'rev-parse' {
+                    switch ($Arguments[-1]) {
+                        'origin/feature/AB9-x:a.md' { [pscustomobject]@{ ExitCode = 0; Output = @('2222222222222222222222222222222222222222') } }
+                        'origin/feature/AB9-x:new.md' { [pscustomobject]@{ ExitCode = 0; Output = @('3333333333333333333333333333333333333333') } }
+                        default { [pscustomobject]@{ ExitCode = 1; Output = @() } }
+                    }
+                }
+                'diff' { [pscustomobject]@{ ExitCode = 0; Output = @('a.md', 'new.md', 'stray.md') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        { Test-PullRequestHead -Branch 'feature/AB9-x' -Files $files } | Should -Throw '*stray.md: changed on the branch, not part of this change*'
+    }
+    It 'throws when the branch cannot be fetched' {
+        Mock -ModuleName SignalLog.Change Invoke-Git { [pscustomobject]@{ ExitCode = 128; Output = @("fatal: couldn't find remote ref") } } -ParameterFilter { $Arguments[0] -eq 'fetch' }
+        { Test-PullRequestHead -Branch 'feature/AB9-x' -Files $files } | Should -Throw '*git fetch*failed*'
+    }
+}
+
+Describe 'Invoke-Change on a resumed run' {
+    It 'stops before the CI wait when the open pull request carries other blobs' {
+        Mock -ModuleName SignalLog.Change Get-BoardItem { [pscustomobject]@{ fields = [pscustomobject]@{ 'System.State' = 'Resolved' } } }
+        Mock -ModuleName SignalLog.Change Get-ChangePullRequest { $null } -ParameterFilter { $State -eq 'merged' }
+        Mock -ModuleName SignalLog.Change Get-ChangePullRequest { 29 } -ParameterFilter { $State -eq 'open' }
+        Mock -ModuleName SignalLog.Change New-SignedCommit { throw 'must not commit' }
+        Mock -ModuleName SignalLog.Change Wait-PullRequestCheck { throw 'must not wait' }
+        Mock -ModuleName SignalLog.Change Wait-ReviewAndMerge { throw 'must not wait for the merge' }
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'rev-parse' { [pscustomobject]@{ ExitCode = 0; Output = @('4444444444444444444444444444444444444444') } }
+                'diff' { [pscustomobject]@{ ExitCode = 0; Output = @('a.md') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        $change = @{
+            Story  = 26
+            Branch = 'feature/AB{id}-x'
+            Title  = 't AB#{id}'
+            Files  = [ordered]@{ 'a.md' = @('1111111111111111111111111111111111111111', '2222222222222222222222222222222222222222') }
+        }
+        { Invoke-Change $change 6>$null } | Should -Throw '*feature/AB26-x does not carry this change*'
+        Should -Invoke -ModuleName SignalLog.Change Wait-PullRequestCheck -Times 0
+        Should -Invoke -ModuleName SignalLog.Change New-SignedCommit -Times 0
+    }
+}
+
 Describe 'New-BoardItem' {
     It 'returns an existing work item without creating one' {
         Mock -ModuleName SignalLog.Change Invoke-BoardApi { [pscustomobject]@{ workItems = @([pscustomobject]@{ id = 42 }) } } -ParameterFilter { $Path -like 'wit/wiql*' }

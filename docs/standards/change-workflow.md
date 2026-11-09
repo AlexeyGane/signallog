@@ -105,7 +105,7 @@ Every change is applied on the owner's machine by one script. The script never m
 2. **Base.** `git switch main`, `git pull --prune`. Files left by an interrupted run are restored only if they are byte-identical to the staged copies; any other uncommitted change stops the script.
 3. **Baseline.** Each file the change touches must have, on `main`, the git blob id the change was verified against; a new file must be absent.
 4. **Files and evidence.** Staged files are copied in; the evidence comment and screenshots go into the work item.
-5. **Commit and pull request.** The staged blob ids are checked again, the commit is signed (an unsigned commit stops the script), pushed, and the pull request is created; the work item moves to Resolved.
+5. **Commit and pull request.** The staged blob ids are checked again, the commit is signed (an unsigned commit stops the script), pushed, and the pull request is created; the work item moves to Resolved. When a run finds its pull request already open, steps 2–5 are skipped, and the script first checks that the branch carries exactly the files of the change with their verified blob ids; any difference stops it before the CI wait.
 6. **CI.** The script polls `gh pr checks` until every check has finished. A run cancelled by a newer run of the same check does not count: the Azure Boards app edits the pull request description right after it is created, which starts a new run and cancels the first. A red check stops the script.
 7. **Review.** The pull request opens in the browser; the review gate (section 5) follows the Viewed marks.
 8. **Merge.** The owner merges; the script waits for the pull request to be `MERGED` and stops if it is closed unmerged.
@@ -139,6 +139,7 @@ Invoke-Change @{
 | No work item, or not Active | Work without an agreed goal and acceptance criteria | Create the work item first, then prepare the change |
 | Blob id on `main` differs from the verified one | Overwriting someone else's change; an untested combination | Rebuild the change on the new `main` |
 | Staged blob id differs after `git add` | A damaged copy or stray edits in the working tree | Stage the files again |
+| A run finds its pull request already open, but the branch carries other blobs or other files than the change | Merging an earlier version of the change while the staged files have moved on (AB#26: PR #29 was merged without the review follow-ups prepared after it was opened) | Do not merge; close the pull request and delete the branch, then run again, or put the difference into a new work item |
 | No evidence comment before the pull request | A pull request with nothing checkable behind it | The script writes the comment before it pushes |
 | Unsigned commit | Commits without a verifiable author | Check `gpg.format`, `user.signingkey`, `gpg.ssh.allowedSignersFile` |
 | Red CI check | Merging something broken | Fix in the same branch and run the script again |
