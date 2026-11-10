@@ -4,7 +4,9 @@
 
 .DESCRIPTION
     A change script describes one change as a hashtable (work item, branch, title, files, evidence, result
-    checks) and calls Invoke-Change. The module does the rest: work item state, baseline, staged files,
+    checks) and calls Invoke-Change. In branch mode a start script calls Start-Change first, the files of the
+    change are written into the working copy on that branch, and Invoke-Change takes them from there
+    (FromWorkingTree); otherwise they are copied from a staging folder. The module does the rest: work item state, baseline, staged files,
     evidence comment, signed commit, pull request, CI, review gate, the wait for the owner's merge, the
     deployment and the result comment. It never merges and never closes a work item.
 
@@ -108,6 +110,15 @@ function Invoke-Git {
     param([string[]] $Arguments)
     $out = & git @Arguments 2>&1
     return [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = $out }
+}
+
+function Invoke-Native {
+    # dotnet and pwsh for the solution check; returns @{ ExitCode; Output }, the output is also shown
+    param([Parameter(Mandatory)] [string] $FilePath, [string[]] $Arguments)
+    $out = & $FilePath @Arguments 2>&1
+    $code = $LASTEXITCODE
+    $out | Out-Host
+    return [pscustomobject]@{ ExitCode = $code; Output = $out }
 }
 
 function Invoke-BoardApi {
@@ -364,6 +375,82 @@ function Test-PullRequestHead {
     Write-ChangeOk "the pull request carries the $($Files.Count) files of this change"
 }
 
+function Test-WorkingTreeChange {
+    <#
+    .SYNOPSIS
+        Branch mode: the working copy holds exactly the files of the change, each with its verified blob.
+    .DESCRIPTION
+        git status may list only the paths of the change; every other change in the working copy stops the run.
+        Each file of the change must hash (git hash-object, with the repository's line-ending rules) to the
+        blob after the change; a file whose blob after the change is $null must be absent.
+    #>
+    param([Parameter(Mandatory)] [System.Collections.IDictionary] $Files)
+    $problems = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in @((Invoke-Git @('status', '--porcelain', '--untracked-files=all')).Output)) {
+        if (-not $line) { continue }
+        $path = ([string] $line).Substring(3).Trim('"')
+        if (-not $Files.Contains($path)) { $problems.Add("${path}: changed in the working copy, not part of this change") }
+    }
+    foreach ($path in $Files.Keys) {
+        $expected = $Files[$path][1]
+        $actual = $null
+        if (Test-Path -LiteralPath $path -PathType Leaf) {
+            $r = Invoke-Git @('hash-object', '--', $path)
+            if ($r.ExitCode -ne 0) { throw "git hash-object $path failed: $($r.Output -join ' ')" }
+            $actual = ([string] @($r.Output)[0]).Trim()
+        }
+        if ($actual -ne $expected) {
+            $problems.Add("${path}: $(if ($actual) { $actual } else { 'absent' }) in the working copy, $(if ($expected) { $expected } else { 'absent' }) in this change")
+        }
+    }
+    if ($problems.Count -gt 0) {
+        throw "The working copy does not hold exactly this change:`n  $($problems -join "`n  ")`nPut the files right (or ask for them again) and run again."
+    }
+    Write-ChangeOk "the working copy holds the $($Files.Count) files of this change and nothing else"
+}
+
+function Test-ChangeBranch {
+    <# Branch mode: the change branch is checked out and adds no commits to main yet. #>
+    param([Parameter(Mandatory)] [string] $Branch)
+    $current = ([string] @((Invoke-Git @('branch', '--show-current')).Output)[0]).Trim()
+    if ($current -ne $Branch) { throw "The working copy is on '$current', expected $Branch. Run the start script of this change first." }
+    $r = Invoke-Git @('fetch', '--quiet', 'origin', 'main')
+    if ($r.ExitCode -ne 0) { throw "git fetch origin main failed: $($r.Output -join ' ')" }
+    $ahead = ([string] @((Invoke-Git @('rev-list', '--count', 'origin/main..HEAD')).Output)[0]).Trim()
+    if ($ahead -ne '0') { throw "$Branch already has $ahead commit(s) that are not on main. The change is committed by this script only." }
+    Write-ChangeOk "on $Branch, no commits beyond main"
+}
+
+function Invoke-SolutionCheck {
+    <#
+    .SYNOPSIS
+        The build job of ci.yml on the owner's machine, in the current directory.
+    .DESCRIPTION
+        Restore, Release build with warnings as errors, tests, format check and the banned API fitness function,
+        stopping at the first failure. The build runs without persistent build servers (--disable-build-servers),
+        so no MSBuild or compiler process keeps the output locked after the check.
+        Returns Passed, Failed (the failed step) and Tests (the summary line of dotnet test).
+    #>
+    $steps = [ordered]@{
+        restore = @('dotnet', @('restore', 'SignalLog.slnx'))
+        build   = @('dotnet', @('build', 'SignalLog.slnx', '--no-restore', '--configuration', 'Release', '--disable-build-servers'))
+        test    = @('dotnet', @('test', '--solution', 'SignalLog.slnx', '--no-build', '--configuration', 'Release'))
+        format  = @('dotnet', @('format', 'SignalLog.slnx', '--verify-no-changes', '--no-restore'))
+        banned  = @('pwsh', @('-NoProfile', '-File', (Join-Path -Path 'eng' -ChildPath 'Test-BannedApi.ps1')))
+    }
+    $failed = @()
+    $tests = ''
+    foreach ($name in $steps.Keys) {
+        Write-ChangeStep "Solution check: $name"
+        $r = Invoke-Native -FilePath $steps[$name][0] -Arguments $steps[$name][1]
+        # String interpolation, not [string]: a failed run may print no summary, and [string] of an empty pipeline is $null
+        if ($name -eq 'test') { $tests = "$(@($r.Output) | Where-Object { "$_" -match 'total:' } | Select-Object -Last 1)".Trim() }
+        if ($r.ExitCode -ne 0) { Write-Host "    - $name failed (exit code $($r.ExitCode))" -ForegroundColor Red; $failed = @($name); break }
+        Write-ChangeOk $name
+    }
+    return [pscustomobject]@{ Passed = ($failed.Count -eq 0); Failed = $failed; Tests = $tests }
+}
+
 function Update-MainBranch {
     foreach ($arguments in @(@('switch', 'main'), @('pull', '--prune'))) {
         $r = Invoke-Git $arguments
@@ -403,10 +490,14 @@ function New-SignedCommit {
     param(
         [Parameter(Mandatory)] [string] $Branch,
         [Parameter(Mandatory)] [string] $Message,
-        [Parameter(Mandatory)] [System.Collections.IDictionary] $Files
+        [Parameter(Mandatory)] [System.Collections.IDictionary] $Files,
+        # Branch mode: the branch exists and is checked out (Start-Change)
+        [switch] $OnBranch
     )
-    $r = Invoke-Git @('switch', '-c', $Branch)
-    if ($r.ExitCode -ne 0) { throw "git switch -c $Branch failed: $($r.Output -join ' ')" }
+    if (-not $OnBranch) {
+        $r = Invoke-Git @('switch', '-c', $Branch)
+        if ($r.ExitCode -ne 0) { throw "git switch -c $Branch failed: $($r.Output -join ' ')" }
+    }
     $r = Invoke-Git (@('add', '--') + @($Files.Keys))
     if ($r.ExitCode -ne 0) { throw "git add failed: $($r.Output -join ' ')" }
     Test-StagedBlob -Files $Files
@@ -528,12 +619,64 @@ function Wait-Deployment {
 
 # --- The whole change ------------------------------------------------------------
 
+function Resolve-ChangeWorkItem {
+    # Step 1 of both modes: the work item by id, or found or created by title; New becomes Active
+    param([Parameter(Mandatory)] [hashtable] $Change)
+    # Optional keys are read by index: under strict mode a missing hashtable key read with a dot throws
+    if ($Change['Story']) { $id = [int] $Change['Story'] }
+    else {
+        $parent = if ($Change['FeatureItem']) { New-BoardItem -Item $Change['FeatureItem'] -ParentId $Change['EpicId'] } else { [int] $Change['StoryParent'] }
+        $id = New-BoardItem -Item $Change['StoryItem'] -ParentId $parent
+    }
+    $state = (Get-BoardItem -Id $id).fields.'System.State'
+    if ($state -eq 'New') { Set-BoardItemState -Id $id -State 'Active'; $state = 'Active' }
+    Write-Host "    AB#$id [$state]"
+    if ($state -notin @('Active', 'Resolved')) { throw "AB#$id is '$state'; it must be Active (or Resolved on a re-run)." }
+    return $id
+}
+
+function Start-Change {
+    <#
+    .SYNOPSIS
+        Branch mode, first script: the work item is Active and its branch is checked out from an up-to-date main.
+    .DESCRIPTION
+        Then the files of the change are written into the working copy, where the owner can read them in the
+        editor, and the publish script runs Invoke-Change with FromWorkingTree = $true. Safe to run again.
+    .PARAMETER Change
+        Hashtable with Story, or StoryItem (and FeatureItem with EpicId, or StoryParent), and Branch ({id} replaced).
+    #>
+    param([Parameter(Mandatory)] [hashtable] $Change)
+    Write-ChangeStep '1. Work item'
+    $id = Resolve-ChangeWorkItem -Change $Change
+    $branch = Expand-ChangeText $Change.Branch @{ id = $id }
+
+    Write-ChangeStep '2. Branch'
+    $current = ([string] @((Invoke-Git @('branch', '--show-current')).Output)[0]).Trim()
+    if ($current -eq $branch) { Write-ChangeSkip "already on $branch" }
+    else {
+        if (@((Invoke-Git @('status', '--porcelain', '--untracked-files=all')).Output | Where-Object { $_ })) {
+            throw "The working copy has uncommitted changes on '$current'. Commit or stash them, then run again."
+        }
+        Update-MainBranch
+        $exists = [bool] (Invoke-Git @('branch', '--list', $branch)).Output
+        $arguments = if ($exists) { @('switch', $branch) } else { @('switch', '-c', $branch) }
+        $r = Invoke-Git $arguments
+        if ($r.ExitCode -ne 0) { throw "git $($arguments -join ' ') failed: $($r.Output -join ' ')" }
+        Write-ChangeOk "$(if ($exists) { 'switched to' } else { 'created' }) $branch from main"
+    }
+    Write-Host ''
+    Write-Host "Ready: AB#$id on $branch. The files of the change go into the working copy next; then run the publish script." -ForegroundColor Green
+    return [pscustomobject]@{ Id = $id; Branch = $branch }
+}
+
 function Invoke-Change {
     <#
     .SYNOPSIS
         Runs one change through the change workflow. Safe to run again: finished steps are skipped.
     .PARAMETER Change
         Hashtable with:
+          FromWorkingTree  $true in branch mode: the files are already in the working copy on Branch (Start-Change);
+                        otherwise they are copied from Staging\tree
           Story         int id of an existing work item, or
           StoryItem     hashtable (Type, Title, Area, Tags, AcceptanceCriteria) found or created under
           FeatureItem   hashtable found or created under EpicId (optional; else StoryParent int)
@@ -552,16 +695,8 @@ function Invoke-Change {
     $ctx = Get-ChangeContext
 
     Write-ChangeStep '1. Work item'
-    # Optional keys are read by index: under strict mode a missing hashtable key read with a dot throws
-    if ($Change['Story']) { $id = [int] $Change['Story'] }
-    else {
-        $parent = if ($Change['FeatureItem']) { New-BoardItem -Item $Change['FeatureItem'] -ParentId $Change['EpicId'] } else { [int] $Change['StoryParent'] }
-        $id = New-BoardItem -Item $Change['StoryItem'] -ParentId $parent
-    }
-    $state = (Get-BoardItem -Id $id).fields.'System.State'
-    if ($state -eq 'New') { Set-BoardItemState -Id $id -State 'Active'; $state = 'Active' }
-    Write-Host "    AB#$id [$state]"
-    if ($state -notin @('Active', 'Resolved')) { throw "AB#$id is '$state'; it must be Active (or Resolved on a re-run)." }
+    $id = Resolve-ChangeWorkItem -Change $Change
+    $fromTree = [bool] $Change['FromWorkingTree']
 
     $values = @{ id = $id; evidence = "https://dev.azure.com/$($ctx.Organization)/$($ctx.Project)/_workitems/edit/$id" }
     $branch = Expand-ChangeText $Change.Branch $values
@@ -576,14 +711,24 @@ function Invoke-Change {
     $resumed = [bool] $open
 
     if (-not $merged -and -not $open) {
-        Write-ChangeStep '2. Base and baseline'
-        Reset-PreparedFile -Files $files
-        Update-MainBranch
-        Test-Baseline -Files $files -Revision 'HEAD'
-        if ($Change['Precheck']) { & $Change['Precheck'] }
+        if ($fromTree) {
+            Write-ChangeStep '2. Branch, baseline and working copy'
+            Test-ChangeBranch -Branch $branch
+            Test-Baseline -Files $files -Revision 'origin/main'
+            Test-WorkingTreeChange -Files $files
+            if ($Change['Precheck']) { & $Change['Precheck'] }
+            Write-ChangeStep '3. Evidence'
+        }
+        else {
+            Write-ChangeStep '2. Base and baseline'
+            Reset-PreparedFile -Files $files
+            Update-MainBranch
+            Test-Baseline -Files $files -Revision 'HEAD'
+            if ($Change['Precheck']) { & $Change['Precheck'] }
 
-        Write-ChangeStep '3. Files and evidence'
-        Copy-StagedFile -Files $files
+            Write-ChangeStep '3. Files and evidence'
+            Copy-StagedFile -Files $files
+        }
         if (-not (Test-BoardComment -Id $id -Marker $evidenceMarker)) {
             $images = foreach ($image in @($Change['Evidence']['Images'])) {
                 if (-not $image) { continue }
@@ -598,7 +743,7 @@ function Invoke-Change {
 
         Write-ChangeStep '4. Signed commit and pull request'
         $message = "$title`n`n$((Expand-ChangeText $Change.CommitBody $values).Trim())`n`nWork item: AB#$id`n`n$trailer"
-        New-SignedCommit -Branch $branch -Message $message -Files $files
+        New-SignedCommit -Branch $branch -Message $message -Files $files -OnBranch:$fromTree
         $body = "$((Expand-ChangeText $Change.PrBody $values).Trim())`n`n🤖 Generated with [Claude Code](https://claude.com/claude-code)`n`nhttps://claude.ai/code/session_01RLzhf5iziPxvCyLkZjanXQ"
         $open = New-ChangePullRequest -Branch $branch -Title $title -Body $body
         if ((Get-BoardItem -Id $id).fields.'System.State' -ne 'Resolved') { Set-BoardItemState -Id $id -State 'Resolved' }
@@ -656,9 +801,9 @@ $published
 }
 
 Export-ModuleMember -Function @(
-    'Initialize-ChangeContext', 'Get-ChangeContext', 'Invoke-Change',
+    'Initialize-ChangeContext', 'Get-ChangeContext', 'Start-Change', 'Invoke-Change', 'Invoke-SolutionCheck',
     'Expand-ChangeText', 'Get-StagedSourcePath', 'Resolve-CheckRun', 'ConvertFrom-RunList', 'Get-ReviewGateDecision', 'Invoke-ResultCheck',
     'Find-BoardItem', 'New-BoardItem', 'Get-BoardItem', 'Set-BoardItemField', 'Set-BoardItemState', 'Test-BoardComment', 'Add-BoardComment', 'Add-BoardAttachment',
-    'Get-BlobId', 'Test-Baseline', 'Test-StagedBlob', 'Test-PullRequestHead', 'Update-MainBranch', 'Reset-PreparedFile', 'Copy-StagedFile', 'New-SignedCommit',
+    'Get-BlobId', 'Test-Baseline', 'Test-StagedBlob', 'Test-PullRequestHead', 'Test-WorkingTreeChange', 'Test-ChangeBranch', 'Update-MainBranch', 'Reset-PreparedFile', 'Copy-StagedFile', 'New-SignedCommit',
     'Get-ChangePullRequest', 'New-ChangePullRequest', 'Wait-PullRequestCheck', 'Get-ReviewState', 'Set-ReviewGateStatus', 'Wait-ReviewAndMerge', 'Wait-Deployment'
 )

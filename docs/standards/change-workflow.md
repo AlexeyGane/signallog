@@ -99,38 +99,59 @@ The ruleset itself is kept as code in [`eng/github/repository.settings.psd1`](ht
 
 ## 6. Change script
 
-Every change is applied on the owner's machine by one script. The script never merges and never closes a work item; it is safe to run again, skipping steps already done.
+Every change is applied on the owner's machine by scripts that never merge and never close a work item; each is safe to run again, skipping steps already done. There are two ways to bring the files of a change in:
+
+- **Branch mode** (the default): a start script makes the work item Active, updates `main` and checks out the change branch. The files of the change are then written straight into the working copy on that branch, where the owner can read them in the editor before anything is committed, and a publish script takes it from there.
+- **Staging mode**: the files are prepared in a staging folder (`<staging>\tree`, with `.github` as `github`) and the publish script copies them in. It remains for files that cannot be written into the working copy directly, such as `.github`.
+
+The publish script runs these steps:
 
 1. **Work item.** The work item exists and is Active (step 1 is done before the change is prepared).
-2. **Base.** `git switch main`, `git pull --prune`. Files left by an interrupted run are restored only if they are byte-identical to the staged copies; any other uncommitted change stops the script.
-3. **Baseline.** Each file the change touches must have, on `main`, the git blob id the change was verified against; a new file must be absent.
-4. **Files and evidence.** Staged files are copied in; the evidence comment and screenshots go into the work item.
+2. **Base.** Branch mode: the change branch is checked out and carries no commits beyond `origin/main`. Staging mode: `git switch main`, `git pull --prune`; files left by an interrupted run are restored only if they are byte-identical to the staged copies, and any other uncommitted change stops the script.
+3. **Baseline.** Each file the change touches must have, on `main` (`origin/main` in branch mode), the git blob id the change was verified against; a new file must be absent.
+4. **Files and evidence.** Branch mode: the working copy must hold exactly the files of the change, each hashing (`git hash-object`) to its verified blob id, and nothing else. Staging mode: the staged files are copied in. Then the evidence comment and screenshots go into the work item.
 5. **Commit and pull request.** The staged blob ids are checked again, the commit is signed (an unsigned commit stops the script), pushed, and the pull request is created; the work item moves to Resolved. When a run finds its pull request already open, steps 2–5 are skipped, and the script first checks that the branch carries exactly the files of the change with their verified blob ids; any difference stops it before the CI wait.
 6. **CI.** The script polls `gh pr checks` until every check has finished. A run cancelled by a newer run of the same check does not count: the Azure Boards app edits the pull request description right after it is created, which starts a new run and cancels the first. A red check stops the script.
 7. **Review.** The pull request opens in the browser; the review gate (section 5) follows the Viewed marks.
 8. **Merge.** The owner merges; the script waits for the pull request to be `MERGED` and stops if it is closed unmerged.
 9. **Deployment and result.** The script waits until the workflow run for the merge commit appears, then watches it to the end; the published result is checked against the acceptance criteria; the result comment goes into the work item.
-10. **Clean-up.** The staging folder is removed.
+10. **Clean-up.** The staging folder (in branch mode it holds only the scripts and the screenshots) is removed.
 
-The steps live in one PowerShell module, [`eng/scripts/SignalLog.Change.psm1`](https://github.com/AlexeyGane/signallog/blob/main/eng/scripts/SignalLog.Change.psm1), tested with Pester in CI ([tests](https://github.com/AlexeyGane/signallog/tree/main/eng/scripts/tests)). A change script holds only what is specific to the change: the work item, the branch and title, the files with their blob ids, the evidence, the texts of the commit and the pull request, and the result checks.
+Before the publish script commits anything, it usually runs `Invoke-SolutionCheck`: the build job of `ci.yml` on the owner's machine (restore, Release build with warnings as errors, tests, format check, banned API fitness function), with the result in the evidence. The build runs with `--disable-build-servers`, so no MSBuild or compiler process stays behind holding build output locked.
+
+The steps live in one PowerShell module, [`eng/scripts/SignalLog.Change.psm1`](https://github.com/AlexeyGane/signallog/blob/main/eng/scripts/SignalLog.Change.psm1), tested with Pester in CI ([tests](https://github.com/AlexeyGane/signallog/tree/main/eng/scripts/tests)). A change script holds only what is specific to the change: the work item, the branch and title, the files with their blob ids, the evidence, the texts of the commit and the pull request, and the result checks. In branch mode the start script holds the work item and the branch:
+
+```powershell
+Import-Module ./eng/scripts/SignalLog.Change.psm1
+Initialize-ChangeContext -Staging 'D:\src\_staging\example' | Out-Null
+Start-Change @{
+    StoryItem   = @{ Type = 'User Story'; Title = 'Example change'; Area = 'Platform'; AcceptanceCriteria = '...' }
+    FeatureItem = @{ Type = 'Feature'; Title = 'Documentation site'; Area = 'Platform' }
+    EpicId      = 1
+    Branch      = 'docs/AB{id}-example'
+}
+```
+
+and the publish script the rest:
 
 ```powershell
 Import-Module ./eng/scripts/SignalLog.Change.psm1
 Initialize-ChangeContext -Staging 'D:\src\_staging\example' | Out-Null
 Invoke-Change @{
-    Story        = 42
-    Branch       = 'docs/AB{id}-example'
-    Title        = 'docs(domain): example change AB#{id}'
-    Files        = [ordered]@{ 'docs/domain/glossary.md' = @('<blob before>', '<blob after>') }
-    Evidence     = @{ Items = '<li><b>Criterion:</b> how it was checked.</li>'; Images = @('page.png') }
-    CommitBody   = 'Why the change was made, wrapped at about 72 characters.'
-    PrBody       = "## What`n`n- ...`n`nWork item: AB#{id}`n`n## Acceptance criteria`n`n- [x] ...`n`n## Checks`n`n- Evidence: {evidence}"
-    Published    = 'https://alexeygane.github.io/signallog/domain/glossary/'
-    ResultChecks = { [ordered]@{ 'page opens' = { (Invoke-WebRequest 'https://alexeygane.github.io/signallog/domain/glossary/').StatusCode -eq 200 } } }
+    Story           = 42
+    FromWorkingTree = $true
+    Branch          = 'docs/AB{id}-example'
+    Title           = 'docs(domain): example change AB#{id}'
+    Files           = [ordered]@{ 'docs/domain/glossary.md' = @('<blob before>', '<blob after>') }
+    Evidence        = @{ Items = '<li><b>Criterion:</b> how it was checked.</li>'; Images = @('page.png') }
+    CommitBody      = 'Why the change was made, wrapped at about 72 characters.'
+    PrBody          = "## What`n`n- ...`n`nWork item: AB#{id}`n`n## Acceptance criteria`n`n- [x] ...`n`n## Checks`n`n- Evidence: {evidence}"
+    Published       = 'https://alexeygane.github.io/signallog/domain/glossary/'
+    ResultChecks    = { [ordered]@{ 'page opens' = { (Invoke-WebRequest 'https://alexeygane.github.io/signallog/domain/glossary/').StatusCode -eq 200 } } }
 }
 ```
 
-`{id}` becomes the work item id and `{evidence}` the link to it. Instead of `Story`, a change can name `StoryItem` (and `FeatureItem` with `EpicId`) to find or create the work item first. `Workflow` names the workflow that deploys the merge (default `docs.yml`; `$null` when nothing deploys).
+`{id}` becomes the work item id and `{evidence}` the link to it. Without `FromWorkingTree` the files come from the staging folder (staging mode), and a change can name `StoryItem` (and `FeatureItem` with `EpicId`) instead of `Story` to find or create the work item in the same run. `Workflow` names the workflow that deploys the merge (default `docs.yml`; `$null` when nothing deploys).
 
 ## 7. Safeguards
 
@@ -139,6 +160,7 @@ Invoke-Change @{
 | No work item, or not Active | Work without an agreed goal and acceptance criteria | Create the work item first, then prepare the change |
 | Blob id on `main` differs from the verified one | Overwriting someone else's change; an untested combination | Rebuild the change on the new `main` |
 | Staged blob id differs after `git add` | A damaged copy or stray edits in the working tree | Stage the files again |
+| Branch mode: another branch is checked out, the branch already has commits, or the working copy holds other files or other content than the change | Committing something nobody verified, or an edit made by hand in the editor that the evidence does not cover | Put the working copy right (or have the files written again) and run again |
 | A run finds its pull request already open, but the branch carries other blobs or other files than the change | Merging an earlier version of the change while the staged files have moved on (AB#26: PR #29 was merged without the review follow-ups prepared after it was opened) | Do not merge; close the pull request and delete the branch, then run again, or put the difference into a new work item |
 | No evidence comment before the pull request | A pull request with nothing checkable behind it | The script writes the comment before it pushes |
 | Unsigned commit | Commits without a verifiable author | Check `gpg.format`, `user.signingkey`, `gpg.ssh.allowedSignersFile` |

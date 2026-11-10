@@ -226,6 +226,13 @@
                             Tags               = 'ADR-0003'
                             AcceptanceCriteria = 'When Invoke-Change finds the pull request of a change already open, it fetches the branch and, before it waits for CI and the merge, checks that every file of the change has its verified blob on the branch and that the branch changes no other file; any difference stops the run and lists the files; Pester tests cover a matching branch, an earlier blob, a missing file, an extra file, a failed fetch and the resumed Invoke-Change path, and pass locally and in CI; the change workflow standard describes the check.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Apply a change from the working copy on its branch'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0003; ADR-0004'
+                            AcceptanceCriteria = 'A start script built on Start-Change makes the work item Active, updates main and checks out the change branch, refusing to leave uncommitted changes behind; with FromWorkingTree, Invoke-Change takes the files from the working copy on that branch instead of a staging folder, after checking that the branch is checked out with no commits beyond main, that the files match the verified baseline on origin/main, and that the working copy holds exactly the files of the change with their verified blobs and nothing else; Invoke-SolutionCheck runs the build job of ci.yml locally with the build and the banned API probe free of persistent build servers; Pester tests cover these cases and pass locally and in CI; the change workflow standard and the cover note describe branch mode.'
+                        }
                     )
                 }
                 @{

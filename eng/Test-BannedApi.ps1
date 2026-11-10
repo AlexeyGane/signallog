@@ -22,7 +22,8 @@ $expected = Select-String -Path $probeFile -Pattern '// BANNED' |
     ForEach-Object { $_.LineNumber } |
     Sort-Object -Unique
 
-$output = & dotnet build $probeDir --no-incremental -nologo 2>&1 | Out-String
+# --disable-build-servers: no MSBuild or compiler server stays behind holding the probe's output locked
+$output = & dotnet build $probeDir --no-incremental --disable-build-servers -nologo 2>&1 | Out-String
 $exitCode = $LASTEXITCODE
 
 if ($exitCode -eq 0) {
