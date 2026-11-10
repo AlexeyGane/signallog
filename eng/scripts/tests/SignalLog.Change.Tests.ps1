@@ -285,6 +285,194 @@ Describe 'Invoke-Change on a resumed run' {
     }
 }
 
+Describe 'Test-WorkingTreeChange' {
+    BeforeEach {
+        $files = [ordered]@{
+            'a.md'    = @('1111111111111111111111111111111111111111', '2222222222222222222222222222222222222222')
+            'new.md'  = @($null, '3333333333333333333333333333333333333333')
+            'gone.md' = @('4444444444444444444444444444444444444444', $null)
+        }
+        Mock -ModuleName SignalLog.Change Test-Path { $true }
+        Mock -ModuleName SignalLog.Change Test-Path { $false } -ParameterFilter { $LiteralPath -eq 'gone.md' }
+    }
+    It 'passes when the working copy holds exactly the change, a deleted file included' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'status' { [pscustomobject]@{ ExitCode = 0; Output = @(' M a.md', '?? new.md', ' D gone.md') } }
+                'hash-object' {
+                    switch ($Arguments[-1]) {
+                        'a.md' { [pscustomobject]@{ ExitCode = 0; Output = @('2222222222222222222222222222222222222222') } }
+                        'new.md' { [pscustomobject]@{ ExitCode = 0; Output = @('3333333333333333333333333333333333333333') } }
+                    }
+                }
+            }
+        }
+        { Test-WorkingTreeChange -Files $files 6>$null } | Should -Not -Throw
+    }
+    It 'throws and names a file the change does not include' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'status' { [pscustomobject]@{ ExitCode = 0; Output = @(' M a.md', '?? new.md', ' D gone.md', ' M stray.md') } }
+                'hash-object' {
+                    switch ($Arguments[-1]) {
+                        'a.md' { [pscustomobject]@{ ExitCode = 0; Output = @('2222222222222222222222222222222222222222') } }
+                        'new.md' { [pscustomobject]@{ ExitCode = 0; Output = @('3333333333333333333333333333333333333333') } }
+                    }
+                }
+            }
+        }
+        { Test-WorkingTreeChange -Files $files } | Should -Throw '*stray.md: changed in the working copy, not part of this change*'
+    }
+    It 'throws and names a file whose content differs from the verified blob' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'status' { [pscustomobject]@{ ExitCode = 0; Output = @(' M a.md', '?? new.md', ' D gone.md') } }
+                'hash-object' {
+                    switch ($Arguments[-1]) {
+                        'a.md' { [pscustomobject]@{ ExitCode = 0; Output = @('5555555555555555555555555555555555555555') } }
+                        'new.md' { [pscustomobject]@{ ExitCode = 0; Output = @('3333333333333333333333333333333333333333') } }
+                    }
+                }
+            }
+        }
+        { Test-WorkingTreeChange -Files $files } | Should -Throw '*a.md: 5555555555555555555555555555555555555555 in the working copy, 2222222222222222222222222222222222222222 in this change*'
+    }
+    It 'throws when a file to be deleted is still there' {
+        Mock -ModuleName SignalLog.Change Test-Path { $true } -ParameterFilter { $LiteralPath -eq 'gone.md' }
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'status' { [pscustomobject]@{ ExitCode = 0; Output = @(' M a.md', '?? new.md') } }
+                'hash-object' {
+                    switch ($Arguments[-1]) {
+                        'a.md' { [pscustomobject]@{ ExitCode = 0; Output = @('2222222222222222222222222222222222222222') } }
+                        'new.md' { [pscustomobject]@{ ExitCode = 0; Output = @('3333333333333333333333333333333333333333') } }
+                        'gone.md' { [pscustomobject]@{ ExitCode = 0; Output = @('4444444444444444444444444444444444444444') } }
+                    }
+                }
+            }
+        }
+        { Test-WorkingTreeChange -Files $files } | Should -Throw '*gone.md: 4444444444444444444444444444444444444444 in the working copy, absent in this change*'
+    }
+}
+
+Describe 'Test-ChangeBranch' {
+    It 'passes on the branch with no commits beyond main' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'branch' { [pscustomobject]@{ ExitCode = 0; Output = @('feature/AB9-x') } }
+                'rev-list' { [pscustomobject]@{ ExitCode = 0; Output = @('0') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        { Test-ChangeBranch -Branch 'feature/AB9-x' 6>$null } | Should -Not -Throw
+    }
+    It 'throws on another branch' {
+        Mock -ModuleName SignalLog.Change Invoke-Git { [pscustomobject]@{ ExitCode = 0; Output = @('main') } }
+        { Test-ChangeBranch -Branch 'feature/AB9-x' } | Should -Throw "*on 'main', expected feature/AB9-x*"
+    }
+    It 'throws when the branch already has commits' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'branch' { [pscustomobject]@{ ExitCode = 0; Output = @('feature/AB9-x') } }
+                'rev-list' { [pscustomobject]@{ ExitCode = 0; Output = @('2') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        { Test-ChangeBranch -Branch 'feature/AB9-x' } | Should -Throw '*already has 2 commit(s)*'
+    }
+}
+
+Describe 'Start-Change' {
+    BeforeEach {
+        Mock -ModuleName SignalLog.Change Get-BoardItem { [pscustomobject]@{ fields = [pscustomobject]@{ 'System.State' = 'New' } } }
+        Mock -ModuleName SignalLog.Change Set-BoardItemState { }
+    }
+    It 'makes the work item Active and creates the branch from an up-to-date main' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            if ($Arguments[0] -eq 'branch' -and $Arguments[1] -eq '--show-current') { [pscustomobject]@{ ExitCode = 0; Output = @('main') } }
+            else { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+        }
+        $r = Start-Change @{ Story = 9; Branch = 'feature/AB{id}-x' } 6>$null
+        $r.Id | Should -Be 9
+        $r.Branch | Should -Be 'feature/AB9-x'
+        Should -Invoke -ModuleName SignalLog.Change Set-BoardItemState -ParameterFilter { $Id -eq 9 -and $State -eq 'Active' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'pull' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' -and $Arguments[1] -eq '-c' -and $Arguments[2] -eq 'feature/AB9-x' } -Times 1
+    }
+    It 'refuses to leave uncommitted changes behind' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'branch' { [pscustomobject]@{ ExitCode = 0; Output = @('main') } }
+                'status' { [pscustomobject]@{ ExitCode = 0; Output = @(' M docs/note.md') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        { Start-Change @{ Story = 9; Branch = 'feature/AB{id}-x' } 6>$null } | Should -Throw '*uncommitted changes*'
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' } -Times 0
+    }
+    It 'does nothing to git when the branch is already checked out' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            if ($Arguments[0] -eq 'branch' -and $Arguments[1] -eq '--show-current') { [pscustomobject]@{ ExitCode = 0; Output = @('feature/AB9-x') } }
+            else { throw "unexpected git $($Arguments -join ' ')" }
+        }
+        (Start-Change @{ Story = 9; Branch = 'feature/AB{id}-x' } 6>$null).Branch | Should -Be 'feature/AB9-x'
+    }
+}
+
+Describe 'Invoke-SolutionCheck' {
+    It 'runs the CI build steps, the build without persistent build servers, and reads the test summary' {
+        Mock -ModuleName SignalLog.Change Invoke-Native {
+            if ($Arguments[0] -eq 'test') { [pscustomobject]@{ ExitCode = 0; Output = @('Test run summary: Passed!', '  total: 57') } }
+            else { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+        }
+        $r = Invoke-SolutionCheck 6>$null
+        $r.Passed | Should -BeTrue
+        $r.Tests | Should -Be 'total: 57'
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Native -ParameterFilter { $FilePath -eq 'dotnet' -and $Arguments[0] -eq 'build' -and $Arguments -contains '--disable-build-servers' -and $Arguments -contains 'Release' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Native -ParameterFilter { $FilePath -eq 'pwsh' -and ($Arguments -join ' ') -match 'Test-BannedApi\.ps1' } -Times 1
+    }
+    It 'stops at the first failed step and names it, also when the failed run prints no summary' {
+        Mock -ModuleName SignalLog.Change Invoke-Native {
+            if ($Arguments[0] -eq 'test') { [pscustomobject]@{ ExitCode = 1; Output = @('failed') } }
+            else { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+        }
+        $r = Invoke-SolutionCheck 6>$null
+        $r.Passed | Should -BeFalse
+        $r.Failed | Should -Be @('test')
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Native -ParameterFilter { $Arguments[0] -eq 'format' } -Times 0
+    }
+}
+
+Describe 'Invoke-Change in branch mode' {
+    It 'checks branch, baseline on origin/main and working copy, and commits on the branch without copying staged files' {
+        Mock -ModuleName SignalLog.Change Get-BoardItem { [pscustomobject]@{ fields = [pscustomobject]@{ 'System.State' = 'Active' } } }
+        Mock -ModuleName SignalLog.Change Get-ChangePullRequest { $null }
+        Mock -ModuleName SignalLog.Change Test-ChangeBranch { }
+        Mock -ModuleName SignalLog.Change Test-Baseline { }
+        Mock -ModuleName SignalLog.Change Test-WorkingTreeChange { }
+        Mock -ModuleName SignalLog.Change Test-BoardComment { $true }
+        Mock -ModuleName SignalLog.Change Reset-PreparedFile { throw 'must not reset' }
+        Mock -ModuleName SignalLog.Change Update-MainBranch { throw 'must not switch to main' }
+        Mock -ModuleName SignalLog.Change Copy-StagedFile { throw 'must not copy staged files' }
+        Mock -ModuleName SignalLog.Change New-SignedCommit { }
+        Mock -ModuleName SignalLog.Change New-ChangePullRequest { throw 'stop after the commit' }
+        $change = @{
+            Story           = 9
+            FromWorkingTree = $true
+            Branch          = 'feature/AB{id}-x'
+            Title           = 't AB#{id}'
+            Files           = [ordered]@{ 'a.md' = @('1111111111111111111111111111111111111111', '2222222222222222222222222222222222222222') }
+            CommitBody      = 'body'
+            PrBody          = 'Work item: AB#{id}'
+        }
+        { Invoke-Change $change 6>$null } | Should -Throw '*stop after the commit*'
+        Should -Invoke -ModuleName SignalLog.Change Test-ChangeBranch -ParameterFilter { $Branch -eq 'feature/AB9-x' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Test-Baseline -ParameterFilter { $Revision -eq 'origin/main' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Test-WorkingTreeChange -Times 1
+        Should -Invoke -ModuleName SignalLog.Change New-SignedCommit -ParameterFilter { $OnBranch -and $Branch -eq 'feature/AB9-x' } -Times 1
+    }
+}
+
 Describe 'New-BoardItem' {
     It 'returns an existing work item without creating one' {
         Mock -ModuleName SignalLog.Change Invoke-BoardApi { [pscustomobject]@{ workItems = @([pscustomobject]@{ id = 42 }) } } -ParameterFilter { $Path -like 'wit/wiql*' }
