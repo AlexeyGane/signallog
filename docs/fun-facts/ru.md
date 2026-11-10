@@ -43,3 +43,11 @@ tj-actions/changed-files — действие (action) для GitHub Actions, к
 Мораль для SignalLog: тег — это подвижная ссылка, которую владелец (или тот, кто украл его токен) может переставить на любой коммит. Полный хеш коммита вычисляется из содержимого, поэтому его нельзя перенаправить на другой код. Поэтому все сторонние действия в наших workflow указаны полным SHA, а обновления версий приходят от Dependabot отдельными pull request и проходят ревью.
 
 Источники: [CISA, Supply Chain Compromise of Third-Party GitHub Action, CVE-2025-30066, 2025-03-18](https://cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-github-action-cve-2025-30066); [GitHub Advisory GHSA-mrrh-fwg8-r2c3](https://github.com/advisories/GHSA-mrrh-fwg8-r2c3); [The Hacker News, 2025-03-23](https://thehackernews.com/2025/03/github-supply-chain-breach-coinbase.html); [Infosecurity Magazine: Tj-actions Supply Chain Attack Traced Back to Single GitHub Token Compromise](https://www.infosecurity-magazine.com/news/tj-actions-supply-chain-attack/).
+
+## On the wire: почему формат данных назван в честь провода
+
+«On the wire», «на проводе», значит данные в том виде, в каком они идут между системами: байты в сообщении, запросе или очереди, в отличие от объекта внутри программы («in memory»). Выражение тянется со времён телеграфа, когда сообщения и правда шли по проводу: *wire* до сих пор значит телеграфную или телефонную линию, а ещё телеграмму, и «to wire» — отправить сообщение или деньги телеграфом. Сети унаследовали слово, и теперь им называют сериализованную форму данных: «wire format» у Protocol Buffers, «wire protocol» у баз данных.
+
+В SignalLog у одной и той же метки времени две формы. В памяти это `DateTimeOffset`, а на проводе — строка `"2026-11-07T09:15:02.123Z"` в JSON события `signallog.price.tick.v1`. Поэтому шаблон этой строки в `UtcTimestampConverter` называется `WireFormat`: он часть контракта сообщения, а не формат для логов или интерфейса.
+
+Источники: [Merriam-Webster: wire](https://www.merriam-webster.com/dictionary/wire) (существительное 5b, 5c; глагол); [Protocol Buffers: Encoding](https://protobuf.dev/programming-guides/encoding/) («This document describes the Protobuf wire format»).

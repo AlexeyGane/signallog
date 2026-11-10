@@ -43,3 +43,11 @@ The chain had started long before. In November–December 2024, a vulnerable `pu
 The lesson for SignalLog: a tag is a movable reference that its owner (or whoever stole the owner's token) can point at any commit. A full commit hash is computed from the content, so it cannot be redirected to other code. That is why every third-party action in our workflows is referenced by its full SHA, and version updates arrive from Dependabot as separate pull requests that go through review.
 
 Sources: [CISA, Supply Chain Compromise of Third-Party GitHub Action, CVE-2025-30066, 2025-03-18](https://cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-github-action-cve-2025-30066); [GitHub Advisory GHSA-mrrh-fwg8-r2c3](https://github.com/advisories/GHSA-mrrh-fwg8-r2c3); [The Hacker News, 2025-03-23](https://thehackernews.com/2025/03/github-supply-chain-breach-coinbase.html); [Infosecurity Magazine: Tj-actions Supply Chain Attack Traced Back to Single GitHub Token Compromise](https://www.infosecurity-magazine.com/news/tj-actions-supply-chain-attack/).
+
+## On the wire: why a data format is named after a wire
+
+"On the wire" means data as it travels between systems: the bytes in a message, a request or a queue, as opposed to the object inside a program ("in memory"). The phrase goes back to the telegraph, when messages really did travel along a wire: *wire* still means a telegraph or telephone system, and also a telegram, and "to wire" means to send a message or money by telegraph. Networks took the word over, and today it names the serialized form of data, as in the "wire format" of Protocol Buffers or the "wire protocol" of a database.
+
+In SignalLog the same timestamp has two forms. In memory it is a `DateTimeOffset`; on the wire it is the string `"2026-11-07T09:15:02.123Z"` in the JSON of a `signallog.price.tick.v1` event. That is why the pattern of that string in `UtcTimestampConverter` is called `WireFormat`: it belongs to the message contract, not to logging or the user interface.
+
+Sources: [Merriam-Webster: wire](https://www.merriam-webster.com/dictionary/wire) (noun 5b, 5c; verb); [Protocol Buffers: Encoding](https://protobuf.dev/programming-guides/encoding/) ("This document describes the Protobuf wire format").
