@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Testing (xunit.v3 on Microsoft.Testing.Platform, see global.json)">
-    <PackageVersion Include="xunit.v3" Version="4.0.2" />
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
     <!-- JSON Schema 2020-12 validation in the contract tests (ADR 0012); 9.4.1 released 2026-10-11 -->
     <PackageVersion Include="JsonSchema.Net" Version="9.4.1" />
     <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.11.0" />
