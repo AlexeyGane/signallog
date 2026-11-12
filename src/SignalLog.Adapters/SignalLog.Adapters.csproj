@@ -9,9 +9,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Worker" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SignalLog.Adapters.Core\SignalLog.Adapters.Core.csproj" />
     <ProjectReference Include="..\SignalLog.Contracts\SignalLog.Contracts.csproj" />
     <ProjectReference Include="..\SignalLog.Domain\SignalLog.Domain.csproj" />
     <ProjectReference Include="..\SignalLog.Observability\SignalLog.Observability.csproj" />

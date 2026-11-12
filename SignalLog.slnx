@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/SignalLog.Adapters/SignalLog.Adapters.csproj" />
+    <Project Path="src/SignalLog.Adapters.Core/SignalLog.Adapters.Core.csproj" />
     <Project Path="src/SignalLog.Api/SignalLog.Api.csproj" />
     <Project Path="src/SignalLog.Contracts/SignalLog.Contracts.csproj" />
     <Project Path="src/SignalLog.Domain/SignalLog.Domain.csproj" />
@@ -17,6 +18,7 @@
     <Project Path="src/SignalLog.Web/SignalLog.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/SignalLog.Adapters.Tests/SignalLog.Adapters.Tests.csproj" />
     <Project Path="tests/SignalLog.Contracts.Tests/SignalLog.Contracts.Tests.csproj" />
   </Folder>
 </Solution>

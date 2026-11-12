@@ -69,7 +69,7 @@
                     Type        = 'Feature'
                     Title       = 'Walking skeleton'
                     Area        = 'Platform'
-                    Description = 'Thinnest end-to-end slice: a replayed tick travels adapter → Service Bus → ingestion → Cosmos DB.'
+                    Description = 'Thinnest end-to-end slice: a replayed tick travels adapter → API Management → ingress function → Service Bus → ingestion → Cosmos DB (ADR 0009, ADR 0010).'
                     Links       = @('https://github.com/AlexeyGane/signallog/blob/main/docs/adr/0006-compute-hosting.md')
                     Children    = @(
                         @{
@@ -97,8 +97,8 @@
                             Type               = 'User Story'
                             Title              = 'Replay adapter publishes a CloudEvents price tick'
                             Area               = 'Adapters'
-                            Tags               = 'ADR-0011; ADR-0012'
-                            AcceptanceCriteria = 'Timer-triggered replay adapter emits signallog.price.tick.v1 with a UUIDv7 id and traceparent; contract test validates against the v1 schema.'
+                            Tags               = 'ADR-0010; ADR-0011; ADR-0012; ADR-0013'
+                            AcceptanceCriteria = 'IMarketDataSource is the single source abstraction (ADR 0011); the replay source gives one synthetic last price per configured instrument, marked REPLAY, as a pure function of seed, instrument and time (reproducible across instances and runs, within a band around the base price, on the tick grid, small steps from minute to minute), with defaults near the market of November 2026; the timer-triggered function ReplayAdapter (no hyphen, ADR 0013) wraps each tick in signallog.price.tick.v1 with PriceTickEvents.Create, so every event has a UUIDv7 id, source /adapters/replay and the traceparent of the run, joined to the trace of the invocation; HttpTickPublisher posts each event in CloudEvents structured mode to the ingress endpoint /v1/ticks from the app setting Ingress__Endpoint (ADR 0010); tests in CI show that the produced events validate against the v1 schema, that the prices are reproducible and bounded, that all events of a run share its trace and have unique ids, and how the publisher posts and fails; the Walking skeleton description follows the ingestion path of ADR 0010.'
                         }
                         @{
                             Type               = 'User Story'

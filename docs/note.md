@@ -402,9 +402,10 @@ Feature — узел связи: он вытекает из Epic, обоснов
 
 **Готово:**
 
-- [x] Решение .NET 10 из девяти проектов: контракты, домен, адаптеры, функции, веб-интерфейс, тесты
+- [x] Решение .NET 10 из одиннадцати проектов: контракты, домен, адаптеры, функции, веб-интерфейс, тесты
 - [x] Генерация идентификаторов событий UUIDv7 с тестами
 - [x] Контракт `PriceTick` v1: [JSON Schema](https://github.com/AlexeyGane/signallog/blob/main/contracts/schemas/price-tick/v1.json) конверта CloudEvents и данных, типы C#, контрактные тесты в CI
+- [x] Replay-адаптер, первый срез: timer-функция `ReplayAdapter` раз в минуту выдаёт по синтетической цене на инструмент (воспроизводимая функция seed, инструмента и времени, уровни около рынка ноября 2026 года) в событиях `PriceTick` v1 с UUIDv7 и trace context прогона и отправляет их HTTP-запросом на `/v1/ticks` ([ADR 0010](adr/0010-api-management-ingestion-gateway.md)); тесты проверяют события по схеме
 - [x] CI: сборка, тесты, формат, fitness function запрещённых API, проверка PR, Actions по SHA, анализ кода CodeQL
 - [x] [21 ADR](adr/README.md), [каталог из 24 NFR](requirements/nfr.md), [шесть страниц доменной базы знаний](domain/README.md), [стандарт ветвления](standards/branching-and-release.md)
 - [x] Скрипт настройки Azure Boards через REST API
@@ -415,7 +416,8 @@ Feature — узел связи: он вытекает из Epic, обоснов
 
 **Далее:**
 
-- [ ] Replay-адаптер: справочник инструментов, параметры калибровки, генератор с сессиями и сбоями
+- [ ] Ingress-функция за API Management: приём `/v1/ticks`, проверка контракта, публикация в Service Bus
+- [ ] Replay-адаптер дальше: справочник инструментов, параметры калибровки, торговые сессии и сбои
 - [ ] Контракт статуса рынка ([ADR 0019](adr/0019-market-status-events.md)): JSON Schema, контрактные тесты
 - [ ] [Доменная модель](domain/model.md) на NodaTime с тестами из таблиц [ADR 0014](adr/0014-instrument-domain-model.md) и [0017](adr/0017-time-and-timezones.md)
 - [ ] Инфраструктура на Bicep, деплой через OIDC

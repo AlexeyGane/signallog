@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Market data adapter components shared by every venue adapter (ADR 0011, ADR 0013): the source abstraction,
+       the replay source, the tick publisher and one adapter run. No package dependencies; the function app hosts them. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\SignalLog.Contracts\SignalLog.Contracts.csproj" />
+  </ItemGroup>
+</Project>
