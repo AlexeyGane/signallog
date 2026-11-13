@@ -19,7 +19,7 @@ flowchart TB
     B --> E["3. Evidence<br/>in the work item"]
     E --> C{"4. Pull request:<br/>CI green?"}
     C -- no: fix in the same branch --> B
-    C -- yes --> R["5. Review<br/>every file Viewed"]
+    C -- yes --> R["5. Review<br/>a resolved thread per file"]
     R --> M["6. Squash and merge"]
     M --> D["7. Deployment<br/>result checked"]
     D --> X["8. Result<br/>in the work item"]
@@ -36,7 +36,7 @@ Steps 5, 6 and 9 (thick border) are the owner's; nothing automates them.
 | 2. Implementation | Code, documentation, tests; everything named in the acceptance criteria is checked | Active | In Progress |
 | 3. Evidence | A comment in the work item's Discussion: for each criterion, how it was checked and what came out; screenshots as attachments | Active | In Progress |
 | 4. Pull request | Branch and title carry the work item id; `AB#<id>` in the description; CI runs | Resolved | Review |
-| 5. Review | The owner reads the pull request and marks every file as Viewed; the review gate turns green (section 5) | Resolved | Review |
+| 5. Review | The owner reads every file of the pull request and resolves the review thread the workflow opened for it (section 5) | Resolved | Review |
 | 6. Merge | The owner presses **Squash and merge** | Resolved | Review |
 | 7. Deployment | The workflow for the merge commit runs; the published result is checked against the acceptance criteria | Resolved | Review |
 | 8. Result | A second comment: pull request, merge commit, deployment run, result checks | Resolved | Review |
@@ -80,20 +80,25 @@ Work item: AB#<id>
 
 A commit message body is wrapped at about 72 characters and its subject kept to about 50 ([T. Pope, 2008](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)); the squash commit takes the pull request title as its subject.
 
-## 5. Review gate: every file Viewed
+## 5. Review gate: a resolved thread per file
 
-A pull request is merged only after the owner has marked every changed file as Viewed. GitHub does not let authors approve their own pull requests and has no built-in rule for viewed files, so the gate has two parts:
+A pull request is merged only after the owner has read every changed file. GitHub does not let authors approve their own pull requests, so the gate is built from two things GitHub enforces on its own, for every pull request, Dependabot's included ([ADR 0002, revision 3](../adr/0002-source-control-platform.md#review-gate-revision-3)):
 
-- **On GitHub:** the ruleset `main-protection` requires a pull request, allows squash merges only ([merge method rule](https://github.blog/changelog/2024-12-04-pull-request-merge-method-rule-public-preview)) and requires the CI checks `pr-title` and `build` and the commit status `review/all-files-viewed` ([ADR 0002, revision 2](../adr/0002-source-control-platform.md#ruleset-on-main-revision-2)). Until that status is green, the merge button stays disabled.
-- **On the owner's machine:** the change script asks GitHub, as the owner, for the `viewerViewedState` of every file in the pull request (GraphQL; values `VIEWED`, `UNVIEWED`, `DISMISSED`). It keeps the status `review/all-files-viewed` at *pending* with a count ("3 of 5 files viewed") and sets it to *success* on the head commit once every file is `VIEWED`.
+- **A thread per file.** The workflow `review-threads` runs on every push to a pull request and opens a file-level review comment on each changed file: "Review this file as of `<commit>`, then resolve this conversation."
+- **Every conversation resolved.** The ruleset `main-protection` requires conversation resolution before merging, and requires the check `review-threads` next to the CI checks `pr-title` and `build`. Until the check is green and every thread is resolved, the merge button stays disabled.
 
-A new push creates a new head commit without the status, so the gate closes again; files changed since they were viewed lose their Viewed mark and must be read again. The status can be set by anyone with write access, which in a single-owner repository is the owner: the gate guards against forgetting a file, not against deliberate bypass.
+The owner reads a file on the **Files changed** tab and resolves its thread there or on **Conversation**. A later push re-opens the review only where it is needed:
 
-A pull request that no change script created, for example a Dependabot update, has nobody keeping the status; the owner runs the gate for it alone:
+| Since the file's thread was opened | The workflow |
+|---|---|
+| The file did not change | does nothing; a resolved thread stays resolved |
+| The file changed and its thread is still open | replies in that thread: "Changed again in `<commit>`" |
+| The file changed after its thread was resolved | opens a new thread: "Changed in `<commit>` after your review" |
+| The file left the pull request | resolves its open thread with a note |
 
-```powershell
-./eng/github/Watch-ReviewGate.ps1 -Number 25
-```
+Each workflow comment carries a hidden marker with the git blob id of the file it asks to review, so the workflow compares content, not commits: a merge from `main`, a force push or a run that was skipped cannot leave a changed file without a thread, and a file whose content is back to what was reviewed still gets a new thread, because the latest review was of something else. Threads opened by people are never touched. Anyone with write access can resolve a thread, which in a single-owner repository is the owner: the gate guards against forgetting a file, not against deliberate bypass.
+
+The workflow uses only its own `GITHUB_TOKEN` with `pull-requests: write`; there is no personal access token and no script on the owner's machine. The plan is made by [`eng/github/SignalLog.ReviewThreads.psm1`](https://github.com/AlexeyGane/signallog/blob/main/eng/github/SignalLog.ReviewThreads.psm1), tested with Pester in CI, and carried out by `eng/github/Update-ReviewThreads.ps1`.
 
 The ruleset itself is kept as code in [`eng/github/repository.settings.psd1`](https://github.com/AlexeyGane/signallog/blob/main/eng/github/repository.settings.psd1); `./eng/github/Initialize-GitHubSettings.ps1 -Check` lists every difference between that file and GitHub without changing anything, and without `-Check` the script applies the file.
 
@@ -111,8 +116,8 @@ The publish script runs these steps:
 3. **Baseline.** Each file the change touches must have, on `main` (`origin/main` in branch mode), the git blob id the change was verified against; a new file must be absent.
 4. **Files and evidence.** Branch mode: the working copy must hold exactly the files of the change, each hashing (`git hash-object`) to its verified blob id, and nothing else. Staging mode: the staged files are copied in. Then the evidence comment and screenshots go into the work item.
 5. **Commit and pull request.** The staged blob ids are checked again, the commit is signed (an unsigned commit stops the script), pushed, and the pull request is created; the work item moves to Resolved. When a run finds its pull request already open, steps 2–5 are skipped, and the script first checks that the branch carries exactly the files of the change with their verified blob ids; any difference stops it before the CI wait.
-6. **CI.** The script polls `gh pr checks` until every check has finished. A run cancelled by a newer run of the same check does not count: the Azure Boards app edits the pull request description right after it is created, which starts a new run and cancels the first. A red check stops the script.
-7. **Review.** The pull request opens in the browser; the review gate (section 5) follows the Viewed marks.
+6. **CI.** The script polls `gh pr checks` until every check, `review-threads` included, has finished. A run cancelled by a newer run of the same check does not count: the Azure Boards app edits the pull request description right after it is created, which starts a new run and cancels the first. A red check stops the script.
+7. **Review.** The pull request opens in the browser; the script reports how many review threads are still open (section 5).
 8. **Merge.** The owner merges; the script waits for the pull request to be `MERGED` and stops if it is closed unmerged.
 9. **Deployment and result.** The script waits until the workflow run for the merge commit appears, then watches it to the end; the published result is checked against the acceptance criteria; the result comment goes into the work item.
 10. **Clean-up.** The staging folder (in branch mode it holds only the scripts and the screenshots) is removed.
@@ -165,7 +170,7 @@ Invoke-Change @{
 | No evidence comment before the pull request | A pull request with nothing checkable behind it | The script writes the comment before it pushes |
 | Unsigned commit | Commits without a verifiable author | Check `gpg.format`, `user.signingkey`, `gpg.ssh.allowedSignersFile` |
 | Red CI check | Merging something broken | Fix in the same branch and run the script again |
-| Not every file Viewed | Merging something unread | Finish the review; the status turns green by itself |
+| A review thread still open | Merging a file nobody read | Read the file and resolve its thread; a push that changes a reviewed file opens a new one |
 | Azure DevOps token expires while the script waits for the merge | Evidence or result comments failing hours into a run | The module takes a new token when the old one is 30 minutes old, and once more if Azure DevOps answers with a sign-in page instead of JSON |
 | Result check fails after deployment | "Merged" taken for "works" | Wait for the Pages CDN and check by hand; the work item stays open |
 

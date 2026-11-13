@@ -42,7 +42,7 @@
             @{ Name = 'In Progress'; Type = 'inProgress'; State = 'Active'; Limit = 2; Split = $true
                Description = 'Work item Active, branch <type>/AB<id>-<description> from main. Done when the change is implemented, checked and the evidence comment is in the work item.' }
             @{ Name = 'Review'; Type = 'inProgress'; State = 'Resolved'; Limit = 2; Split = $false
-               Description = 'Pull request open with AB#<id> in title and description; CI green; every file Viewed. Done when squash-merged, deployed, the result is recorded in the work item and the owner closes it by hand.' }
+               Description = 'Pull request open with AB#<id> in title and description; CI green; every review thread resolved. Done when squash-merged, deployed, the result is recorded in the work item and the owner closes it by hand.' }
             @{ Name = 'Done'; Type = 'outgoing'; State = 'Closed'; Limit = 0; Split = $false
                Description = '' }
         )
@@ -188,7 +188,7 @@
                     Title       = 'Change workflow'
                     Area        = 'Platform'
                     Tags        = 'ADR-0002; ADR-0003; ADR-0004'
-                    Description = 'Every change starts as a work item on the board and ends when its owner closes it by hand: implementation, evidence in the work item, green pull request, review with every file marked Viewed, squash merge, deployment and the result recorded in the work item.'
+                    Description = 'Every change starts as a work item on the board and ends when its owner closes it by hand: implementation, evidence in the work item, green pull request, review with a resolved thread on every file, squash merge, deployment and the result recorded in the work item.'
                     Links       = @('https://github.com/AlexeyGane/signallog/blob/main/docs/standards/change-workflow.md')
                     Children    = @(
                         @{
@@ -232,6 +232,13 @@
                             Area               = 'Platform'
                             Tags               = 'ADR-0003; ADR-0004'
                             AcceptanceCriteria = 'A start script built on Start-Change makes the work item Active, updates main and checks out the change branch, refusing to leave uncommitted changes behind; with FromWorkingTree, Invoke-Change takes the files from the working copy on that branch instead of a staging folder, after checking that the branch is checked out with no commits beyond main, that the files match the verified baseline on origin/main, and that the working copy holds exactly the files of the change with their verified blobs and nothing else; Invoke-SolutionCheck runs the build job of ci.yml locally with the build and the banned API probe free of persistent build servers; Pester tests cover these cases and pass locally and in CI; the change workflow standard and the cover note describe branch mode.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Review every file through resolved review threads'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0002; ADR-0004'
+                            AcceptanceCriteria = 'A workflow review-threads runs on every push to a pull request to main, with its own GITHUB_TOKEN (pull-requests: write, contents: read) and no personal access token, and opens one file-level review thread per changed file, Dependabot pull requests included.<br><br>On a later push it opens a new thread only for a file whose content (git blob) changed after its thread was resolved, replies in a thread that is still open when its file changes, leaves files with unchanged content alone and resolves its own threads of files that left the pull request; threads of people are never touched; running it again changes nothing.<br><br>The main-protection ruleset requires conversation resolution and the checks pr-title, build and review-threads; the commit status review/all-files-viewed, eng/github/Watch-ReviewGate.ps1 and the Viewed functions of the change module are gone; Initialize-GitHubSettings.ps1 -Check reports no difference after the change.<br><br>The plan of the workflow is a function covered by Pester tests (new pull request, unchanged, changed after resolution, changed while open, reverted, deleted file, file left the pull request, threads of people); staging mode can delete a file; all Pester tests pass locally and in CI.<br><br>ADR 0002 revision 3 records the decision with the options considered and its sources; the change workflow standard, the branching standard, the cover note, the pull request template and the board column descriptions describe the new gate; strict site build passes.'
                         }
                     )
                 }

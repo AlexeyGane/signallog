@@ -28,14 +28,6 @@ Describe 'Module' {
         $commands | Should -Not -Contain 'Invoke-Git'
     }
 
-    It 'needs neither a staging folder nor a token with -GitHubOnly' {
-        Mock -ModuleName SignalLog.Change Invoke-Az { throw 'az must not be called' }
-        $ctx = Initialize-ChangeContext -GitHubOnly
-        $ctx.Repository | Should -Be 'AlexeyGane/signallog'
-        $ctx.Headers.Count | Should -Be 0
-        Initialize-ChangeContext -Staging (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'signallog-change-tests') -Token 'test-token' | Out-Null
-    }
-
     It 'requires a staging folder for a full change' {
         { Initialize-ChangeContext -Token 'x' } | Should -Throw '*Staging*'
         Initialize-ChangeContext -Staging (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'signallog-change-tests') -Token 'test-token' | Out-Null
@@ -106,12 +98,12 @@ Describe 'Resolve-CheckRun' {
         )
         (Resolve-CheckRun -Checks $checks).State | Should -Be 'pass'
     }
-    It 'excludes the review gate' {
+    It 'waits for the review-threads check like any other check' {
         $checks = @(
-            [pscustomobject]@{ name = 'review/all-files-viewed'; bucket = 'pending' }
+            [pscustomobject]@{ name = 'review-threads'; bucket = 'pending' }
             [pscustomobject]@{ name = 'build'; bucket = 'pass' }
         )
-        (Resolve-CheckRun -Checks $checks -Exclude 'review/all-files-viewed').State | Should -Be 'pass'
+        (Resolve-CheckRun -Checks $checks).State | Should -Be 'pending'
     }
 }
 
@@ -130,19 +122,70 @@ Describe 'ConvertFrom-RunList' {
     }
 }
 
-Describe 'Get-ReviewGateDecision' {
-    It 'is pending with a count while files are unviewed' {
-        $d = Get-ReviewGateDecision -Viewed 3 -Total 4
-        $d.State | Should -Be 'pending'
-        $d.Description | Should -Be '3 of 4 files viewed'
+Describe 'Format-ReviewProgress' {
+    It 'counts the open review threads' {
+        $p = Format-ReviewProgress -Open 3 -Total 4
+        $p.Done | Should -BeFalse
+        $p.Text | Should -Be '3 of 4 review threads open'
     }
-    It 'is success when every file is viewed' {
-        $d = Get-ReviewGateDecision -Viewed 4 -Total 4
-        $d.State | Should -Be 'success'
-        $d.Description | Should -Be 'All 4 files viewed'
+    It 'is done when every review thread is resolved' {
+        $p = Format-ReviewProgress -Open 0 -Total 4
+        $p.Done | Should -BeTrue
+        $p.Text | Should -Be 'all 4 review threads resolved: the merge is yours'
     }
-    It 'is never success for a pull request without files' {
-        (Get-ReviewGateDecision -Viewed 0 -Total 0).State | Should -Be 'pending'
+    It 'is never done before the workflow has opened any thread' {
+        (Format-ReviewProgress -Open 0 -Total 0).Done | Should -BeFalse
+    }
+}
+
+Describe 'Wait-ReviewAndMerge' {
+    It 'reports the open threads and returns once the pull request is merged' {
+        $script:answers = [System.Collections.Generic.Queue[object]]::new()
+        $script:answers.Enqueue([pscustomobject]@{ state = 'OPEN'; total = 2; open = 1 })
+        $script:answers.Enqueue([pscustomobject]@{ state = 'MERGED'; total = 2; open = 0 })
+        Mock -ModuleName SignalLog.Change Invoke-Gh { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+        Mock -ModuleName SignalLog.Change Get-ReviewThreadCount { $script:answers.Dequeue() }
+        Mock -ModuleName SignalLog.Change Start-Sleep { }
+        Wait-ReviewAndMerge -Number 40 6>$null
+        Should -Invoke -ModuleName SignalLog.Change Get-ReviewThreadCount -Times 2
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Gh -Times 1 -ParameterFilter { $Arguments -contains '--web' }
+    }
+    It 'stops when the pull request is closed without merging' {
+        Mock -ModuleName SignalLog.Change Invoke-Gh { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+        Mock -ModuleName SignalLog.Change Get-ReviewThreadCount { [pscustomobject]@{ state = 'CLOSED'; total = 1; open = 1 } }
+        { Wait-ReviewAndMerge -Number 40 6>$null } | Should -Throw '*closed without merging*'
+    }
+}
+
+Describe 'Copy-StagedFile and Reset-PreparedFile with a deleted file' {
+    BeforeEach {
+        $files = [ordered]@{
+            'a.md'    = @('1111111111111111111111111111111111111111', '2222222222222222222222222222222222222222')
+            'gone.ps1' = @('4444444444444444444444444444444444444444', $null)
+        }
+    }
+    It 'deletes a file whose blob after the change is null and copies the others' {
+        Mock -ModuleName SignalLog.Change New-Item { }
+        Mock -ModuleName SignalLog.Change Copy-Item { }
+        Mock -ModuleName SignalLog.Change Remove-Item { }
+        Mock -ModuleName SignalLog.Change Test-Path { $true }
+        Copy-StagedFile -Files $files
+        Should -Invoke -ModuleName SignalLog.Change Remove-Item -Times 1 -ParameterFilter { $LiteralPath -eq 'gone.ps1' }
+        Should -Invoke -ModuleName SignalLog.Change Copy-Item -Times 1 -ParameterFilter { $Destination -eq 'a.md' }
+    }
+    It 'puts back a deletion left by an interrupted run (<status>)' -ForEach @(@{ status = ' D' }, @{ status = 'D ' }) {
+        $script:line = "$status gone.ps1"
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            if ($Arguments[0] -eq 'status') { [pscustomobject]@{ ExitCode = 0; Output = @($script:line) } }
+            else { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+        }
+        Reset-PreparedFile -Files $files 6>$null
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -Times 1 -Exactly -ParameterFilter { $Arguments[0] -eq 'restore' -and $Arguments -contains 'gone.ps1' }
+    }
+    It 'refuses a deletion the change did not prepare' {
+        Mock -ModuleName SignalLog.Change Invoke-Git { [pscustomobject]@{ ExitCode = 0; Output = @(' D a.md') } } -ParameterFilter { $Arguments[0] -eq 'status' }
+        Mock -ModuleName SignalLog.Change Test-Path { $LiteralPath -ne 'a.md' }
+        { Reset-PreparedFile -Files $files } | Should -Throw '*did not prepare*'
     }
 }
 

@@ -67,7 +67,7 @@ A branch that cannot be merged within two days signals that the story is too lar
 - **Scopes** follow the solution layout: `adapters`, `ingress`, `ingestion`, `api`, `web`, `domain`, `contracts`, `infra`, `docs`, `ci`.
 - **Breaking changes** to the message contract or public API use `!` (`feat(contracts)!: ...`) and require a contract-version decision ([ADR 0012](../adr/0012-message-contract-and-versioning.md)).
 - **Commits inside a branch** may be informal (`wip`, `fix typo`); they are squashed away.
-- **Review:** the PR template's self-review checklist is mandatory; required status checks must pass (ADR 0002 explains why approvals are set to 0 in a solo project). Every changed file is marked Viewed before the merge ([review gate](change-workflow.md#5-review-gate-every-file-viewed)).
+- **Review:** the PR template's self-review checklist is mandatory; required status checks must pass (ADR 0002 explains why approvals are set to 0 in a solo project). Every changed file gets a review thread, resolved by the owner before the merge ([review gate](change-workflow.md#5-review-gate-a-resolved-thread-per-file)).
 - **After merge** the head branch is deleted automatically.
 
 ## 4. Unfinished work: feature flags
@@ -116,7 +116,7 @@ The ruleset and the repository settings are kept as code in [`eng/github/reposit
 | Linear history, squash only | Ruleset + repository merge settings |
 | PR title format and `AB#` | Required check `pr-title` (`ci.yml`) |
 | Build, analyzers, tests, format, fitness functions | Required check `build` (`ci.yml`) |
-| Every changed file read before the merge | Required status `review/all-files-viewed`, set by the review gate ([change workflow](change-workflow.md#5-review-gate-every-file-viewed)) |
+| Every changed file read before the merge | A review thread per file from the workflow `review-threads`, its required check, and the ruleset's conversation resolution ([change workflow](change-workflow.md#5-review-gate-a-resolved-thread-per-file)) |
 | Work item, evidence, merge and closure by the owner | [Change workflow](change-workflow.md) and its change scripts |
 | Branch name format | Not enforced automatically; checked in self-review |
 | Branch age ≤ 2 days | Visible on the Scrumban board (story cycle time) |
