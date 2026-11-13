@@ -27,6 +27,7 @@ A page belongs to one folder by what it records: a choice goes to `adr/`, a test
 - **One idea per sentence.** Name things precisely (`price-ticks` topic, not "the queue"); expand abbreviations on first use on each page or link the glossary.
 - **Sources:** facts about markets, vendors, standards or concepts cite a primary source with the date checked; concepts link to [Concepts and their sources](concepts-and-sources.md). Text without a source is the author's assessment and says so.
 - **Dates** are ISO 8601 (`2026-11-05`). Examples use real calendar dates so they can become tests.
+- **Numbers and units:** every price, tick size, quantity or score shows its unit or scale next to the number (`82.50 EUR/MWh`), in its column header or row label, or in the same phrase. An example price tied to a real date is marked as illustrative unless it cites a source.
 - **Diagrams** are Mermaid code blocks (fence `mermaid`), never images exported from a tool, so that they are reviewed as text. Check that each diagram renders before merging (GitHub preview or local site).
 - **Links** are relative between pages (`../adr/0012-message-contract-and-versioning.md#enforcement`), so that they work on GitHub and on the site and are checked by the build. Links to code outside `docs/` use full GitHub URLs.
 
