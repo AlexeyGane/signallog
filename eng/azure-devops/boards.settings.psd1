@@ -102,6 +102,13 @@
                         }
                         @{
                             Type               = 'User Story'
+                            Title              = 'Explain how the replay source generates prices'
+                            Area               = 'Adapters'
+                            Tags               = 'ADR-0011; ADR-0012'
+                            AcceptanceCriteria = 'docs/domain/replay-price-generator.md explains why the replay price is a pure function of seed, instrument and time, how SplitMix64 and FNV-1a give reproducible random values at the knots and why System.Random and string.GetHashCode are not used, how cosine interpolation and the two noise layers shape the line, how the band and the tick grid are applied in decimal, and how large one minute''s step can be; charts and figures come from running ReplaySource; each property is mapped to its test; limits and next steps are listed; sources are cited with the date checked; the page is in the domain README and the site navigation, and the strict site build passes.'
+                        }
+                        @{
+                            Type               = 'User Story'
                             Title              = 'Ingestion persists a price tick idempotently'
                             Area               = 'Ingestion'
                             Tags               = 'ADR-0008; ADR-0009'

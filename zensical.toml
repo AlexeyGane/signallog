@@ -51,6 +51,7 @@ nav = [
       "domain/time-and-delivery.md",
       "domain/tenors-and-delivery-periods.md",
       "domain/market-data-sources.md",
+      "domain/replay-price-generator.md",
       "domain/market-conventions.md",
   ] },
   { "Standards" = [
