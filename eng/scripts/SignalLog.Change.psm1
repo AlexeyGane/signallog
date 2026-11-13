@@ -30,9 +30,6 @@ function Initialize-ChangeContext {
     <#
     .SYNOPSIS
         Sets the repository, board and site the module works with, and gets an Azure DevOps token.
-    .PARAMETER GitHubOnly
-        For GitHub-only steps (the review gate of a pull request no change script created, for example from
-        Dependabot): no staging folder and no Azure DevOps token are needed.
     #>
     [CmdletBinding()]
     param(
@@ -41,13 +38,11 @@ function Initialize-ChangeContext {
         [string] $Project = 'SignalLog',
         [string] $SiteUrl = 'https://alexeygane.github.io/signallog',
         [string] $Staging,
-        [string] $Gate = 'review/all-files-viewed',
-        [switch] $GitHubOnly,
         # For tests only: skips az
         [string] $Token
     )
-    if (-not $GitHubOnly -and -not $Staging) { throw 'Staging is required unless -GitHubOnly is given.' }
-    $fromAz = -not $Token -and -not $GitHubOnly
+    if (-not $Staging) { throw 'Staging is required: the folder with the scripts and evidence of the change.' }
+    $fromAz = -not $Token
     if ($fromAz) { $Token = Get-AzDevOpsToken }
     $script:Ctx = [pscustomobject]@{
         Repository   = $Repository
@@ -58,7 +53,6 @@ function Initialize-ChangeContext {
         BaseUrl      = "https://dev.azure.com/$Organization/$Project"
         SiteUrl      = $SiteUrl.TrimEnd('/')
         Staging      = $Staging
-        Gate         = $Gate
         Headers      = $(if ($Token) { @{ Authorization = "Bearer $Token" } } else { @{} })
         TokenFromAz  = $fromAz
         TokenTaken   = Get-Date
@@ -179,8 +173,8 @@ function Resolve-CheckRun {
         description right after creation, which starts a new run and cancels the old one). A check whose
         only runs are cancelled is still pending. Returns @{ State = pending|fail|pass; Summary; Failed }.
     #>
-    param([AllowEmptyCollection()] [object[]] $Checks = @(), [string] $Exclude)
-    $relevant = @($Checks | Where-Object { $_ -and $_.name -ne $Exclude })
+    param([AllowEmptyCollection()] [object[]] $Checks = @())
+    $relevant = @($Checks | Where-Object { $_ })
     if ($relevant.Count -eq 0) { return [pscustomobject]@{ State = 'pending'; Summary = ''; Failed = @() } }
     $runs = foreach ($group in ($relevant | Group-Object -Property name)) {
         $live = @($group.Group | Where-Object { $_.bucket -ne 'cancel' })
@@ -209,11 +203,12 @@ function ConvertFrom-RunList {
     return $null
 }
 
-function Get-ReviewGateDecision {
-    <# State and description of the review gate status for viewed/total files. #>
-    param([Parameter(Mandatory)] [int] $Viewed, [Parameter(Mandatory)] [int] $Total)
-    if ($Total -gt 0 -and $Viewed -ge $Total) { return [pscustomobject]@{ State = 'success'; Description = "All $Total files viewed" } }
-    return [pscustomobject]@{ State = 'pending'; Description = "$Viewed of $Total files viewed" }
+function Format-ReviewProgress {
+    <# One line on the review of a pull request: how many of its review threads are still open. #>
+    param([Parameter(Mandatory)] [int] $Open, [Parameter(Mandatory)] [int] $Total)
+    if ($Total -eq 0) { return [pscustomobject]@{ Done = $false; Text = 'no review threads yet: the review-threads workflow opens one per file' } }
+    if ($Open -eq 0) { return [pscustomobject]@{ Done = $true; Text = "all $Total review threads resolved: the merge is yours" } }
+    return [pscustomobject]@{ Done = $false; Text = "$Open of $Total review threads open" }
 }
 
 function Invoke-ResultCheck {
@@ -467,8 +462,10 @@ function Reset-PreparedFile {
         $status = ([string] $line).Substring(0, 2)
         $path = ([string] $line).Substring(3).Trim('"')
         $source = Get-StagedSourcePath -Staging $ctx.Staging -Path $path
-        $prepared = $Files.Contains($path) -and (Test-Path -LiteralPath $source) -and
-            ((Get-FileHash -LiteralPath $source).Hash -eq (Get-FileHash -LiteralPath $path).Hash)
+        # A file the change deletes was left deleted; any other file must be byte-identical to its staged copy
+        $deleted = $status -in @(' D', 'D ') -and $Files.Contains($path) -and $null -eq $Files[$path][1]
+        $prepared = $deleted -or ($Files.Contains($path) -and (Test-Path -LiteralPath $source) -and (Test-Path -LiteralPath $path -PathType Leaf) -and
+            ((Get-FileHash -LiteralPath $source).Hash -eq (Get-FileHash -LiteralPath $path).Hash))
         if (-not $prepared) { throw "Uncommitted change in $path that this change did not prepare. Commit or stash it, then run again." }
         if ($status -eq '??') { Remove-Item -LiteralPath $path -Force } else { Invoke-Git @('restore', '--staged', '--worktree', '--', $path) | Out-Null }
         Write-ChangeSkip "${path}: put back (left by an earlier run)"
@@ -476,9 +473,14 @@ function Reset-PreparedFile {
 }
 
 function Copy-StagedFile {
+    <# Staging mode: copies each staged file into the working copy; a file whose blob after the change is $null is deleted. #>
     param([Parameter(Mandatory)] [System.Collections.IDictionary] $Files)
     $ctx = Get-ChangeContext
     foreach ($path in $Files.Keys) {
+        if ($null -eq $Files[$path][1]) {
+            if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force }
+            continue
+        }
         $dir = Split-Path -Path $path -Parent
         if ($dir) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
         Copy-Item -LiteralPath (Get-StagedSourcePath -Staging $ctx.Staging -Path $path) -Destination $path -Force
@@ -541,14 +543,14 @@ function New-ChangePullRequest {
 }
 
 function Wait-PullRequestCheck {
-    <# Waits for the CI checks of the pull request (not the review gate); throws on a red check. #>
+    <# Waits for every check of the pull request, the review-threads check included; throws on a red check. #>
     param([Parameter(Mandatory)] [int] $Number, [int] $TimeoutMinutes = 60)
     $ctx = Get-ChangeContext
     $deadline = (Get-Date).AddMinutes($TimeoutMinutes)
     while ((Get-Date) -lt $deadline) {
         $r = Invoke-Gh @('pr', 'checks', [string] $Number, '--repo', $ctx.Repository, '--json', 'name,bucket')
         $checks = if ($r.Output) { @(($r.Output -join "`n") | ConvertFrom-Json) } else { @() }
-        $state = Resolve-CheckRun -Checks $checks -Exclude $ctx.Gate
+        $state = Resolve-CheckRun -Checks $checks
         if ($state.State -eq 'fail') { throw "CI failed on PR #${Number}: $($state.Failed -join ', '). Fix it in the branch and run the script again." }
         if ($state.State -eq 'pass') { Write-ChangeOk "CI: $($state.Summary)"; return $state }
         Start-Sleep -Seconds 15
@@ -556,43 +558,39 @@ function Wait-PullRequestCheck {
     throw "CI did not finish on PR #$Number within $TimeoutMinutes minutes."
 }
 
-function Get-ReviewState {
+function Get-ReviewThreadCount {
+    <# State of the pull request and its review threads: @{ state; total; open }. #>
     param([Parameter(Mandatory)] [int] $Number)
     $ctx = Get-ChangeContext
-    $query = 'query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){state headRefOid files(first:100){nodes{viewerViewedState}}}}}'
+    $query = 'query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){state reviewThreads(first:100){nodes{isResolved}}}}}'
     $r = Invoke-Gh @('api', 'graphql', '-F', "owner=$($ctx.Owner)", '-F', "name=$($ctx.Name)", '-F', "number=$Number", '-f', "query=$query",
-        '--jq', '.data.repository.pullRequest | {state, head: .headRefOid, total: (.files.nodes | length), viewed: ([.files.nodes[] | select(.viewerViewedState == "VIEWED")] | length)}')
+        '--jq', '.data.repository.pullRequest | {state, total: (.reviewThreads.nodes | length), open: ([.reviewThreads.nodes[] | select(.isResolved | not)] | length)}')
     if ($r.ExitCode -ne 0) { throw 'GitHub GraphQL query failed' }
     return ($r.Output -join "`n") | ConvertFrom-Json
 }
 
-function Set-ReviewGateStatus {
-    param([Parameter(Mandatory)] [string] $Sha, [Parameter(Mandatory)] [string] $State, [Parameter(Mandatory)] [string] $Description, [Parameter(Mandatory)] [int] $Number)
-    $ctx = Get-ChangeContext
-    $r = Invoke-Gh @('api', '-X', 'POST', "repos/$($ctx.Repository)/statuses/$Sha", '-f', "state=$State", '-f', "context=$($ctx.Gate)",
-        '-f', "description=$Description", '-f', "target_url=https://github.com/$($ctx.Repository)/pull/$Number/files")
-    if ($r.ExitCode -ne 0) { throw 'Setting the review gate status failed' }
-}
-
 function Wait-ReviewAndMerge {
-    <# Opens the PR, keeps the review gate in step with the Viewed marks and waits for the owner's merge. #>
+    <#
+    .SYNOPSIS
+        Opens the pull request, reports the open review threads and waits for the owner's merge.
+    .DESCRIPTION
+        The review gate lives on GitHub (ADR 0002 revision 3): the workflow review-threads opens a thread per changed
+        file and the ruleset blocks the merge until every thread is resolved. The script only reports; it never merges.
+    #>
     param([Parameter(Mandatory)] [int] $Number)
     $ctx = Get-ChangeContext
-    Write-Host "    Review PR #$Number in the browser: mark every file as Viewed, then press 'Squash and merge'." -ForegroundColor Yellow
-    Write-Host '    The script follows the Viewed marks and waits for your merge; Ctrl+C stops it, a later run resumes.' -ForegroundColor Yellow
+    Write-Host "    Review PR #$Number in the browser: read each file, resolve its review thread, then press 'Squash and merge'." -ForegroundColor Yellow
+    Write-Host '    The script waits for your merge; Ctrl+C stops it, a later run resumes.' -ForegroundColor Yellow
     Invoke-Gh @('pr', 'view', [string] $Number, '--repo', $ctx.Repository, '--web') | Out-Null
     $last = ''
     while ($true) {
-        $s = Get-ReviewState -Number $Number
+        $s = Get-ReviewThreadCount -Number $Number
         if ($s.state -eq 'MERGED') { break }
         if ($s.state -eq 'CLOSED') { throw "PR #$Number was closed without merging. Stopping." }
-        $key = "$($s.head)/$($s.viewed)/$($s.total)"
-        if ($key -ne $last) {
-            $decision = Get-ReviewGateDecision -Viewed $s.viewed -Total $s.total
-            Set-ReviewGateStatus -Sha $s.head -State $decision.State -Description $decision.Description -Number $Number
-            if ($decision.State -eq 'success') { Write-ChangeOk "$($decision.Description): $($ctx.Gate) is green, merge is yours" }
-            else { Write-Host "    . $($decision.Description)" -ForegroundColor DarkGray }
-            $last = $key
+        $progress = Format-ReviewProgress -Open $s.open -Total $s.total
+        if ($progress.Text -ne $last) {
+            if ($progress.Done) { Write-ChangeOk $progress.Text } else { Write-Host "    . $($progress.Text)" -ForegroundColor DarkGray }
+            $last = $progress.Text
         }
         Start-Sleep -Seconds 15
     }
@@ -735,7 +733,7 @@ function Invoke-Change {
                 $url = Add-BoardAttachment -Id $id -Path (Join-Path -Path (Join-Path -Path $ctx.Staging -ChildPath 'evidence') -ChildPath $image)
                 "<p><img src=`"$url`" alt=`"$([System.Net.WebUtility]::HtmlEncode($image))`"/></p>"
             }
-            $rows = ($files.Keys | ForEach-Object { "<li><code>$_</code>: blob <code>$($files[$_][1].Substring(0, 12))</code></li>" }) -join ''
+            $rows = ($files.Keys | ForEach-Object { if ($files[$_][1]) { "<li><code>$_</code>: blob <code>$($files[$_][1].Substring(0, 12))</code></li>" } else { "<li><code>$_</code>: deleted</li>" } }) -join ''
             $items = Expand-ChangeText ([string] $Change['Evidence']['Items']) $values
             Add-BoardComment -Id $id -Html "<p><b>$evidenceMarker</b> Checked before the pull request (change workflow, step 3).</p><ol>$items</ol><p>Files (git blob after the change):</p><ul>$rows</ul>$($images -join '')"
         }
@@ -802,8 +800,8 @@ $published
 
 Export-ModuleMember -Function @(
     'Initialize-ChangeContext', 'Get-ChangeContext', 'Start-Change', 'Invoke-Change', 'Invoke-SolutionCheck',
-    'Expand-ChangeText', 'Get-StagedSourcePath', 'Resolve-CheckRun', 'ConvertFrom-RunList', 'Get-ReviewGateDecision', 'Invoke-ResultCheck',
+    'Expand-ChangeText', 'Get-StagedSourcePath', 'Resolve-CheckRun', 'ConvertFrom-RunList', 'Format-ReviewProgress', 'Invoke-ResultCheck',
     'Find-BoardItem', 'New-BoardItem', 'Get-BoardItem', 'Set-BoardItemField', 'Set-BoardItemState', 'Test-BoardComment', 'Add-BoardComment', 'Add-BoardAttachment',
     'Get-BlobId', 'Test-Baseline', 'Test-StagedBlob', 'Test-PullRequestHead', 'Test-WorkingTreeChange', 'Test-ChangeBranch', 'Update-MainBranch', 'Reset-PreparedFile', 'Copy-StagedFile', 'New-SignedCommit',
-    'Get-ChangePullRequest', 'New-ChangePullRequest', 'Wait-PullRequestCheck', 'Get-ReviewState', 'Set-ReviewGateStatus', 'Wait-ReviewAndMerge', 'Wait-Deployment'
+    'Get-ChangePullRequest', 'New-ChangePullRequest', 'Wait-PullRequestCheck', 'Get-ReviewThreadCount', 'Wait-ReviewAndMerge', 'Wait-Deployment'
 )
