@@ -288,6 +288,13 @@
                             Tags               = 'ADR-0004; NFR-SEC-03'
                             AcceptanceCriteria = '.github/workflows/codeql.yml analyses C# (build mode none) and the GitHub Actions workflows with the security-extended query suite on every pull request, on push to main and weekly; actions are pinned by full commit SHA to a release at least two weeks old; the job names are unique across workflows; GitHub default setup for code scanning is off; the first analysis on main uploads results to code scanning; the cover note no longer shows CodeQL as planned.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Keep the CodeQL action steps on one version'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0004; NFR-SEC-03'
+                            AcceptanceCriteria = 'Both CodeQL steps in .github/workflows/codeql.yml (init and analyze) use github/codeql-action at the same commit, v4.39.3, its SHA taken from the action''s own repository; .github/dependabot.yml puts every github/codeql-action step in one group, so Dependabot updates them in a single pull request; a Pester test in CI checks every workflow: each action is pinned to a full commit SHA and all steps of one action use the same commit, and it fails on the codeql.yml of pull requests #33 and #34; ADR 0004 records the rule and its reason; CodeQL passes on the pull request; strict site build passes.'
+                        }
                     )
                 }
             )
