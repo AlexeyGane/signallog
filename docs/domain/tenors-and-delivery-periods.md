@@ -4,7 +4,7 @@ What a gas or power contract delivers, how long that is, and what traders mean b
 
 ## 1. Two questions that look like one
 
-A trader who says "TTF day-ahead is 31.20" answers two questions at once:
+A trader who says "TTF day-ahead is 82.50 EUR/MWh" (an illustrative price) answers two questions at once:
 
 1. **Which contract?** The gas day of Monday 2026-11-09 on ICE Endex. This is an absolute fact and never changes.
 2. **Why that one?** Because on Friday 2026-11-06 the day-ahead is the next weekday. This is a relative label that points to a different contract every trading day.

@@ -257,6 +257,13 @@
                             Tags               = 'ADR-0017'
                             AcceptanceCriteria = 'docs/domain/market-conventions.md gives the TTF (NDEX TFM) session in the zone ICE anchors it to, with an ICE source and the date checked, instead of "20:50-18:00 New York (inferred anchor)": on 2026-11-06 ICE shows 00:50-22:00 London and 19:50-17:00 New York, an hour earlier in New York than on 2026-10-30, so the anchor is European, not New York; the Brent and JKM rows are checked the same way and confirmed or corrected; the New York inference in docs/domain/time-and-delivery.md, the glossary example and the open question on the anchor zone are corrected or closed; an example in an ADR or business rule that turns out wrong is changed by a numbered revision, not rewritten; strict site build passes.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Show the unit of every number in the documentation'
+                            Area               = 'Platform'
+                            Tags               = 'BR-PRICE-01'
+                            AcceptanceCriteria = 'The day-ahead example on the tenors page shows its currency and unit (EUR/MWh); a search of the documentation finds no other price, tick size or quantity whose unit is missing from the number itself, its column header or its row label; the documentation standard has a writing rule for it; the strict site build passes.'
+                        }
                     )
                 }
                 @{
