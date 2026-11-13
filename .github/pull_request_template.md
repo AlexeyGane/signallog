@@ -30,4 +30,4 @@ Work item: AB#<id>
 - [ ] Tests added or updated
 - [ ] No secrets in code or configuration
 - [ ] Banned APIs not suppressed without justification (`RS0030`)
-- [ ] Every changed file marked Viewed
+- [ ] Every changed file read and its review thread resolved

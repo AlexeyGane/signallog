@@ -36,10 +36,8 @@ BeforeAll {
         }
     }
 
-    function Add-StatusChecks($Snapshot, [string[]] $Contexts = @('pr-title', 'build', 'review/all-files-viewed')) {
-        $checks = foreach ($c in $Contexts) {
-            if ($c -eq 'review/all-files-viewed') { [pscustomobject]@{ context = $c } } else { [pscustomobject]@{ context = $c; integration_id = 15368 } }
-        }
+    function Add-StatusChecks($Snapshot, [string[]] $Contexts = @('pr-title', 'build', 'review-threads')) {
+        $checks = foreach ($c in $Contexts) { [pscustomobject]@{ context = $c; integration_id = 15368 } }
         $rule = [pscustomobject]@{ type = 'required_status_checks'; parameters = [pscustomobject]@{
                 strict_required_status_checks_policy = $false; do_not_enforce_on_create = $false; required_status_checks = @($checks) } }
         $Snapshot.Rulesets[0].rules = @($Snapshot.Rulesets[0].rules) + $rule
@@ -53,15 +51,25 @@ AfterAll {
 
 Describe 'Module and settings file' {
     It 'parses without errors' {
-        foreach ($file in @('SignalLog.GitHubSettings.psm1', 'Initialize-GitHubSettings.ps1', 'Watch-ReviewGate.ps1')) {
+        foreach ($file in @('SignalLog.GitHubSettings.psm1', 'Initialize-GitHubSettings.ps1')) {
             $errors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $root $file), [ref] $null, [ref] $errors) | Out-Null
             $errors | Should -BeNullOrEmpty -Because $file
         }
     }
-    It 'requires pr-title, build and the review gate on main' {
+    It 'requires pr-title, build and the review gate, all from GitHub Actions, on main' {
         $rule = $desired.Rulesets[0].rules | Where-Object { $_.type -eq 'required_status_checks' }
-        @($rule.parameters.required_status_checks | ForEach-Object { $_.context }) | Should -Be @('pr-title', 'build', 'review/all-files-viewed')
+        @($rule.parameters.required_status_checks | ForEach-Object { $_.context }) | Should -Be @('pr-title', 'build', 'review-threads')
+        @($rule.parameters.required_status_checks | ForEach-Object { $_.integration_id }) | Should -Be @(15368, 15368, 15368)
+    }
+    It 'requires every review thread to be resolved (the review gate)' {
+        $pr = $desired.Rulesets[0].rules | Where-Object { $_.type -eq 'pull_request' }
+        $pr.parameters.required_review_thread_resolution | Should -BeTrue
+    }
+    It 'requires the job of the review-threads workflow by its name' {
+        $workflow = Get-Content -LiteralPath (Join-Path (Split-Path -Parent (Split-Path -Parent $root)) '.github/workflows/review-threads.yml') -Raw
+        $workflow | Should -Match '(?m)^  review-threads:\r?\n    name: review-threads\r?$'
+        $workflow | Should -Match '(?m)^      pull-requests: write\r?$'
     }
     It 'allows squash merges only and keeps zero approvals' {
         $desired.Settings.allow_merge_commit | Should -BeFalse
@@ -87,8 +95,8 @@ Describe 'Test-SettingsMatch' {
         Test-SettingsMatch @() @() | Should -BeTrue
     }
     It 'matches list elements by subset' {
-        $actual = '[ { "context": "build", "integration_id": 15368 }, { "context": "review/all-files-viewed" } ]' | ConvertFrom-Json
-        Test-SettingsMatch @(@{ context = 'review/all-files-viewed' }, @{ context = 'build'; integration_id = 15368 }) $actual | Should -BeTrue
+        $actual = '[ { "context": "build", "integration_id": 15368 }, { "context": "review-threads", "integration_id": 15368 } ]' | ConvertFrom-Json
+        Test-SettingsMatch @(@{ context = 'review-threads' }, @{ context = 'build'; integration_id = 15368 }) $actual | Should -BeTrue
         Test-SettingsMatch @(@{ context = 'pr-title' }, @{ context = 'build' }) $actual | Should -BeFalse
     }
     It 'treats a missing value as a difference' {

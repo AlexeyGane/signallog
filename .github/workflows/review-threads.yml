@@ -1,0 +1,40 @@
+# ADR 0002 revision 3 — the review gate. Every changed file of a pull request gets a file-level review thread;
+# the main-protection ruleset (eng/github/repository.settings.psd1) requires every conversation to be resolved
+# and this job's check, review-threads, to pass, so a pull request is merged only after each file was read.
+# A later push opens a thread again only for a file whose content changed; see SignalLog.ReviewThreads.psm1.
+name: review-threads
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+
+permissions: {}
+
+# Runs of one pull request queue instead of overlapping; a run works from the pull request as it is, so a
+# replaced pending run loses nothing.
+concurrency:
+  group: review-threads-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  review-threads:
+    name: review-threads
+    runs-on: ubuntu-latest
+    # Workflows started by Dependabot get a read-only token unless the workflow asks for more (GitHub Docs,
+    # "Troubleshooting failures when Dependabot triggers existing workflows"); no secrets are used.
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: One review thread per changed file
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: ./eng/github/Update-ReviewThreads.ps1 -Repository $env:REPOSITORY -Number $env:NUMBER

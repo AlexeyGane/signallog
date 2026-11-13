@@ -1,6 +1,6 @@
 # ADR 0004 — continuous integration. The main-protection ruleset (eng/github/repository.settings.psd1,
-# ADR 0002 revision 2) requires the checks of the jobs pr-title and build below, and the commit status
-# review/all-files-viewed set by the owner's review gate. Job names are unique across workflows.
+# ADR 0002 revision 3) requires the checks of the jobs pr-title and build below, and the check of the job
+# review-threads (review-threads.yml), the review gate. Job names are unique across workflows.
 name: ci
 
 on:

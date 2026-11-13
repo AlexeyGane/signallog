@@ -1,4 +1,4 @@
-# Desired state of the GitHub repository settings (ADR 0002 revision 2, ADR 0004).
+# Desired state of the GitHub repository settings (ADR 0002 revision 3, ADR 0004).
 # Applied by Initialize-GitHubSettings.ps1; -Check lists every difference from GitHub and changes nothing.
 # Only the keys listed here are managed; anything else on GitHub is left as it is.
 # Snapshot this was built from: GitHub API, 2026-11-07.
@@ -55,7 +55,8 @@
                 @{
                     type       = 'pull_request'
                     parameters = @{
-                        # A solo owner cannot approve their own pull request; the review gate replaces approval
+                        # A solo owner cannot approve their own pull request; the review gate replaces approval:
+                        # the workflow review-threads opens a thread per changed file and every thread must be resolved
                         required_approving_review_count                 = 0
                         dismiss_stale_reviews_on_push                   = $false
                         required_reviewers                              = @()
@@ -73,11 +74,12 @@
                     parameters = @{
                         strict_required_status_checks_policy = $false
                         do_not_enforce_on_create             = $false
-                        # ci.yml jobs (GitHub Actions app 15368) and the review gate commit status (set by the owner)
+                        # Jobs of ci.yml and review-threads.yml (GitHub Actions app 15368). review-threads is required so
+                        # that a pull request cannot be merged before the threads for its latest push exist.
                         required_status_checks               = @(
                             @{ context = 'pr-title'; integration_id = 15368 }
                             @{ context = 'build'; integration_id = 15368 }
-                            @{ context = 'review/all-files-viewed' }
+                            @{ context = 'review-threads'; integration_id = 15368 }
                         )
                     }
                 }
