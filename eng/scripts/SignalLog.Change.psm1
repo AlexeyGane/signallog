@@ -416,15 +416,98 @@ function Test-ChangeBranch {
     Write-ChangeOk "on $Branch, no commits beyond main"
 }
 
+function Get-ToolingTestCommand {
+    <#
+    .SYNOPSIS
+        The command line that runs the PowerShell tooling tests of a tree, as the build job of ci.yml does.
+    .DESCRIPTION
+        Meant for a new pwsh process: modules left in the session by earlier change scripts (for example a module a
+        Precheck imported, which becomes a nested module of SignalLog.Change) make Mock -ModuleName ambiguous.
+        The last line of output is "RESULT <passed> <total> <failed> <Pester version>".
+    #>
+    param([Parameter(Mandatory)] [string] $Root)
+    # Path.Combine, not Join-Path: no drive lookup, so a tree on another drive or platform is still named as given
+    $paths = @('eng/scripts/tests', 'eng/github/tests' | ForEach-Object { "'" + ([System.IO.Path]::Combine($Root, $_) -replace "'", "''") + "'" }) -join ', '
+    return 'Import-Module -Name Pester -MinimumVersion 5.5 -MaximumVersion 5.99.99; ' +
+        "`$r = Invoke-Pester -Path $paths -Output Detailed -PassThru; " +
+        "'RESULT {0} {1} {2} {3}' -f `$r.PassedCount, `$r.TotalCount, `$r.FailedCount, (Get-Module -Name Pester).Version"
+}
+
+function ConvertFrom-ToolingTestOutput {
+    <# Reads the RESULT line of Get-ToolingTestCommand: Passed, PassedCount, TotalCount, FailedCount, Summary. #>
+    param([AllowEmptyCollection()] [AllowNull()] [object[]] $Output = @())
+    $line = @($Output | Where-Object { "$_" -match '^RESULT \d+ \d+ \d+ \S+$' }) | Select-Object -Last 1
+    if (-not $line) { return $null }
+    $parts = ([string] $line).Split(' ')
+    $passed, $total, $failed = $parts[1..3] | ForEach-Object { [int] $_ }
+    return [pscustomobject]@{
+        Passed      = ($failed -eq 0 -and $total -gt 0)
+        PassedCount = $passed
+        TotalCount  = $total
+        FailedCount = $failed
+        Summary     = "$passed of $total passed (Pester $($parts[4]), PowerShell $($PSVersionTable.PSVersion))"
+    }
+}
+
+function Invoke-ToolingTest {
+    <#
+    .SYNOPSIS
+        Runs the PowerShell tooling tests of a tree (eng/scripts/tests, eng/github/tests) in a new pwsh process.
+    .PARAMETER Root
+        The tree to test: the working copy (default) or a test tree from Copy-ChangeTestTree.
+    .OUTPUTS
+        Passed, PassedCount, TotalCount, FailedCount, Summary. Throws when Pester reports no result.
+    #>
+    param([string] $Root = '.')
+    Write-ChangeStep "Tooling tests (Pester, own process): $Root"
+    $r = Invoke-Native -FilePath 'pwsh' -Arguments @('-NoProfile', '-NonInteractive', '-Command', (Get-ToolingTestCommand -Root $Root))
+    $result = ConvertFrom-ToolingTestOutput -Output @($r.Output)
+    if (-not $result) { throw "The tooling tests reported no result (exit code $($r.ExitCode)); see the output above." }
+    if ($result.Passed) { Write-ChangeOk $result.Summary } else { Write-Host "    - $($result.FailedCount) tooling test(s) failed" -ForegroundColor Red }
+    return $result
+}
+
+function Copy-ChangeTestTree {
+    <#
+    .SYNOPSIS
+        Staging mode: a copy of the working copy with the change applied, for tests before the commit.
+    .DESCRIPTION
+        Copies the files git knows in the working copy (tracked, and untracked ones that are not ignored), then the
+        staged files of the change (.github staged as github), and removes the files the change deletes.
+        The copy is <staging>/build; an earlier copy is replaced. Returns its path.
+    #>
+    param([Parameter(Mandatory)] [System.Collections.IDictionary] $Files)
+    $ctx = Get-ChangeContext
+    $build = Join-Path -Path $ctx.Staging -ChildPath 'build'
+    if (Test-Path -LiteralPath $build) { Remove-Item -LiteralPath $build -Recurse -Force }
+    $listed = Invoke-Git @('-c', 'core.quotepath=off', 'ls-files', '--cached', '--others', '--exclude-standard')
+    if ($listed.ExitCode -ne 0) { throw "git ls-files failed: $($listed.Output -join ' ')" }
+    foreach ($path in @($listed.Output | ForEach-Object { [string] $_ } | Where-Object { $_ } | Sort-Object -Unique)) {
+        if ($Files.Contains($path) -or -not (Test-Path -LiteralPath $path -PathType Leaf)) { continue }
+        $target = Join-Path -Path $build -ChildPath $path
+        New-Item -ItemType Directory -Path (Split-Path -Path $target -Parent) -Force | Out-Null
+        Copy-Item -LiteralPath $path -Destination $target -Force
+    }
+    foreach ($path in $Files.Keys) {
+        if ($null -eq $Files[$path][1]) { continue }
+        $target = Join-Path -Path $build -ChildPath $path
+        New-Item -ItemType Directory -Path (Split-Path -Path $target -Parent) -Force | Out-Null
+        Copy-Item -LiteralPath (Get-StagedSourcePath -Staging $ctx.Staging -Path $path) -Destination $target -Force
+    }
+    return $build
+}
+
 function Invoke-SolutionCheck {
     <#
     .SYNOPSIS
         The build job of ci.yml on the owner's machine, in the current directory.
     .DESCRIPTION
-        Restore, Release build with warnings as errors, tests, format check and the banned API fitness function,
-        stopping at the first failure. The build runs without persistent build servers (--disable-build-servers),
-        so no MSBuild or compiler process keeps the output locked after the check.
-        Returns Passed, Failed (the failed step) and Tests (the summary line of dotnet test).
+        Restore, Release build with warnings as errors, tests, format check, the banned API fitness function and the
+        PowerShell tooling tests (in their own process, see Invoke-ToolingTest), stopping at the first failure.
+        The build runs without persistent build servers (--disable-build-servers), so no MSBuild or compiler
+        process keeps the output locked after the check.
+        Returns Passed, Failed (the failed step), Tests (the summary line of dotnet test) and Tooling (the summary
+        of the tooling tests).
     #>
     $steps = [ordered]@{
         restore = @('dotnet', @('restore', 'SignalLog.slnx'))
@@ -432,18 +515,26 @@ function Invoke-SolutionCheck {
         test    = @('dotnet', @('test', '--solution', 'SignalLog.slnx', '--no-build', '--configuration', 'Release'))
         format  = @('dotnet', @('format', 'SignalLog.slnx', '--verify-no-changes', '--no-restore'))
         banned  = @('pwsh', @('-NoProfile', '-File', (Join-Path -Path 'eng' -ChildPath 'Test-BannedApi.ps1')))
+        tooling = @('pwsh', @('-NoProfile', '-NonInteractive', '-Command', (Get-ToolingTestCommand -Root '.')))
     }
     $failed = @()
     $tests = ''
+    $tooling = ''
     foreach ($name in $steps.Keys) {
         Write-ChangeStep "Solution check: $name"
         $r = Invoke-Native -FilePath $steps[$name][0] -Arguments $steps[$name][1]
         # String interpolation, not [string]: a failed run may print no summary, and [string] of an empty pipeline is $null
         if ($name -eq 'test') { $tests = "$(@($r.Output) | Where-Object { "$_" -match 'total:' } | Select-Object -Last 1)".Trim() }
+        if ($name -eq 'tooling') {
+            # Invoke-Pester without -CI exits 0 even when tests fail: the RESULT line decides
+            $result = ConvertFrom-ToolingTestOutput -Output @($r.Output)
+            if ($result) { $tooling = $result.Summary }
+            if (-not $result -or -not $result.Passed) { Write-Host '    - tooling failed' -ForegroundColor Red; $failed = @($name); break }
+        }
         if ($r.ExitCode -ne 0) { Write-Host "    - $name failed (exit code $($r.ExitCode))" -ForegroundColor Red; $failed = @($name); break }
         Write-ChangeOk $name
     }
-    return [pscustomobject]@{ Passed = ($failed.Count -eq 0); Failed = $failed; Tests = $tests }
+    return [pscustomobject]@{ Passed = ($failed.Count -eq 0); Failed = $failed; Tests = $tests; Tooling = $tooling }
 }
 
 function Update-MainBranch {
@@ -800,6 +891,7 @@ $published
 
 Export-ModuleMember -Function @(
     'Initialize-ChangeContext', 'Get-ChangeContext', 'Start-Change', 'Invoke-Change', 'Invoke-SolutionCheck',
+    'Get-ToolingTestCommand', 'ConvertFrom-ToolingTestOutput', 'Invoke-ToolingTest', 'Copy-ChangeTestTree',
     'Expand-ChangeText', 'Get-StagedSourcePath', 'Resolve-CheckRun', 'ConvertFrom-RunList', 'Format-ReviewProgress', 'Invoke-ResultCheck',
     'Find-BoardItem', 'New-BoardItem', 'Get-BoardItem', 'Set-BoardItemField', 'Set-BoardItemState', 'Test-BoardComment', 'Add-BoardComment', 'Add-BoardAttachment',
     'Get-BlobId', 'Test-Baseline', 'Test-StagedBlob', 'Test-PullRequestHead', 'Test-WorkingTreeChange', 'Test-ChangeBranch', 'Update-MainBranch', 'Reset-PreparedFile', 'Copy-StagedFile', 'New-SignedCommit',
