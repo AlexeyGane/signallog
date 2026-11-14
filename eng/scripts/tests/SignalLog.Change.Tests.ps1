@@ -466,6 +466,7 @@ Describe 'Invoke-SolutionCheck' {
     It 'runs the CI build steps, the build without persistent build servers, and reads the test summary' {
         Mock -ModuleName SignalLog.Change Invoke-Native {
             if ($Arguments[0] -eq 'test') { [pscustomobject]@{ ExitCode = 0; Output = @('Test run summary: Passed!', '  total: 57') } }
+            elseif (($Arguments -join ' ') -match 'Invoke-Pester') { [pscustomobject]@{ ExitCode = 0; Output = @('RESULT 1 1 0 5.7.1') } }
             else { [pscustomobject]@{ ExitCode = 0; Output = @() } }
         }
         $r = Invoke-SolutionCheck 6>$null
@@ -473,6 +474,25 @@ Describe 'Invoke-SolutionCheck' {
         $r.Tests | Should -Be 'total: 57'
         Should -Invoke -ModuleName SignalLog.Change Invoke-Native -ParameterFilter { $FilePath -eq 'dotnet' -and $Arguments[0] -eq 'build' -and $Arguments -contains '--disable-build-servers' -and $Arguments -contains 'Release' } -Times 1
         Should -Invoke -ModuleName SignalLog.Change Invoke-Native -ParameterFilter { $FilePath -eq 'pwsh' -and ($Arguments -join ' ') -match 'Test-BannedApi\.ps1' } -Times 1
+    }
+    It 'runs the tooling tests last, in their own pwsh process, and reports their summary' {
+        Mock -ModuleName SignalLog.Change Invoke-Native {
+            if (($Arguments -join ' ') -match 'Invoke-Pester') { [pscustomobject]@{ ExitCode = 0; Output = @('Tests Passed: 110', 'RESULT 110 110 0 5.7.1') } }
+            else { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+        }
+        $r = Invoke-SolutionCheck 6>$null
+        $r.Passed | Should -BeTrue
+        $r.Tooling | Should -Match '^110 of 110 passed \(Pester 5\.7\.1, PowerShell '
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Native -Times 1 -Exactly -ParameterFilter { $FilePath -eq 'pwsh' -and $Arguments -contains '-NoProfile' -and ($Arguments -join ' ') -match 'Invoke-Pester' }
+    }
+    It 'fails on failed tooling tests although Invoke-Pester exits 0' {
+        Mock -ModuleName SignalLog.Change Invoke-Native {
+            if (($Arguments -join ' ') -match 'Invoke-Pester') { [pscustomobject]@{ ExitCode = 0; Output = @('RESULT 107 110 3 5.7.1') } }
+            else { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+        }
+        $r = Invoke-SolutionCheck 6>$null
+        $r.Passed | Should -BeFalse
+        $r.Failed | Should -Be @('tooling')
     }
     It 'stops at the first failed step and names it, also when the failed run prints no summary' {
         Mock -ModuleName SignalLog.Change Invoke-Native {
@@ -483,6 +503,91 @@ Describe 'Invoke-SolutionCheck' {
         $r.Passed | Should -BeFalse
         $r.Failed | Should -Be @('test')
         Should -Invoke -ModuleName SignalLog.Change Invoke-Native -ParameterFilter { $Arguments[0] -eq 'format' } -Times 0
+    }
+}
+
+Describe 'Tooling tests in their own process' {
+    It 'tests both test folders of the given tree, quoting the path' {
+        $command = Get-ToolingTestCommand -Root "D:\src\_staging\o'brien\build"
+        $command | Should -Match ([regex]::Escape("'D:\src\_staging\o''brien\build"))
+        $command | Should -Match 'eng.scripts.tests'
+        $command | Should -Match 'eng.github.tests'
+        $command | Should -Match '-MinimumVersion 5\.5 -MaximumVersion 5\.99\.99'
+        $command | Should -Match "'RESULT \{0\} \{1\} \{2\} \{3\}'"
+    }
+    It 'reads the RESULT line and ignores the rest of the output' {
+        $r = ConvertFrom-ToolingTestOutput -Output @('[+] something', 'RESULT 3 4 1 5.7.1', 'trailing')
+        $r.Passed | Should -BeFalse
+        $r.FailedCount | Should -Be 1
+        $r.Summary | Should -Match '^3 of 4 passed \(Pester 5\.7\.1'
+    }
+    It 'is never passed without tests or without a RESULT line' {
+        (ConvertFrom-ToolingTestOutput -Output @('RESULT 0 0 0 5.7.1')).Passed | Should -BeFalse
+        ConvertFrom-ToolingTestOutput -Output @('no result') | Should -BeNullOrEmpty
+    }
+    It 'runs pwsh without the profile and throws when Pester reports no result' {
+        Mock -ModuleName SignalLog.Change Invoke-Native { [pscustomobject]@{ ExitCode = 1; Output = @('Import-Module: Pester not found') } }
+        { Invoke-ToolingTest -Root 'x' 6>$null } | Should -Throw '*no result*'
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Native -Times 1 -ParameterFilter { $FilePath -eq 'pwsh' -and $Arguments[0] -eq '-NoProfile' -and $Arguments -contains '-NonInteractive' }
+    }
+    It 'returns the result of a run in a real new process' -Skip:(-not (Get-Command -Name pwsh -ErrorAction SilentlyContinue)) {
+        $tree = Join-Path -Path $TestDrive -ChildPath 'tree'
+        foreach ($folder in 'eng/scripts/tests', 'eng/github/tests') { New-Item -ItemType Directory -Path (Join-Path $tree $folder) -Force | Out-Null }
+        Set-Content -LiteralPath (Join-Path $tree 'eng/scripts/tests/A.Tests.ps1') -Value "Describe 'a' { It 'passes' { 1 | Should -Be 1 } }"
+        Set-Content -LiteralPath (Join-Path $tree 'eng/github/tests/B.Tests.ps1') -Value "Describe 'b' { It 'fails' { 1 | Should -Be 2 } }"
+        Mock -ModuleName SignalLog.Change Out-Host { }
+        $r = Invoke-ToolingTest -Root $tree 6>$null
+        $r.TotalCount | Should -Be 2
+        $r.FailedCount | Should -Be 1
+        $r.Passed | Should -BeFalse
+    }
+}
+
+Describe 'Copy-ChangeTestTree' {
+    BeforeEach {
+        $script:root = Join-Path -Path $TestDrive -ChildPath ([guid]::NewGuid().ToString('n'))
+        $script:work = Join-Path -Path $root -ChildPath 'work'
+        $script:staging = Join-Path -Path $root -ChildPath 'staging'
+        foreach ($file in @{ 'a.md' = 'old a'; 'keep.md' = 'keep'; 'gone.ps1' = 'gone'; '.github/workflows/ci.yml' = 'old ci' }.GetEnumerator()) {
+            $path = Join-Path -Path $work -ChildPath $file.Key
+            New-Item -ItemType Directory -Path (Split-Path -Path $path -Parent) -Force | Out-Null
+            Set-Content -LiteralPath $path -Value $file.Value -NoNewline
+        }
+        foreach ($file in @{ 'tree/a.md' = 'new a'; 'tree/new.md' = 'new'; 'tree/github/workflows/ci.yml' = 'new ci' }.GetEnumerator()) {
+            $path = Join-Path -Path $staging -ChildPath $file.Key
+            New-Item -ItemType Directory -Path (Split-Path -Path $path -Parent) -Force | Out-Null
+            Set-Content -LiteralPath $path -Value $file.Value -NoNewline
+        }
+        Initialize-ChangeContext -Staging $staging -Token 'test-token' | Out-Null
+        Mock -ModuleName SignalLog.Change Invoke-Git { [pscustomobject]@{ ExitCode = 0; Output = @('a.md', 'keep.md', 'gone.ps1', '.github/workflows/ci.yml', 'listed-but-deleted.md') } } -ParameterFilter { $Arguments -contains 'ls-files' }
+        Push-Location -LiteralPath $work
+    }
+    AfterEach {
+        Pop-Location
+    }
+    It 'copies the working copy, applies the staged files and leaves out the deleted ones' {
+        $files = [ordered]@{
+            'a.md'                     = @(('1' * 40), ('2' * 40))
+            'new.md'                   = @($null, ('3' * 40))
+            '.github/workflows/ci.yml' = @(('4' * 40), ('5' * 40))
+            'gone.ps1'                 = @(('6' * 40), $null)
+        }
+        $build = Copy-ChangeTestTree -Files $files
+        $build | Should -Be (Join-Path -Path $staging -ChildPath 'build')
+        Get-Content -LiteralPath (Join-Path $build 'a.md') -Raw | Should -Be 'new a'
+        Get-Content -LiteralPath (Join-Path $build 'new.md') -Raw | Should -Be 'new'
+        Get-Content -LiteralPath (Join-Path $build '.github/workflows/ci.yml') -Raw | Should -Be 'new ci'
+        Get-Content -LiteralPath (Join-Path $build 'keep.md') -Raw | Should -Be 'keep'
+        Test-Path -LiteralPath (Join-Path $build 'gone.ps1') | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $build 'listed-but-deleted.md') | Should -BeFalse
+    }
+    It 'replaces an earlier copy' {
+        $stale = Join-Path -Path $staging -ChildPath 'build/stale.md'
+        New-Item -ItemType Directory -Path (Split-Path -Path $stale -Parent) -Force | Out-Null
+        Set-Content -LiteralPath $stale -Value 'stale'
+        $build = Copy-ChangeTestTree -Files ([ordered]@{})
+        Test-Path -LiteralPath (Join-Path $build 'stale.md') | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $build 'keep.md') | Should -BeTrue
     }
 }
 
