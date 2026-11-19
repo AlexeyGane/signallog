@@ -1,0 +1,42 @@
+# Pages that do not follow the references standard yet (docs/standards/references.md, section 1).
+# check_references.py reports their findings as warnings; every other page gets errors.
+# A page leaves this list when its story of Azure Boards Feature #42 is done; no page is added.
+# One repository-relative path per line; lines starting with # are comments.
+docs/adr/0000-cost-optimization-strategy.md
+docs/adr/0001-documentation-platform.md
+docs/adr/0002-source-control-platform.md
+docs/adr/0003-application-lifecycle-management.md
+docs/adr/0004-ci-cd-platform.md
+docs/adr/0005-identity-and-access.md
+docs/adr/0006-compute-hosting.md
+docs/adr/0007-observability.md
+docs/adr/0008-data-storage.md
+docs/adr/0009-event-driven-ingestion.md
+docs/adr/0010-api-management-ingestion-gateway.md
+docs/adr/0011-market-data-sourcing-and-licensing.md
+docs/adr/0012-message-contract-and-versioning.md
+docs/adr/0013-adapter-control-plane.md
+docs/adr/0014-instrument-domain-model.md
+docs/adr/0015-ui-and-real-time-push.md
+docs/adr/0016-environments-and-infrastructure-as-code.md
+docs/adr/0017-time-and-timezones.md
+docs/adr/0018-latency-and-freshness-targets.md
+docs/adr/0019-market-status-events.md
+docs/adr/0020-documentation-site.md
+docs/adr/README.md
+docs/domain/glossary.md
+docs/domain/market-conventions.md
+docs/domain/market-data-sources.md
+docs/domain/model.md
+docs/domain/tenors-and-delivery-periods.md
+docs/domain/time-and-delivery.md
+docs/fun-facts/index.md
+docs/fun-facts/ru.md
+docs/note.md
+docs/requirements/README.md
+docs/requirements/business-rules.md
+docs/requirements/nfr.md
+docs/standards/branching-and-release.md
+docs/standards/change-workflow.md
+docs/standards/coding.md
+docs/standards/concepts-and-sources.md

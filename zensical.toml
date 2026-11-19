@@ -67,6 +67,7 @@ nav = [
       { "English" = "fun-facts/index.md" },
       { "Русский" = "fun-facts/ru.md" },
   ] },
+  { "References" = "references/index.md" },
 ]
 
 [project.validation]
@@ -85,6 +86,7 @@ features = [
   "content.action.edit",
   "content.action.view",
   "content.code.copy",
+  "content.footnote.tooltips",
   "search.highlight",
 ]
 
@@ -102,3 +104,13 @@ custom_checkbox = true
 
 # Explicit heading ids ("## Резюме {#summary}"): stable anchors for pages whose headings are not in English.
 [project.markdown_extensions.attr_list]
+
+# Citations (ADR 0021): footnotes cite entries of docs/references/index.md by key and show as tooltips.
+[project.markdown_extensions.footnotes]
+
+# Abbreviations: includes/abbreviations.md is appended to every page, so a defined abbreviation shows its expansion on hover.
+[project.markdown_extensions.abbr]
+
+[project.markdown_extensions.pymdownx.snippets]
+auto_append = ["includes/abbreviations.md"]
+check_paths = true

@@ -1,4 +1,5 @@
 # ADR 0020 — documentation site. Strict build on pull requests; build and deploy to GitHub Pages on main.
+# ADR 0021 — the bibliography page is generated from docs/references/sources.toml and checked before the build.
 name: docs
 
 on:
@@ -41,6 +42,12 @@ jobs:
 
       - name: Install Zensical (hash-pinned)
         run: python -m pip install --require-hashes -r eng/docs/requirements.txt
+
+      - name: Bibliography generator tests (ADR 0021)
+        run: python -m unittest discover -s eng/docs/tests -v
+
+      - name: Bibliography is valid and up to date (ADR 0021)
+        run: python eng/docs/build_references.py --check
 
       - name: "Build (strict: invalid links or anchors fail)"
         run: zensical build --clean --strict

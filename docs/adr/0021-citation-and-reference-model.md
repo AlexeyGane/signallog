@@ -24,21 +24,21 @@ The question is: **how do pages, Russian mirrors and code refer to concepts, fac
 
 ## Decision Drivers
 
-- D1 — One place per source: its URL, version, date checked and archived copy are kept once.
+- D1 — One place per source: its URL, version, date checked and archived copy are kept once. Links decay: of the web pages that existed in 2013, 38 % could no longer be reached a decade later.[^chapekis-2024]
 - D2 — Claim-level traceability: a reader sees which sentence rests on which source.
 - D3 — Readable text: a citation does not interrupt reading.
 - D4 — Stable identifiers: a citation survives reordered paragraphs and renamed headings.
 - D5 — Several sources for one concept, each with its role (where the concept comes from, its current definition, further reading).
 - D6 — Works with Zensical 0.1.1 and on GitHub without plugins.
-- D7 — A broken or unused citation fails CI.
+- D7 — A broken or unused citation fails CI. Wikipedia, for example, reports a list-defined reference that the text does not use as an error.[^wikipedia-list-defined-references]
 - D8 — One rule for pages, Russian mirrors and code.
 
 ## Considered Options
 
 1. **Source lists per page in one format** (the status quo, normalised)
-2. **Full citations in footnotes on every page**, as in ordinary Wikipedia footnotes or numbered journal references
-3. **Pandoc citation keys** (`[@key]`) with a bibliography plugin
-4. **Shortened footnotes**: a footnote whose label is a key and whose text links to one bibliography, with registers for terms and concepts
+2. **Full citations in footnotes on every page**, as in ordinary Wikipedia footnotes or numbered journal references[^nature-final-submission]
+3. **Pandoc citation keys** (`[@key]`) with a bibliography plugin[^quarto-citations]
+4. **Shortened footnotes**: a footnote whose label is a key and whose text links to one bibliography, with registers for terms and concepts[^wikipedia-shortened-footnotes]
 
 ## Decision Outcome
 
@@ -56,7 +56,7 @@ The question is: **how do pages, Russian mirrors and code refer to concepts, fac
 | D6 Zensical 0.1.1 and GitHub | Yes | Yes, once `footnotes` is enabled | No ¹ | Yes ² |
 | D7 Checked in CI | Format only | Partly | Yes | Yes ³ |
 
-¹ Zensical does not run MkDocs plugins it does not implement; their configuration is silently ignored, and no bibliography plugin is implemented ([Zensical, MkDocs plugins](https://zensical.org/compatibility/plugins/), checked 2026-11-19). GitHub would show `[@key]` as text. ² Verified on 2026-11-19 with Zensical 0.1.1: footnotes render with the extension enabled, a footnote label can be the source key, and one footnote can be referenced twice on a page. GitHub has rendered Markdown footnotes since 2021-09-30 ([GitHub changelog](https://github.blog/changelog/2021-09-30-footnotes-now-supported-in-markdown-fields/)). ³ Verified on 2026-11-19: `zensical build --strict` fails when a footnote links to an anchor that the bibliography page does not have. A footnote that is defined but never referenced is rendered without a warning, so a script checks that.
+¹ Zensical does not run MkDocs plugins it does not implement; their configuration is silently ignored, and no bibliography plugin is implemented.[^zensical-mkdocs-plugins] GitHub would show `[@key]` as text. ² Verified on 2026-11-19 with Zensical 0.1.1: footnotes render with the extension enabled, a footnote label can be the source key, and one footnote can be referenced twice on a page. GitHub has rendered Markdown footnotes since 2021-09-30.[^gh-2021-09-30-footnotes] ³ Verified on 2026-11-19: `zensical build --strict` fails when a footnote links to an anchor that the bibliography page does not have. A footnote that is defined but never referenced is rendered without a warning, so a script checks that.
 
 Drivers not scored: D3 (every option keeps URLs out of the running text or can do so), D5 and D8 (the registers and the rules for code can be added to any option).
 
@@ -66,11 +66,11 @@ Sensitivity: Option 4 meets every scored driver, so no weighting changes the ord
 
 | Element | Decision |
 |---|---|
-| Bibliography | `docs/references/sources.toml`: one entry per external source with a stable key, CSL field names, `accessed`, an optional `archive`, `tier` (1 primary, 2 vendor documentation, 3 news) and `stability` (`pinned` or `living`). `eng/docs/build_references.py` writes the page `docs/references/index.md` and checks it with `--check` |
-| Data format | TOML, read with `tomllib` from the Python standard library (Python 3.11 and later, already required by the documentation standard); no new hashed package |
+| Bibliography | `docs/references/sources.toml`: one entry per external source with a stable key, CSL field names[^csl-1-0-2], `accessed`, an optional `archive`, `tier` (1 primary, 2 vendor documentation, 3 news) and `stability` (`pinned` or `living`). `eng/docs/build_references.py` writes the page `docs/references/index.md` and checks it with `--check` |
+| Data format | TOML, read with `tomllib` from the Python standard library (Python 3.11 and later, already required by the documentation standard)[^python-tomllib]; no new hashed package |
 | Citation in text | A Markdown footnote at the end of the passage it supports. Its label is the key; its text links to the bibliography entry and gives a locator (section, page, table). Pages carry no external URLs |
 | Terms and concepts | The [glossary](../domain/glossary.md) (domain terms) and the [concepts register](../standards/concepts-and-sources.md) (engineering concepts) are linked at the first use on a page. The register lists the sources of a concept by role |
-| Roles of sources | Origin, definition, evidence, method or data, further reading, disputes. They follow the IETF split into normative and informative references and the citation types of CiTO |
+| Roles of sources | Origin, definition, evidence, method or data, further reading, disputes. They follow the IETF split into normative and informative references[^iesg-2006-04-19-references] and the citation types of CiTO[^dcmi-cito][^willighagen-2020] |
 | Dates | The date a source was checked lives only in the bibliography. The date on which a fact holds stays in the text when it is part of the claim |
 | Code | Decisions and requirements by identifier (`ADR 0012`, `NFR-SEC-03`); principles by `<seealso href>` to an explicit anchor of the site; sources by key in brackets (`[steele-2014]`); no external URLs |
 | Anchors | `<a id="…"></a>` for anything linked from outside a page: GitHub shows the `{#id}` syntax as text |
@@ -79,7 +79,7 @@ Sensitivity: Option 4 meets every scored driver, so no weighting changes the ord
 
 ### Consequences
 
-- Good, because a source is re-checked by editing one entry, and the text carries a superscript number with a tooltip instead of a URL and a date.
+- Good, because a source is re-checked by editing one entry, and the text carries a superscript number with a tooltip instead of a URL and a date.[^zensical-footnotes]
 - Good, because links from code become a contract: an explicit anchor that CI checks against the built site.
 - Good, because the bibliography is data with CSL field names, so it can move to Pandoc, Zotero or a future Zensical module without being retyped.
 - Bad, because a reader is one click further from the URL: text → footnote → bibliography.
@@ -114,6 +114,19 @@ Sensitivity: Option 4 meets every scored driver, so no weighting changes the ord
 
 ## More Information
 
-- Sources checked 2026-11-19: [Wikipedia — Help:Shortened footnotes](https://en.wikipedia.org/wiki/Help:Shortened_footnotes) (brief inline citations with a location in the source that point to full citations kept elsewhere, so that the full citations are not repeated; Wikipedia keeps them on the same page, this model keeps them in one bibliography for all pages); [Zensical — MkDocs plugins](https://zensical.org/compatibility/plugins/); [Zensical — footnotes](https://zensical.org/docs/authoring/footnotes/) (`content.footnote.tooltips`); [GitHub changelog — footnotes in Markdown fields](https://github.blog/changelog/2021-09-30-footnotes-now-supported-in-markdown-fields/); [Wikipedia — list-defined references](https://en.wikipedia.org/wiki/Help:List-defined_references) (an unused reference is an error); [IESG — normative and informative references](https://datatracker.ietf.org/doc/statement-iesg-iesg-statement-normative-and-informative-references-20060419/); [DCMI — CiTO](https://msi.dublincore.org/standards/cito); [E. Willighagen, Adoption of the Citation Typing Ontology by the Journal of Cheminformatics, 2020](https://pmc.ncbi.nlm.nih.gov/articles/PMC7385899); [Nature — final submission](https://www.nature.com/nature/for-authors/final-submission) (numbered references in order of appearance); [Quarto — citations](https://quarto.org/docs/authoring/citations.html); [Pew Research Center — When Online Content Disappears, 2024-05-17](https://www.pewresearch.org/data-labs/2024/05/17/when-online-content-disappears/) (38 % of pages from 2013 no longer accessible; 54 % of Wikipedia pages with at least one dead link in References).
-- This ADR and the references standard are written before the bibliography exists, so they cite their sources in the current form. They move to footnotes with the first pages that use the bibliography.
-- Implementation: Azure Boards Feature #42 "Citations and references", stories AB#43 to AB#55.
+- Related decisions: [ADR 0001](0001-documentation-platform.md) (documentation in the repository), [ADR 0004](0004-ci-cd-platform.md) (CI), [ADR 0020](0020-documentation-site.md) (the site and its strict build).
+- Implementation: Azure Boards Feature #42 "Citations and references", stories AB#43 to AB#55. The sources of this ADR are entries of the [bibliography](../references/index.md); they were checked on 2026-11-19.
+
+[^chapekis-2024]: [Chapekis et al. 2024](../references/index.md#chapekis-2024), Pew Research Center: 38 % of pages from 2013 no longer accessible; 54 % of Wikipedia pages with at least one dead link in References.
+[^wikipedia-list-defined-references]: [Wikipedia, Help:List-defined references](../references/index.md#wikipedia-list-defined-references).
+[^nature-final-submission]: [Nature, Final submission](../references/index.md#nature-final-submission): references numbered in order of appearance.
+[^quarto-citations]: [Quarto, Citations](../references/index.md#quarto-citations): the Pandoc `[@key]` syntax.
+[^wikipedia-shortened-footnotes]: [Wikipedia, Help:Shortened footnotes](../references/index.md#wikipedia-shortened-footnotes): Wikipedia keeps the full citations on the same page; this model keeps them in one bibliography for all pages.
+[^zensical-mkdocs-plugins]: [Zensical, MkDocs plugins](../references/index.md#zensical-mkdocs-plugins).
+[^gh-2021-09-30-footnotes]: [GitHub Changelog, 2021-09-30](../references/index.md#gh-2021-09-30-footnotes).
+[^csl-1-0-2]: [CSL 1.0.2 specification](../references/index.md#csl-1-0-2), appendices III (types) and IV (variables).
+[^python-tomllib]: [Python, tomllib](../references/index.md#python-tomllib): added in Python 3.11; reads TOML and does not write it.
+[^iesg-2006-04-19-references]: [IESG statement, 2006-04-19](../references/index.md#iesg-2006-04-19-references).
+[^dcmi-cito]: [CiTO](../references/index.md#dcmi-cito).
+[^willighagen-2020]: [Willighagen 2020](../references/index.md#willighagen-2020): `usesMethodIn`, `usesDataFrom`, `disagreesWith` in a journal's practice.
+[^zensical-footnotes]: [Zensical, Footnotes](../references/index.md#zensical-footnotes): the feature `content.footnote.tooltips`.

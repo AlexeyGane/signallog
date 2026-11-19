@@ -26,7 +26,7 @@ The design carries a W3C trace context across every arrow and authenticates ever
 
 | If you want to know… | Read |
 |---|---|
-| Why the system looks the way it does | [Architecture decisions](adr/README.md): 21 ADRs with context, drivers, considered options and consequences |
+| Why the system looks the way it does | [Architecture decisions](adr/README.md): 22 ADRs with context, drivers, considered options and consequences |
 | What quality the system must reach, and how it is checked | [Non-functional requirements](requirements/nfr.md) |
 | Which domain rules any implementation must respect | [Business rules](requirements/business-rules.md) |
 | What the domain terms mean | [Glossary](domain/glossary.md) and the [domain model](domain/model.md) |
@@ -34,6 +34,7 @@ The design carries a W3C trace context across every arrow and authenticates ever
 | How work moves from an idea to production | [Branching and release standard](standards/branching-and-release.md), [Documentation standard](standards/documentation.md) |
 | How the code is written, and what checks each rule | [C# coding standard](standards/coding.md) |
 | Where a concept or definition comes from | [Concepts and their sources](standards/concepts-and-sources.md) |
+| Which external sources the documentation rests on | [Bibliography](references/index.md): every source described once, with the pages that cite it |
 
 ## How the work is traced
 
