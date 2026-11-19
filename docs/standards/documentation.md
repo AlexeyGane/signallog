@@ -17,6 +17,7 @@ This standard describes **how** documentation is organised, written, reviewed an
 | `docs/requirements/` | Quality requirements (`NFR-*`) and domain rules (`BR-*`) | [Requirements README](../requirements/README.md): identifiers, scenarios, verification |
 | `docs/domain/` | Domain knowledge: glossary, model, market facts, worked examples | [Domain README](../domain/README.md): sources with dates, **Inferred** and open questions marked |
 | `docs/standards/` | Operating procedures that change without an ADR | A header table (status, owner, what it implements) like this page |
+| `docs/references/` | The bibliography: `sources.toml` (edited by hand) and the generated page `index.md` | [References standard](references.md): one entry per external source, cited by key |
 | `README.md` (repository root) | Entry point on GitHub: what the project is, how to build | Short; links into `docs/` |
 
 A page belongs to one folder by what it records: a choice goes to `adr/`, a testable quality to `requirements/`, knowledge to `domain/`, a procedure to `standards/`. When a page starts mixing them, split it.
@@ -25,7 +26,7 @@ A page belongs to one folder by what it records: a choice goes to `adr/`, a test
 
 - **Language:** English for everything in the repository, so that the site, code and commit history read the same. Two exceptions: a Russian mirror of a page (section 7) and an unlisted page written for a specific Russian-speaking audience (section 6), which says so in a comment at its top.
 - **One idea per sentence.** Name things precisely (`price-ticks` topic, not "the queue"); expand abbreviations on first use on each page or link the glossary.
-- **Sources:** facts about markets, vendors, standards or concepts cite a primary source with the date checked; concepts link to [Concepts and their sources](concepts-and-sources.md), domain terms to the [glossary](../domain/glossary.md). How a source is cited (one bibliography entry per source, a footnote at the end of the passage it supports, the date checked kept in the bibliography) is described in the [references standard](references.md); [ADR 0021](../adr/0021-citation-and-reference-model.md) records the decision. Text without a source is the author's assessment and says so.
+- **Sources:** facts about markets, vendors, standards or concepts cite an entry of the [bibliography](../references/index.md), where the date it was checked is kept; concepts link to [Concepts and their sources](concepts-and-sources.md), domain terms to the [glossary](../domain/glossary.md). How a source is cited (one bibliography entry per source, a footnote at the end of the passage it supports, the date checked kept in the bibliography) is described in the [references standard](references.md); [ADR 0021](../adr/0021-citation-and-reference-model.md) records the decision. Text without a source is the author's assessment and says so.
 - **Dates** are ISO 8601 (`2026-11-05`). Examples use real calendar dates so they can become tests.
 - **Numbers and units:** every price, tick size, quantity or score shows its unit or scale next to the number (`82.50 EUR/MWh`), in its column header or row label, or in the same phrase. An example price tied to a real date is marked as illustrative unless it cites a source.
 - **Diagrams** are Mermaid code blocks (fence `mermaid`), never images exported from a tool, so that they are reviewed as text. Check that each diagram renders before merging (GitHub preview or local site).
@@ -40,22 +41,25 @@ A page belongs to one folder by what it records: a choice goes to `adr/`, a test
 
 ## 4. Building and previewing locally
 
-Requires Python 3.11 or later ([Zensical on PyPI](https://pypi.org/project/zensical/)). From the repository root:
+Requires Python 3.11 or later.[^pypi-zensical] From the repository root:
 
 ```powershell
 python -m venv .venv-docs
 .\.venv-docs\Scripts\Activate.ps1
 pip install --require-hashes -r eng/docs/requirements.txt
+python eng/docs/build_references.py  # after editing docs/references/sources.toml or a citation: regenerate the bibliography page
 zensical serve          # preview at http://localhost:8000, rebuilds on save
 zensical build --clean  # the same strict build as CI; fails on any broken link or anchor
 python eng/docs/remove-unlisted-from-sitemap.py site  # as CI: drop unlisted pages from sitemap.xml
+python -m unittest discover -s eng/docs/tests  # as CI: tests of the bibliography generator
+python eng/docs/build_references.py --check    # as CI: fails when the bibliography page is out of date
 ```
 
 `site/` and `.venv-docs/` are not committed.
 
 ## 5. Publication and checks
 
-- The `docs` workflow builds the site in strict mode on every pull request that touches `docs/`, `zensical.toml`, `eng/docs/` or the workflow itself, and fails on an invalid link or anchor ([ADR 0020](../adr/0020-documentation-site.md)).
+- The `docs` workflow builds the site in strict mode on every pull request that touches `docs/`, `zensical.toml`, `eng/docs/` or the workflow itself, and fails on an invalid link or anchor ([ADR 0020](../adr/0020-documentation-site.md)). Before the build it runs the tests of the bibliography generator and `build_references.py --check`, which fails when `sources.toml` breaks the rules of the [references standard](references.md#32-entry-fields) or the bibliography page is out of date ([ADR 0021](../adr/0021-citation-and-reference-model.md)).
 - On merge to `main`, the same workflow deploys the site to GitHub Pages: `https://alexeygane.github.io/signallog/`.
 - Dependency updates for the site (Zensical and its packages, GitHub Actions) arrive as Dependabot pull requests and are reviewed like code.
 
@@ -80,10 +84,12 @@ A page may be published in English and Russian at once. English stays the primar
 
 - The mirror lives next to the page as `ru.md` (`fun-facts/index.md` and `fun-facts/ru.md`); both pages link to each other in their first line.
 - Both versions change in the **same pull request**. A pull request that edits one without the other is incomplete.
-- Facts, numbers and sources are identical; only the language differs. Each version links the same sources.
+- Facts, numbers and sources are identical; only the language differs. Both versions cite the same bibliography keys.
 - A listed page and its mirror are both in `nav`; an unlisted page and its mirror are both unlisted (section 6).
 
 | Page | Mirror | Status |
 |---|---|---|
 | [Fun facts](../fun-facts/index.md) | [Русский](../fun-facts/ru.md) | Published |
 | `docs/note.md` (cover note, unlisted) | English, `docs/note/en.md` or similar | Planned: written for one reader; the English version waits until the note is generalised |
+
+[^pypi-zensical]: [Zensical on PyPI](../references/index.md#pypi-zensical): Requires Python 3.11 or later.

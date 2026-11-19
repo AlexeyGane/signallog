@@ -40,8 +40,9 @@ flowchart LR
     P --> R["round to the tick size<br/>(decimal)"]
 ```
 
-Each layer is **value noise**: random values fixed at evenly spaced knots, joined by cosine interpolation. The technique comes from procedural graphics, where it draws clouds, terrain and marble ([Perlin 1985](#sources)).
+Each layer is **value noise**: random values fixed at evenly spaced knots, joined by cosine interpolation. The technique comes from procedural graphics, where it draws clouds, terrain and marble.[^perlin-1985]
 
+<a id="knots"></a>
 ## 3. From time to knots
 
 Time becomes a real number of minutes since a fixed epoch, 2026-01-01 00:00 UTC:
@@ -71,9 +72,10 @@ Every knot `k` needs a random value `r(k)` in `[-1, 1)` with three properties:
 
 A random number generator such as `System.Random` is a **stream**: the 7,513th value needs the 7,512 before it. The generator uses a **hash function** instead, which mixes its input so thoroughly that the output looks random.
 
+<a id="splitmix64"></a>
 ### 4.1 SplitMix64
 
-SplitMix64 is the finalizer of the generator by Steele, Lea and Flood ([2014](#sources)). It takes a 64-bit value and mixes its bits:
+SplitMix64 is the finalizer of the generator by Steele, Lea and Flood.[^steele-2014] It takes a 64-bit value and mixes its bits:
 
 ```text
 z = x + 0x9E3779B97F4A7C15
@@ -89,6 +91,7 @@ All arithmetic is modulo 2^64: the bits above the 64th are dropped, which in C# 
 
 The first constant is 2^64 divided by the golden ratio φ ≈ 1.618, a common choice because its bits have no regular pattern.
 
+<a id="uniform"></a>
 ### 4.2 From 64 bits to a value in [-1, 1)
 
 ```text
@@ -98,6 +101,7 @@ r = 2u - 1                      → [-1, 1)
 
 A `double` has a 53-bit significand, so every one of the 2^53 values is represented exactly and all are equally likely.
 
+<a id="instrument-key"></a>
 ### 4.3 A key per instrument and seed
 
 If TTF and Brent shared one noise, their lines would move in step. Each instrument therefore has its own key:
@@ -107,7 +111,7 @@ key = SplitMix64(seed XOR FNV-1a(instrumentId))
 r(k) = SplitMix64(key XOR (k · 0x9E3779B97F4A7C15))     mapped to [-1, 1) as in 4.2
 ```
 
-**FNV-1a** (Fowler–Noll–Vo, [IETF draft](#sources)) XORs each input byte into the hash and multiplies by the FNV prime. The generator uses the 64-bit offset basis and prime, but feeds the instrument id one UTF-16 code unit at a time instead of one byte; instrument ids are ASCII ([ADR 0014](../adr/0014-instrument-domain-model.md)), so this is a stable, deterministic variant, not the byte-exact FNV-1a value:
+**FNV-1a** (Fowler–Noll–Vo) XORs each input byte into the hash and multiplies by the FNV prime.[^rfc-9923] The generator uses the 64-bit offset basis and prime, but feeds the instrument id one UTF-16 code unit at a time instead of one byte; instrument ids are ASCII ([ADR 0014](../adr/0014-instrument-domain-model.md)), so this is a stable, deterministic variant, not the byte-exact FNV-1a value:
 
 ```text
 h = 0xCBF29CE484222325                  offset basis
@@ -118,8 +122,8 @@ The **seed** (default 20261111) selects a whole family of paths: another seed gi
 
 ### 4.4 Why not System.Random or string.GetHashCode
 
-- `new Random(seed)` is a stream (no direct access), and its sequence for a seed is not promised to stay the same: Microsoft's documentation notes that the same seed "may produce different sequences of random numbers if run on different versions of .NET" ([Random class](#sources)). A runtime upgrade could then change every replayed price without a change in SignalLog.
-- `string.GetHashCode()` is randomized per process in .NET: "two subsequent runs of the same program may return different hash codes" ([String.GetHashCode](#sources)). Each function run would get another key, and the price would jump to a random place in the band every minute. FNV-1a, written out in the code, gives the same 64 bits everywhere.
+- `new Random(seed)` is a stream (no direct access), and its sequence for a seed is not promised to stay the same: Microsoft's documentation notes that the same seed "may produce different sequences of random numbers if run on different versions of .NET".[^ms-dotnet-random] A runtime upgrade could then change every replayed price without a change in SignalLog.
+- `string.GetHashCode()` is randomized per process in .NET: "two subsequent runs of the same program may return different hash codes".[^ms-dotnet-string-gethashcode] Each function run would get another key, and the price would jump to a random place in the band every minute. FNV-1a, written out in the code, gives the same 64 bits everywhere.
 
 ## 5. Cosine interpolation
 
@@ -156,6 +160,7 @@ xychart-beta
 
 Cosine interpolation keeps the curve smooth at the knots, but not its second derivative; smoother schemes (cubic, Perlin's quintic fade) exist and are not needed for a price display.
 
+<a id="two-layers"></a>
 ## 6. Two layers
 
 One hourly layer gives waves an hour long. A second, daily layer adds a slow drift, so that some days trade higher and some lower:
@@ -173,7 +178,7 @@ price = base · (1 + range · noise)
 final = round(price / tick) · tick         round half to even, in decimal
 ```
 
-The defaults ([ReplayOptions](#sources)) sit near the market of November 2026:
+The defaults (`ReplayOptions`) sit near the market of November 2026:
 
 | Instrument | Base | Range | Band | Tick size |
 |---|---|---|---|---|
@@ -234,13 +239,13 @@ The generator draws a believable line, not a model of the market:
 
 The next replay stories address these: reference data for instruments, calibration from public statistics ([market data sources](market-data-sources.md), section 2), sessions and injected faults. They can replace the formula without touching anything else, because it sits behind `IMarketDataSource`.
 
-## Sources
+## See also
 
-Checked on 2026-11-12.
+- Code: `ReplaySource` and `ReplayOptions` in [src/SignalLog.Adapters.Core](https://github.com/AlexeyGane/signallog/tree/main/src/SignalLog.Adapters.Core); tests in [tests/SignalLog.Adapters.Tests](https://github.com/AlexeyGane/signallog/tree/main/tests/SignalLog.Adapters.Tests).
+- [ADR 0011](../adr/0011-market-data-sourcing-and-licensing.md) and [Market data sources](market-data-sources.md): why replay is the default source.
 
-- Ken Perlin, "An Image Synthesizer", SIGGRAPH 1985, Computer Graphics 19(3), pp. 287–296, [doi:10.1145/325165.325247](https://doi.org/10.1145/325165.325247): procedural noise from random values at lattice points with smooth interpolation.
-- Guy L. Steele Jr., Doug Lea, Christine H. Flood, "Fast Splittable Pseudorandom Number Generators", OOPSLA 2014, pp. 453–472, [doi:10.1145/2660193.2660195](https://doi.org/10.1145/2660193.2660195): SplitMix64 and its mixing function.
-- Glenn Fowler, Landon Curt Noll, Kiem-Phong Vo, Donald Eastlake, Tony Hansen, "The FNV Non-Cryptographic Hash Algorithm", Internet-Draft draft-eastlake-fnv-31, March 2025, [ietf.org](https://www.ietf.org/archive/id/draft-eastlake-fnv-31.html): FNV-1a, 64-bit offset basis 0xCBF29CE484222325 and prime 0x100000001B3.
-- Microsoft Learn, [Random class](https://learn.microsoft.com/dotnet/api/system.random): a seeded sequence may differ between .NET versions.
-- Microsoft Learn, [String.GetHashCode](https://learn.microsoft.com/dotnet/api/system.string.gethashcode): hash codes may differ between runs, versions and platforms.
-- SignalLog code: `ReplaySource` and `ReplayOptions` in [src/SignalLog.Adapters.Core](https://github.com/AlexeyGane/signallog/tree/main/src/SignalLog.Adapters.Core); tests in [tests/SignalLog.Adapters.Tests](https://github.com/AlexeyGane/signallog/tree/main/tests/SignalLog.Adapters.Tests).
+[^perlin-1985]: [Perlin 1985](../references/index.md#perlin-1985): procedural noise from random values at lattice points joined by smooth interpolation.
+[^steele-2014]: [Steele, Lea, Flood 2014](../references/index.md#steele-2014): SplitMix64 and its mixing function.
+[^rfc-9923]: [RFC 9923](../references/index.md#rfc-9923), section 2 (FNV-1a) and section 5, tables 1 and 2 (64-bit FNV prime 0x100000001B3 and offset basis 0xCBF29CE484222325).
+[^ms-dotnet-random]: [Random class](../references/index.md#ms-dotnet-random), the passage on generating the same sequence from a seed.
+[^ms-dotnet-string-gethashcode]: [String.GetHashCode](../references/index.md#ms-dotnet-string-gethashcode), Remarks.

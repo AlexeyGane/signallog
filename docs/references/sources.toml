@@ -1,0 +1,218 @@
+# Bibliography of SignalLog (ADR 0021). One [[source]] per external source, cited by its id.
+# Field names follow CSL; tier, stability, further_reading and note are SignalLog's own (references standard, section 3).
+# After editing, run: python eng/docs/build_references.py   (writes docs/references/index.md)
+
+# --- Standards and specifications ---
+
+[[source]]
+id        = "csl-1-0-2"
+type      = "standard"
+title     = "Citation Style Language 1.0.2 Specification"
+author    = ["Rintze M. Zelle", "Brenton M. Wiernik", "Frank G. Bennett, Jr.", "Bruce D'Arcus", "Denis Maier"]
+publisher = "Citation Style Language project"
+version   = "1.0.2"
+url       = "https://docs.citationstyles.org/en/stable/specification.html"
+tier      = 1
+stability = "pinned"
+note      = "appendix III lists the item types, appendix IV the variables"
+
+[[source]]
+id        = "rfc-9923"
+type      = "standard"
+title     = "The FNV Non-Cryptographic Hash Algorithm"
+author    = ["L. Noll", "K. Vo", "D. Eastlake 3rd", "T. Hansen"]
+publisher = "RFC Editor (Independent Submission, Informational)"
+number    = "RFC 9923"
+issued    = "2026-02"
+url       = "https://www.rfc-editor.org/rfc/rfc9923"
+tier      = 1
+stability = "pinned"
+note      = "published from draft-eastlake-fnv, which earlier pages cited as revision 31"
+
+# --- Books, papers and reports ---
+
+[[source]]
+id              = "chapekis-2024"
+type            = "report"
+title           = "When Online Content Disappears"
+author          = ["Athena Chapekis", "Samuel Bestvater", "Emma Remy", "Gonzalo Rivero"]
+publisher       = "Pew Research Center"
+issued          = "2024-05-17"
+url             = "https://www.pewresearch.org/data-labs/2024/05/17/when-online-content-disappears/"
+tier            = 1
+stability       = "pinned"
+
+[[source]]
+id              = "iesg-2006-04-19-references"
+type            = "report"
+title           = "IESG Statement: Normative and Informative References"
+publisher       = "Internet Engineering Steering Group (IESG)"
+issued          = "2006-04-19"
+url             = "https://datatracker.ietf.org/doc/statement-iesg-iesg-statement-normative-and-informative-references-20060419/"
+tier            = 1
+stability       = "pinned"
+
+[[source]]
+id              = "perlin-1985"
+type            = "article-journal"
+title           = "An Image Synthesizer"
+author          = ["Ken Perlin"]
+container-title = "ACM SIGGRAPH Computer Graphics"
+volume          = "19"
+issue           = "3"
+page            = "287–296"
+issued          = "1985-07"
+doi             = "10.1145/325165.325247"
+tier            = 1
+stability       = "pinned"
+note            = "proceedings of SIGGRAPH 1985"
+
+[[source]]
+id              = "steele-2014"
+type            = "paper-conference"
+title           = "Fast Splittable Pseudorandom Number Generators"
+author          = ["Guy L. Steele Jr.", "Doug Lea", "Christine H. Flood"]
+container-title = "Proceedings of the 2014 ACM International Conference on Object Oriented Programming Systems Languages & Applications (OOPSLA 2014)"
+page            = "453–472"
+issued          = "2014-10-15"
+doi             = "10.1145/2660193.2660195"
+tier            = 1
+stability       = "pinned"
+
+[[source]]
+id              = "willighagen-2020"
+type            = "article-journal"
+title           = "Adoption of the Citation Typing Ontology by the Journal of Cheminformatics"
+author          = ["Egon Willighagen"]
+container-title = "Journal of Cheminformatics"
+volume          = "12"
+number          = "Article 47"
+issued          = "2020-08-06"
+doi             = "10.1186/s13321-020-00448-1"
+tier            = 1
+stability       = "pinned"
+
+# --- Documentation and web pages ---
+
+[[source]]
+id        = "dcmi-cito"
+type      = "webpage"
+title     = "CiTO, the Citation Typing Ontology"
+author    = ["David Shotton", "Silvio Peroni"]
+publisher = "Dublin Core Metadata Initiative (DCMI)"
+url       = "https://msi.dublincore.org/standards/cito"
+accessed  = "2026-11-19"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-dotnet-random"
+type      = "webpage"
+title     = "Random Class"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/api/system.random"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "ms-dotnet-string-gethashcode"
+type      = "webpage"
+title     = "String.GetHashCode Method"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/api/system.string.gethashcode"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "nature-final-submission"
+type      = "webpage"
+title     = "Final submission"
+publisher = "Nature"
+url       = "https://www.nature.com/nature/for-authors/final-submission"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "pypi-zensical"
+type      = "software"
+title     = "zensical"
+publisher = "Python Package Index (PyPI)"
+url       = "https://pypi.org/project/zensical/"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "python-tomllib"
+type      = "webpage"
+title     = "tomllib — Parse TOML files"
+publisher = "Python Software Foundation"
+url       = "https://docs.python.org/3/library/tomllib.html"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "quarto-citations"
+type      = "webpage"
+title     = "Citations"
+publisher = "Quarto"
+url       = "https://quarto.org/docs/authoring/citations.html"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "wikipedia-list-defined-references"
+type      = "webpage"
+title     = "Help:List-defined references"
+publisher = "Wikipedia"
+url       = "https://en.wikipedia.org/wiki/Help:List-defined_references"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "wikipedia-shortened-footnotes"
+type      = "webpage"
+title     = "Help:Shortened footnotes"
+publisher = "Wikipedia"
+url       = "https://en.wikipedia.org/wiki/Help:Shortened_footnotes"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "zensical-footnotes"
+type      = "webpage"
+title     = "Footnotes"
+publisher = "Zensical"
+url       = "https://zensical.org/docs/authoring/footnotes/"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "zensical-mkdocs-plugins"
+type      = "webpage"
+title     = "MkDocs plugins"
+publisher = "Zensical"
+url       = "https://zensical.org/compatibility/plugins/"
+accessed  = "2026-11-19"
+tier      = 2
+stability = "living"
+
+# --- Posts and news ---
+
+[[source]]
+id        = "gh-2021-09-30-footnotes"
+type      = "post-weblog"
+title     = "Footnotes now supported in Markdown fields"
+publisher = "GitHub Changelog"
+issued    = "2021-09-30"
+url       = "https://github.blog/changelog/2021-09-30-footnotes-now-supported-in-markdown-fields/"
+tier      = 2
+stability = "pinned"
