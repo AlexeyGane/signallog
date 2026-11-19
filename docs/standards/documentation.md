@@ -5,7 +5,7 @@
 | Status | Active |
 | Owner | Solution Architect |
 | Implements | [ADR 0020](../adr/0020-documentation-site.md) (site and publication), [ADR 0001](../adr/0001-documentation-platform.md) (docs-as-code, superseded in its tool choice) |
-| Related | [ADR README](../adr/README.md) (ADR format and lifecycle), [Requirements README](../requirements/README.md) (NFR and business-rule format), [Concepts and their sources](concepts-and-sources.md) |
+| Related | [ADR README](../adr/README.md) (ADR format and lifecycle), [Requirements README](../requirements/README.md) (NFR and business-rule format), [References standard](references.md) (how sources and concepts are cited), [Concepts and their sources](concepts-and-sources.md) |
 
 This standard describes **how** documentation is organised, written, reviewed and published. The decision **that** documentation lives in the repository and is published as a site is recorded in ADR 0001 and ADR 0020; this document is the operating procedure and changes through a normal pull request without a new ADR.
 
@@ -25,7 +25,7 @@ A page belongs to one folder by what it records: a choice goes to `adr/`, a test
 
 - **Language:** English for everything in the repository, so that the site, code and commit history read the same. Two exceptions: a Russian mirror of a page (section 7) and an unlisted page written for a specific Russian-speaking audience (section 6), which says so in a comment at its top.
 - **One idea per sentence.** Name things precisely (`price-ticks` topic, not "the queue"); expand abbreviations on first use on each page or link the glossary.
-- **Sources:** facts about markets, vendors, standards or concepts cite a primary source with the date checked; concepts link to [Concepts and their sources](concepts-and-sources.md). Text without a source is the author's assessment and says so.
+- **Sources:** facts about markets, vendors, standards or concepts cite a primary source with the date checked; concepts link to [Concepts and their sources](concepts-and-sources.md), domain terms to the [glossary](../domain/glossary.md). How a source is cited (one bibliography entry per source, a footnote at the end of the passage it supports, the date checked kept in the bibliography) is described in the [references standard](references.md); [ADR 0021](../adr/0021-citation-and-reference-model.md) records the decision. Text without a source is the author's assessment and says so.
 - **Dates** are ISO 8601 (`2026-11-05`). Examples use real calendar dates so they can become tests.
 - **Numbers and units:** every price, tick size, quantity or score shows its unit or scale next to the number (`82.50 EUR/MWh`), in its column header or row label, or in the same phrase. An example price tied to a real date is marked as illustrative unless it cites a source.
 - **Diagrams** are Mermaid code blocks (fence `mermaid`), never images exported from a tool, so that they are reviewed as text. Check that each diagram renders before merging (GitHub preview or local site).

@@ -37,6 +37,7 @@ nav = [
       "adr/0018-latency-and-freshness-targets.md",
       "adr/0019-market-status-events.md",
       "adr/0020-documentation-site.md",
+      "adr/0021-citation-and-reference-model.md",
       "adr/template.md",
   ] },
   { "Requirements" = [
@@ -56,6 +57,7 @@ nav = [
   ] },
   { "Standards" = [
       "standards/documentation.md",
+      "standards/references.md",
       "standards/branching-and-release.md",
       "standards/change-workflow.md",
       "standards/coding.md",

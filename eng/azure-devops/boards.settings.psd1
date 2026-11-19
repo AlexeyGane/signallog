@@ -192,6 +192,107 @@
                 }
                 @{
                     Type        = 'Feature'
+                    Title       = 'Citations and references'
+                    Area        = 'Architecture'
+                    Tags        = 'ADR-0021; NFR-DOC-01'
+                    Description = 'Every external fact in the documentation and the code cites one entry of a single bibliography by a stable key; terms and concepts link to their registers; links from code resolve on the site; CI keeps it so.'
+                    Links       = @('https://github.com/AlexeyGane/signallog/blob/main/docs/adr/0021-citation-and-reference-model.md')
+                    Children    = @(
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Record the citation and reference model in ADR 0021'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0021; ADR-0020; NFR-DOC-01'
+                            AcceptanceCriteria = 'docs/adr/0021-citation-and-reference-model.md is Accepted and records options A-D (source lists per page, full footnotes per page, Pandoc keys with a plugin, shortened footnotes with one bibliography), the drivers and the consequences; docs/standards/references.md describes keys, entry fields, footnotes, roles of sources, the date checked and the date of a fact, links from code and explicit anchors, and says that converting citations in an Accepted ADR is an editorial change; the documentation standard, the ADR conventions, the domain conventions, the concepts page and the ADR template point to it; the Feature and its stories are in boards.settings.psd1; the strict build passes.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Publish the bibliography from sources.toml'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0021; NFR-DOC-01'
+                            AcceptanceCriteria = 'zensical.toml enables footnotes, abbr, pymdownx.snippets with auto_append and the feature content.footnote.tooltips; docs/references/sources.toml holds entries with CSL field names, tier and stability; eng/docs/build_references.py writes docs/references/index.md with one anchor per key, entries grouped by kind and a Cited in list, and --check fails when the page is out of date; unittest tests cover the generator; docs/domain/replay-price-generator.md cites its sources by footnotes and has explicit anchors knots, splitmix64, uniform, instrument-key and two-layers; the strict build passes.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Check citations and links from code in CI'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0021; ADR-0004; NFR-DOC-01'
+                            AcceptanceCriteria = 'eng/docs/check_references.py reports unused footnotes, external URLs outside the bibliography, bibliography entries that are cited nowhere and not marked further_reading, unused concepts, different keys in an English page and its Russian mirror, links from code and configuration to site pages or anchors that do not exist, and ADR, NFR or BR ids and source keys in code that do not exist; pages listed in eng/docs/references-legacy.txt get warnings, all others errors; the docs workflow runs build_references.py --check and the checker after the build and also runs on changes under src/, contracts/ and eng/azure-devops/; the pull request template asks whether external sources are cited by key; unittest tests cover each kind of finding; the workflow tests pass.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Cite sources by key on the domain pages'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0021; ADR-0011; ADR-0014; ADR-0017'
+                            AcceptanceCriteria = 'market-data-sources, market-conventions, tenors-and-delivery-periods, time-and-delivery and model cite every external fact by a footnote to the bibliography; no external URL and no checked date remains on these pages, and the date of a fact stays in the text; a source whose copies had different checked dates is checked again; all dates are ISO 8601; terms and concepts are linked at first use; the pages are removed from the legacy list.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Give every glossary term an anchor and a tooltip'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0021; NFR-DOC-01'
+                            AcceptanceCriteria = 'Every term in docs/domain/glossary.md has an explicit anchor; the sources of the glossary are footnotes to the bibliography; includes/abbreviations.md lists the abbreviations of the glossary and is appended to every page; links to glossary sections elsewhere point to terms; the page is removed from the legacy list.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Cite sources by key in ADRs 0000 to 0010'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0021'
+                            AcceptanceCriteria = 'External links in the text and in More Information of ADRs 0000 to 0010 are footnotes to the bibliography; More Information keeps only links to other decisions; no decision text changes; concepts are linked at first use; the files are removed from the legacy list.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Cite sources by key in ADRs 0011 to 0020 and the ADR log'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0021'
+                            AcceptanceCriteria = 'External links in ADRs 0011 to 0020 and in docs/adr/README.md are footnotes to the bibliography; More Information keeps only links to other decisions; no decision text changes; concepts are linked at first use; the files are removed from the legacy list.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Cite sources by key in the requirements and standards'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0021; NFR-DOC-01'
+                            AcceptanceCriteria = 'The requirements README, the NFR catalogue, the business rules, the branching and release standard, the change workflow standard and the C# coding standard cite external sources by footnotes; their Sources lists are footnotes or Further reading; the pages are removed from the legacy list.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Generate the concepts register with sources by role'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0021; NFR-DOC-01'
+                            AcceptanceCriteria = 'Concepts are kept in docs/standards/concepts.toml with sources by role (origin, definition, evidence, method or data, further reading, disputes) and links to stories, decisions and code; the concepts page is generated, and Used in is computed from links in the documentation; a concept that no page uses fails the check, and the unused entry for the queuing formula is removed; UUIDv7 and C4 are linked at first use on the pages that mention them.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Link Fun Facts and the cover note to the bibliography'
+                            Area               = 'Architecture'
+                            Tags               = 'ADR-0021; ADR-0020; NFR-DOC-01'
+                            AcceptanceCriteria = 'Every fun fact has an explicit anchor, cites its sources by footnotes and ends with See also to its concept or decision, in English and Russian with the same keys and anchors; the concepts register links back to the stories; the references of the cover note point to bibliography entries; the pages are removed from the legacy list.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Document the replay constants and link them to the documentation'
+                            Area               = 'Adapters'
+                            Tags               = 'ADR-0021; ADR-0011'
+                            AcceptanceCriteria = 'Every number literal with a meaning in ReplaySource is a named constant with a summary, its unit or no unit, the bibliography key of its source where it comes from a specification, and a seealso href to an explicit anchor of the replay generator page; EventIds cites rfc-9562 and the currency summaries cite iso-4217 by key; section 8 of the coding standard links to an explicit anchor and describes constants from specifications and source keys in comments; the replay tests give the same prices as before; links from code are checked as errors; build and tests pass.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Check external links every week'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0021; ADR-0004'
+                            AcceptanceCriteria = 'A scheduled workflow checks every URL in sources.toml once a week with lychee, the action pinned to a commit SHA, and lists living sources whose accessed date is older than 180 days; a failure does not block pull requests; the workflow tests pass.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Turn all citation checks into errors'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0021; NFR-DOC-01'
+                            AcceptanceCriteria = 'eng/docs/references-legacy.txt is empty and removed, and the warning mode is removed from check_references.py; every finding fails the docs workflow; the documentation standard and the references standard say so.'
+                        }
+                    )
+                }
+                @{
+                    Type        = 'Feature'
                     Title       = 'Change workflow'
                     Area        = 'Platform'
                     Tags        = 'ADR-0002; ADR-0003; ADR-0004'

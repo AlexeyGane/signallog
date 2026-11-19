@@ -85,4 +85,4 @@ How we will know the decision is implemented and still holds: a [fitness functio
 
 ## More Information
 
-Links to evidence (vendor docs, pricing pages), open questions, review triggers.
+Links to related decisions, open questions, review triggers. External sources (vendor docs, pricing pages, standards) are cited where the text relies on them, in the form described in the [references standard](../standards/references.md): a footnote such as `[^ms-cosmos-free-tier]` that links to the bibliography entry.
