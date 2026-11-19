@@ -51,15 +51,17 @@ python eng/docs/build_references.py  # after editing docs/references/sources.tom
 zensical serve          # preview at http://localhost:8000, rebuilds on save
 zensical build --clean  # the same strict build as CI; fails on any broken link or anchor
 python eng/docs/remove-unlisted-from-sitemap.py site  # as CI: drop unlisted pages from sitemap.xml
-python -m unittest discover -s eng/docs/tests  # as CI: tests of the bibliography generator
+python -m unittest discover -s eng/docs/tests  # as CI: tests of the bibliography generator and the citation checker
 python eng/docs/build_references.py --check    # as CI: fails when the bibliography page is out of date
+python eng/docs/check_references.py            # as CI: citations, mirrors and links from code; errors fail, legacy pages warn
 ```
 
 `site/` and `.venv-docs/` are not committed.
 
 ## 5. Publication and checks
 
-- The `docs` workflow builds the site in strict mode on every pull request that touches `docs/`, `zensical.toml`, `eng/docs/` or the workflow itself, and fails on an invalid link or anchor ([ADR 0020](../adr/0020-documentation-site.md)). Before the build it runs the tests of the bibliography generator and `build_references.py --check`, which fails when `sources.toml` breaks the rules of the [references standard](references.md#32-entry-fields) or the bibliography page is out of date ([ADR 0021](../adr/0021-citation-and-reference-model.md)).
+- The `docs` workflow builds the site in strict mode on every pull request that touches `docs/`, `zensical.toml`, `eng/docs/` or the workflow itself, and fails on an invalid link or anchor ([ADR 0020](../adr/0020-documentation-site.md)). Before the build it runs the tests of the bibliography tools and `build_references.py --check`, which fails when `sources.toml` breaks the rules of the [references standard](references.md#32-entry-fields) or the bibliography page is out of date ([ADR 0021](../adr/0021-citation-and-reference-model.md)).
+- After the build it runs `check_references.py`, which checks the citations of every page, the Russian mirrors and the links, identifiers and source keys in code and configuration ([references standard, section 14](references.md#14-checks)). The workflow also runs on changes under `src/`, `tests/`, `contracts/` and `eng/azure-devops/`, because code links to the site. A finding is an error; on a page in `eng/docs/references-legacy.txt` it is a warning until the page is migrated.
 - On merge to `main`, the same workflow deploys the site to GitHub Pages: `https://alexeygane.github.io/signallog/`.
 - Dependency updates for the site (Zensical and its packages, GitHub Actions) arrive as Dependabot pull requests and are reviewed like code.
 

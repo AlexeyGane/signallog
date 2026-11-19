@@ -179,7 +179,7 @@ Converting the citations of an Accepted ADR to this standard is an editorial cha
 | A footnote links to an existing bibliography entry | `zensical build --strict` | Every pull request that changes the documentation |
 | The bibliography page matches `sources.toml`; entries are valid | `build_references.py --check` | Every pull request that changes the documentation |
 | No unused footnotes; no external URLs outside the bibliography; every entry cited or marked `further_reading`; every concept used; a mirror has the keys of its page | `check_references.py` | Every pull request that changes the documentation |
-| Links from code and configuration resolve on the built site; identifiers and keys in code exist | `check_references.py` | Every pull request that changes the documentation, `src/`, `contracts/` or `eng/azure-devops/` |
+| Links from code and configuration resolve on the built site; identifiers and keys in code exist | `check_references.py` | Every pull request that changes the documentation, `src/`, `tests/`, `contracts/` or `eng/azure-devops/` |
 | External URLs open; living sources were checked within the configured period | Scheduled workflow | Once a week; does not block pull requests |
 
-Pages in the legacy list get warnings instead of errors until they are migrated.
+Pages in the legacy list get warnings instead of errors until they are migrated. `check_references.py` names each finding by kind (`footnote`, `external-url`, `uncited-source`, `unused-concept`, `mirror`, `code-link`, `code-id`, `legacy-list`) with the file and line; links from the project's own site, repository and board are navigation and are not reported as external URLs. A link from code to a site anchor must name an explicit anchor of the source page (section 12).

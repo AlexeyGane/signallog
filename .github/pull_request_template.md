@@ -27,6 +27,7 @@ Work item: AB#<id>
 - [ ] PR title follows Conventional Commits and references `AB#<id>`; the description repeats it
 - [ ] Evidence comment is in the work item
 - [ ] Affected ADRs / NFRs updated or referenced
+- [ ] External sources cited by key: a footnote to the bibliography, no URL in the text ([references standard](https://alexeygane.github.io/signallog/standards/references/))
 - [ ] Tests added or updated
 - [ ] No secrets in code or configuration
 - [ ] Banned APIs not suppressed without justification (`RS0030`)

@@ -1,5 +1,6 @@
 # ADR 0020 — documentation site. Strict build on pull requests; build and deploy to GitHub Pages on main.
-# ADR 0021 — the bibliography page is generated from docs/references/sources.toml and checked before the build.
+# ADR 0021 — the bibliography page is generated from docs/references/sources.toml and checked before the build;
+# citations and links from code are checked after it.
 name: docs
 
 on:
@@ -11,6 +12,11 @@ on:
       - "overrides/**"
       - "eng/docs/**"
       - ".github/workflows/docs.yml"
+      # Code and configuration link to the site and name decisions and sources (references standard, section 11)
+      - "src/**"
+      - "tests/**"
+      - "contracts/**"
+      - "eng/azure-devops/**"
   push:
     branches: [main]
     paths:
@@ -19,6 +25,11 @@ on:
       - "overrides/**"
       - "eng/docs/**"
       - ".github/workflows/docs.yml"
+      # Code and configuration link to the site and name decisions and sources (references standard, section 11)
+      - "src/**"
+      - "tests/**"
+      - "contracts/**"
+      - "eng/azure-devops/**"
   workflow_dispatch:
 
 permissions:
@@ -43,7 +54,7 @@ jobs:
       - name: Install Zensical (hash-pinned)
         run: python -m pip install --require-hashes -r eng/docs/requirements.txt
 
-      - name: Bibliography generator tests (ADR 0021)
+      - name: Tests of the bibliography generator and the citation checker (ADR 0021)
         run: python -m unittest discover -s eng/docs/tests -v
 
       - name: Bibliography is valid and up to date (ADR 0021)
@@ -51,6 +62,9 @@ jobs:
 
       - name: "Build (strict: invalid links or anchors fail)"
         run: zensical build --clean --strict
+
+      - name: Citations and links from code (ADR 0021; legacy pages give warnings)
+        run: python eng/docs/check_references.py
 
       - name: Remove unlisted pages from sitemap.xml
         run: python eng/docs/remove-unlisted-from-sitemap.py site
