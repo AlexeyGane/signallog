@@ -8,7 +8,7 @@ This folder is the decision log for SignalLog ([what an ADR is](../standards/con
 - **Status lifecycle:** `Proposed` → `Accepted` → (`Deprecated` | `Superseded by NNNN`). An Accepted ADR is never edited in substance; a changed decision gets a new ADR that supersedes it.
 - **Minimum content for Accepted:** context, drivers, at least two considered options, outcome, consequences, confirmation. One-line stubs stay `Proposed`.
 - **Review:** every ADR change goes through a pull request; CODEOWNERS requires the Solution Architect role.
-- **Sources:** concepts and definitions link to [Concepts and their sources](../standards/concepts-and-sources.md) or cite their own source. Every statement about an external product, standard or organisation (a capability, limit, price, date or recommendation) links to its primary source, in place or under *More Information*, with the date it was checked. "Microsoft recommends" or "GitHub documents" without a link is not accepted in review. A judgement that is the author's own is worded as such ("author's assessment"), not as a fact.
+- **Sources:** concepts and definitions link to [Concepts and their sources](../standards/concepts-and-sources.md) or cite their own source. The form of a citation follows the [references standard](../standards/references.md) ([ADR 0021](0021-citation-and-reference-model.md)); converting the citations of an Accepted ADR to it is an editorial change, not a change of the decision. Every statement about an external product, standard or organisation (a capability, limit, price, date or recommendation) links to its primary source, in place or under *More Information*, with the date it was checked. "Microsoft recommends" or "GitHub documents" without a link is not accepted in review. A judgement that is the author's own is worded as such ("author's assessment"), not as a fact.
 - **Weighted evaluation:** optional; when used, it follows the method below.
 - **Deciders:** this is a solo project. The Solution Architect and Key Developer roles are held by one person; the roles are kept separate on purpose so that each decision is argued from the architect's perspective (drivers, trade-offs) before being implemented. Template: [template.md](template.md).
 
@@ -50,6 +50,7 @@ Tables written before 2026-11-04 (ADR 0001, 0003, 0008) carry a note that they p
 | [0018](0018-latency-and-freshness-targets.md) | Latency and freshness targets: provisional values and calibration | Accepted | new |
 | [0019](0019-market-status-events.md) | Market status events | Accepted | new |
 | [0020](0020-documentation-site.md) | Documentation site: Zensical on GitHub Pages | Accepted | new (supersedes 0001) |
+| [0021](0021-citation-and-reference-model.md) | Citation and reference model: one bibliography, shortened footnotes | Accepted | new |
 
 ## What changed versus the original ADR files
 

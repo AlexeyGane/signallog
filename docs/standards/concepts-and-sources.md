@@ -2,9 +2,9 @@
 
 Engineering, architecture, methodology and measurement concepts used in SignalLog's documents, each with a short definition, the source where it was introduced or is defined, and where the project uses it. Domain terms (instruments, tenors, gas days) are defined in the [glossary](../domain/glossary.md); vendor capabilities and limits are cited in the ADR that relies on them ([ADR conventions](../adr/README.md#conventions)).
 
-**Rule.** A concept used in a document either links to this page or cites its own source. A concept that is added to a document is added here in the same pull request.
+**Rule.** A concept is linked to this page at its first use on a page, and a concept that is added to a document is added here in the same pull request. How sources are cited, and the roles of the sources of a concept (origin, definition, evidence, method or data, further reading, disputes), are described in the [references standard](references.md).
 
-Sources were checked on 2026-11-04; those of the *Code* section on 2026-11-15. For books the ISBN is given for the edition that introduced the concept; a later edition is listed where the project relies on it.
+Sources were checked on 2026-11-04; those of the *Code* section on 2026-11-15; those of the *Documentation and citation* section on 2026-11-19. For books the ISBN is given for the edition that introduced the concept; a later edition is listed where the project relies on it.
 
 ## Architecture and decisions
 
@@ -43,6 +43,15 @@ Sources were checked on 2026-11-04; those of the *Code* section on 2026-11-15. F
 | <a id="conventional-commits"></a>**Conventional Commits** | A commit-message format (`type(scope): subject`) that tools can parse. | https://www.conventionalcommits.org/ | [Branching standard](branching-and-release.md) |
 | <a id="semver"></a>**Semantic Versioning** | `MAJOR.MINOR.PATCH`, with rules for when each part changes. | https://semver.org/ | [Branching standard](branching-and-release.md) |
 | <a id="docs-as-code"></a>**Docs-as-code** | Documentation written in plain-text formats, versioned with the code and reviewed in pull requests. | Write the Docs, *Docs as Code* — https://www.writethedocs.org/guide/docs-as-code/ | [ADR 0001](../adr/0001-documentation-platform.md) |
+
+## Documentation and citation
+
+| Concept | Definition (as used here) | Source | Used in |
+|---|---|---|---|
+| <a id="shortened-footnotes"></a>**Shortened footnotes** | A citation method in which a brief inline citation (typically author, year and a location in the source) points to the full citation of the source kept elsewhere, so that the full citation is not repeated. Wikipedia keeps the full citations on the same page; SignalLog keeps them in one bibliography for all pages ([ADR 0021](../adr/0021-citation-and-reference-model.md)). | Wikipedia, *Help:Shortened footnotes* — https://en.wikipedia.org/wiki/Help:Shortened_footnotes | [ADR 0021](../adr/0021-citation-and-reference-model.md), [references standard](references.md) |
+| <a id="normative-informative"></a>**Normative and informative references** | A normative reference must be read to understand or implement the subject; an informative reference gives background, such as history, and is not needed to implement it. | IESG, *Normative and Informative References*, 2006-04-19 — https://datatracker.ietf.org/doc/statement-iesg-iesg-statement-normative-and-informative-references-20060419/ | [References standard](references.md#7-roles-of-sources) |
+| <a id="cito"></a>**Citation Typing Ontology (CiTO)** | An ontology of the reasons for a citation, such as `citesAsAuthority`, `citesAsEvidence`, `citesAsRecommendedReading`, `critiques`, `usesMethodIn`, `usesDataFrom` and `disagreesWith`. | D. Shotton, S. Peroni, *CiTO, the Citation Typing Ontology* — https://msi.dublincore.org/standards/cito ; E. Willighagen, "Adoption of the Citation Typing Ontology by the Journal of Cheminformatics", *Journal of Cheminformatics*, 2020, doi:10.1186/s13321-020-00448-1 (`usesMethodIn`, `usesDataFrom`, `disagreesWith`) | [References standard](references.md#7-roles-of-sources) |
+| <a id="csl"></a>**Citation Style Language (CSL)** | An open XML-based language for formatting citations and bibliographies. Its specification names the item types (`book`, `webpage`, `standard` and others) and the variables (`title`, `author`, `issued`, `accessed`, `URL`, `DOI` and others) that the bibliography uses as field names. | CSL 1.0.2 specification, appendices III (types) and IV (variables) — https://docs.citationstyles.org/en/stable/specification.html ; https://citationstyles.org/ | [ADR 0021](../adr/0021-citation-and-reference-model.md), [references standard](references.md#32-entry-fields) |
 
 ## Integration and resilience
 
