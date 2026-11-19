@@ -58,6 +58,7 @@ nav = [
       "standards/documentation.md",
       "standards/branching-and-release.md",
       "standards/change-workflow.md",
+      "standards/coding.md",
       "standards/concepts-and-sources.md",
   ] },
   { "Fun facts" = [

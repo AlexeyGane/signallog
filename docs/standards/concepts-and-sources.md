@@ -4,7 +4,7 @@ Engineering, architecture, methodology and measurement concepts used in SignalLo
 
 **Rule.** A concept used in a document either links to this page or cites its own source. A concept that is added to a document is added here in the same pull request.
 
-Sources were checked on 2026-11-04. For books the ISBN is given for the edition that introduced the concept; a later edition is listed where the project relies on it.
+Sources were checked on 2026-11-04; those of the *Code* section on 2026-11-15. For books the ISBN is given for the edition that introduced the concept; a later edition is listed where the project relies on it.
 
 ## Architecture and decisions
 
@@ -17,6 +17,12 @@ Sources were checked on 2026-11-04. For books the ISBN is given for the edition 
 | <a id="quality-attribute-scenario"></a>**Quality-attribute scenario** | A testable statement of a quality requirement: source, stimulus, environment, artifact, response and response measure. | L. Bass, P. Clements, R. Kazman, *Software Architecture in Practice*, 4th ed., Addison-Wesley, 2021, ISBN 978-0-13-688609-9 (scenarios were introduced in earlier editions; the 4th is the one used here) | [Requirements README](../requirements/README.md), [NFR catalogue](../requirements/nfr.md) |
 | <a id="iso-25010"></a>**ISO/IEC 25010** | Product quality model: quality characteristics and sub-characteristics used to classify NFRs. | ISO/IEC 25010:2023 — https://www.iso.org/standard/78176.html | [NFR catalogue](../requirements/nfr.md) |
 | <a id="ubiquitous-language"></a>**Ubiquitous language** | One vocabulary shared by domain experts and code, used with the same meaning in conversation, documents and type names. | E. Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*, Addison-Wesley, 2003, ISBN 978-0-321-12521-7 | [Glossary](../domain/glossary.md) |
+
+## Code
+
+| Concept | Definition (as used here) | Source | Used in |
+|---|---|---|---|
+| <a id="guard-clause"></a>**Guard clause** | A check of a precondition at the start of a method that leaves the method at once (by throwing or returning) when the precondition fails, so that the main path is not nested inside a condition. | K. Beck, *Smalltalk Best Practice Patterns*, Prentice Hall, 1997, **ISBN 978-0-13-476904-2**, pattern "Guard Clause" (where the name was introduced). M. Fowler, *Refactoring: Improving the Design of Existing Code*, Addison-Wesley, 1999, ISBN 978-0-201-48567-7, refactoring "Replace Nested Conditional with Guard Clauses" | [C# coding standard, section 3](coding.md#3-guard-clauses) |
 
 ## Decision analysis
 

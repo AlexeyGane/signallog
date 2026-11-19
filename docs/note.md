@@ -434,6 +434,7 @@ Feature — узел связи: он вытекает из Epic, обоснов
 - [Доменная база знаний](domain/README.md)
 - [Стандарт ветвления и релизов](standards/branching-and-release.md)
 - [Стандарт процесса изменений](standards/change-workflow.md)
+- [Стандарт кода C#](standards/coding.md): правила и то, что проверяет каждое из них, — сборка, `dotnet format` или ревью
 
 **Внешние источники, упомянутые в записке**
 

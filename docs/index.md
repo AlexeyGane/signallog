@@ -32,6 +32,7 @@ The design carries a W3C trace context across every arrow and authenticates ever
 | What the domain terms mean | [Glossary](domain/glossary.md) and the [domain model](domain/model.md) |
 | How exchanges define delivery periods, sessions and prices | [Time and delivery](domain/time-and-delivery.md), [Tenors and delivery periods](domain/tenors-and-delivery-periods.md), [Market conventions](domain/market-conventions.md) |
 | How work moves from an idea to production | [Branching and release standard](standards/branching-and-release.md), [Documentation standard](standards/documentation.md) |
+| How the code is written, and what checks each rule | [C# coding standard](standards/coding.md) |
 | Where a concept or definition comes from | [Concepts and their sources](standards/concepts-and-sources.md) |
 
 ## How the work is traced
