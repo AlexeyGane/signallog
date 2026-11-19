@@ -254,6 +254,13 @@
                             Tags               = 'ADR-0004'
                             AcceptanceCriteria = 'The PowerShell tooling tests (eng/scripts/tests, eng/github/tests) run from the change module in a new pwsh process without the profile (Invoke-ToolingTest), so modules left in the session by earlier change scripts cannot change the result; Invoke-SolutionCheck runs them as its last step, like the build job of ci.yml, and fails on failed tests although Invoke-Pester exits 0, reading the result line instead.<br><br>Copy-ChangeTestTree builds the test copy for staging mode in the module: the files git knows in the working copy, the staged files with .github staged as github, without the files the change deletes, replacing an earlier copy; staging scripts no longer copy files themselves.<br><br>Pester tests cover the command line (both folders, a quoted path), the result line, a missing result, a real run in a new process, the solution check step and the test copy; with the nested-module situation of AB#33 recreated, Invoke-Pester in the session fails 3 tests and Invoke-ToolingTest passes all; all Pester tests pass locally and in CI.<br><br>The change workflow standard explains why the tooling tests run in their own process; strict site build passes.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Write down the C# coding standard'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0004; ADR-0012; ADR-0017'
+                            AcceptanceCriteria = 'docs/standards/coding.md records the C# rules of the project and, for each, whether the build, dotnet format or the review enforces it: layout and usings, guard clauses followed by a blank line, explicit types, naming, sealed types and records, decimal prices, TimeProvider, UUIDv7 ids, regular expressions, async and cancellation, logging, comments, tests and suppressions; the rules match .editorconfig, Directory.Build.props and BannedSymbols.txt; the page is in the site navigation, the cover note and the concepts page link it, and the strict site build passes.'
+                        }
                     )
                 }
                 @{
