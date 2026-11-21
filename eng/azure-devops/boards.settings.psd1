@@ -224,7 +224,7 @@
                             Title              = 'Cite sources by key on the domain pages'
                             Area               = 'Architecture'
                             Tags               = 'ADR-0021; ADR-0011; ADR-0014; ADR-0017'
-                            AcceptanceCriteria = 'market-data-sources, market-conventions, tenors-and-delivery-periods, time-and-delivery and model cite every external fact by a footnote to the bibliography; no external URL and no checked date remains on these pages, and the date of a fact stays in the text; a source whose copies had different checked dates is checked again; all dates are ISO 8601; terms and concepts are linked at first use; the pages are removed from the legacy list.'
+                            AcceptanceCriteria = 'market-data-sources, market-conventions, tenors-and-delivery-periods, time-and-delivery and model cite every external fact by a footnote to the bibliography; no external URL and no checked date remains on these pages, and the date of a fact stays in the text; every source is read again and its accessed date set, and a statement that its source does not support is corrected, marked unverified or removed; dates in the text are ISO 8601, except where a column spells out how an identifier reads; concepts are linked at first use and each page links the glossary (links to single terms follow when terms get anchors); the pages are removed from the legacy list; the bibliography accepts the CSL type legislation; the checker counts a footnote followed by a colon as used; the strict build and check_references.py report no errors.'
                         }
                         @{
                             Type               = 'User Story'

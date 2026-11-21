@@ -83,6 +83,10 @@ class PageTests(RepositoryFixture):
         self.assertEqual(["footnote [^defined-only] is defined but not used", "footnote [^used-only] is used but not defined"], messages)
         self.assertEqual({"docs/domain/page.md"}, {f.path for f in self.findings("footnote")})
 
+    def test_a_footnote_used_before_a_colon_counts_as_used(self):
+        self.write("docs/domain/page.md", "# P\n\nRead on 2026-11-07[^rfc-9562]: the pages agree.\n\n[^rfc-9562]: [RFC 9562](../references/index.md#rfc-9562).\n")
+        self.assertEqual([], self.findings("footnote"))
+
     def test_external_url_on_a_page_is_an_error_with_its_line(self):
         self.write("docs/domain/page.md", "# P\n\nSee https://example.org/spec.\n")
         [finding] = self.findings("external-url")

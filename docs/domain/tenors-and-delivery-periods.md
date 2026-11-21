@@ -1,6 +1,6 @@
 # Tenors and delivery periods
 
-What a gas or power contract delivers, how long that is, and what traders mean by "day-ahead" or "M+1". The decisions are in [ADR 0014](../adr/0014-instrument-domain-model.md) (revision 2); time rules are in [ADR 0017](../adr/0017-time-and-timezones.md) and [Time and delivery](time-and-delivery.md). Facts were checked on 2026-11-01 unless marked otherwise.
+What a gas or power contract delivers, how long that is, and what traders mean by "day-ahead" or "M+1". The decisions are in [ADR 0014](../adr/0014-instrument-domain-model.md) (revision 2); time rules are in [ADR 0017](../adr/0017-time-and-timezones.md) and [Time and delivery](time-and-delivery.md). Terms are explained in the [glossary](glossary.md); the sources are in the [bibliography](../references/index.md), with the date each was checked.
 
 ## 1. Two questions that look like one
 
@@ -15,7 +15,7 @@ SignalLog stores the first and computes the second. A stored price always names 
 
 ### ICE Endex — Dutch TTF Natural Gas Daily Futures
 
-From the contract specification (all times CET, gas day 06:00 to 06:00):
+From the contract specification (all times CET, gas day 06:00 to 06:00):[^ice-tfe-spec]
 
 | Period | Delivery |
 |---|---|
@@ -26,19 +26,19 @@ From the contract specification (all times CET, gas day 06:00 to 06:00):
 | Working Days Next Week (WK/DY NW) | Monday 06:00 to Saturday 06:00, UK bank holidays excluded |
 | Balance of Month (BOM) | From two business days ahead to the end of the month; not listed on some end-of-month days |
 
-Up to 92 consecutive daily contracts can be listed. Unit of trading: 1 MW for each hour of each gas day (23, 24 or 25). Trading stops at 18:00 CET on the business day before delivery starts.
+Up to 92 consecutive daily contracts can be listed. Unit of trading: 1 MW for each hour of each gas day (23, 24 or 25). Trading stops at 18:00 CET on the business day before delivery starts.[^ice-tfe-spec]
 
 ### ICE Endex — Dutch TTF Natural Gas Futures (monthly)
 
-Up to 156 consecutive month contracts. "Quarterly, seasonal, calendar, and any period of consecutive monthly contracts can be registered as a strip": a quarter is traded as three month contracts at one price, not as a contract of its own.
+Up to 156 consecutive month contracts. "Quarterly, seasonal, calendar, and any period of consecutive monthly contracts can be registered as a strip":[^ice-tfm-spec] a quarter is traded as three month contracts at one price, not as a contract of its own.
 
 ### EEX — power futures
 
-Maturities: day, weekend, week, month, quarter, year, and for some markets season and fiscal year. For German power: the next 11 days, the next 2 weekends, the current and next 4 weeks, months, quarters and years (counts vary by market). EEX power futures use **cascading**: a year contract is replaced by its quarters and months as delivery approaches, a quarter by its months.
+Maturities: day, weekend, week, month, quarter, year, and for some markets season and fiscal year. For German power: the next 11 days, the next 2 weekends, the current and next 4 weeks, months, quarters and years (counts vary by market). EEX power futures use **cascading**, managed by the clearing house ECC:[^eex-power-futures] a year contract is replaced by its quarters and months as delivery approaches, a quarter by its months.
 
 ### Oil and LNG
 
-Brent and JKM are listed as month contracts only. Their relative tenors (`M+n`) work the same way, but no daily or weekend periods exist.
+Brent and JKM are listed as month contracts only.[^ice-brn][^ice-jkm] Their relative tenors (`M+n`) work the same way, but no daily or weekend periods exist.
 
 ## 3. Identifiers
 
@@ -49,7 +49,7 @@ The identifier format is defined in ADR 0014. Summary:
 | Day | `2026-11-09` | Gas day of Monday 9 November 2026 |
 | Weekend | `2026-12-25-WE` | Weekend starting with the gas day of Friday 25 December 2026 |
 | Balance of week | `2026-11-04-BOW` | From gas day 4 November to the end of that week |
-| Week | `2026-W46` | ISO week 46 of 2026, Monday 9 to Sunday 15 November |
+| Week | `2026-W46` | [ISO](../standards/concepts-and-sources.md#iso-8601) week 46 of 2026, Monday 9 to Sunday 15 November |
 | Working days of week | `2026-W46-WD` | Working days of ISO week 46 |
 | Balance of month | `2026-11-04-BOM` | From gas day 4 November to the end of November |
 | Month | `2026-12` | December 2026 |
@@ -60,7 +60,7 @@ The identifier format is defined in ADR 0014. Summary:
 
 Full instrument ids: `NDEX.TFM.2026-12`, `NDEX.TFM.2026-12-25-WE`, `XEEE.<code>.2027-Q1`.
 
-**Why the weekend is anchored on its first day.** The weekend starting Friday 2026-12-25 runs to Tuesday 2026-12-29 06:00, because 25 and 28 December 2026 are UK bank holidays (Boxing Day falls on a Saturday and moves to Monday). Encoding the end date would make the id depend on a holiday calendar; anchoring on the first day keeps it unique and short. The extent is stored with the contract.
+**Why the weekend is anchored on its first day.** The weekend starting Friday 2026-12-25 runs to Tuesday 2026-12-29 06:00, because 25 and 28 December 2026 are UK bank holidays (Boxing Day falls on a Saturday and moves to Monday).[^gov-uk-bank-holidays] Encoding the end date would make the id depend on a holiday calendar; anchoring on the first day keeps it unique and short. The extent is stored with the contract.
 
 ## 4. Lengths and volumes
 
@@ -139,9 +139,13 @@ The jump at a roll is real: two different contracts have two different prices. S
 | Product codes of TTF daily products and EEX German power maturities | Instrument ids | ICE product guide, EEX product list |
 | Does any permitted live source publish strip prices? | Whether `listing = Strip` is needed in the first release | Data sources review ([ADR 0011](../adr/0011-market-data-sourcing-and-licensing.md)) |
 
-## Sources
+## See also
 
-- ICE Endex, Dutch TTF Natural Gas Daily Futures, contract specification — https://www.ice.com/api/productguide/spec/45436633/pdf (checked 2026-11-01)
-- ICE Endex, Dutch TTF Natural Gas Futures, contract specification — https://www.ice.com/api/productguide/spec/27996665/pdf (checked 2026-11-01)
-- EEX, Power Futures — https://eex.com/en/markets/power/power-futures (checked 2026-11-01)
-- Brent and TTF last trading day rules: [market conventions](market-conventions.md), section 1
+- Last trading day rules of Brent and TTF: [market conventions](market-conventions.md#1-instruments-in-the-starter-set), section 1.
+
+[^ice-tfe-spec]: [ICE Endex, TTF daily futures specification](../references/index.md#ice-tfe-spec): contract series, number of contracts, unit of trading and last trading day.
+[^ice-tfm-spec]: [ICE Endex, TTF futures specification](../references/index.md#ice-tfm-spec), listing cycle.
+[^eex-power-futures]: [EEX, Power Futures](../references/index.md#eex-power-futures).
+[^ice-brn]: [ICE, Brent Crude Futures](../references/index.md#ice-brn).
+[^ice-jkm]: [ICE, JKM LNG (Platts) Future](../references/index.md#ice-jkm).
+[^gov-uk-bank-holidays]: [GOV.UK, bank holidays](../references/index.md#gov-uk-bank-holidays): England and Wales, 2026.

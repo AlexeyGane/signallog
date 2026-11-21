@@ -32,7 +32,7 @@ HEADING = re.compile(r"^#\s+(.+?)\s*$", re.M)
 
 # Groups of the page, in order: heading -> CSL types (references standard, section 3.2).
 GROUPS = {
-    "Standards and specifications": ("standard",),
+    "Standards, specifications and legislation": ("standard", "legislation"),
     "Books, papers and reports": ("book", "article-journal", "paper-conference", "report"),
     "Documentation and web pages": ("webpage", "software"),
     "Posts and news": ("post-weblog", "article-newspaper"),

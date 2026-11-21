@@ -46,7 +46,7 @@ Field names follow the Citation Style Language (CSL), so the data can be convert
 | Field | Required | Holds |
 |---|---|---|
 | `id` | yes | The key |
-| `type` | yes | CSL type: `book`, `article-journal`, `paper-conference`, `report`, `standard`, `webpage`, `post-weblog`, `article-newspaper`, `software` |
+| `type` | yes | CSL type: `book`, `article-journal`, `paper-conference`, `report`, `standard`, `legislation`, `webpage`, `post-weblog`, `article-newspaper`, `software` |
 | `title` | yes | Title in the language of the source |
 | `author` or `publisher` | one of them | Authors, or the organisation |
 | `issued` | when known | Date of publication or of the version |

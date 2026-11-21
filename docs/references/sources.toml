@@ -216,3 +216,508 @@ issued    = "2021-09-30"
 url       = "https://github.blog/changelog/2021-09-30-footnotes-now-supported-in-markdown-fields/"
 tier      = 2
 stability = "pinned"
+
+# --- Domain: time rules and legislation (AB#46) ---
+
+[[source]]
+id        = "eu-directive-2000-84"
+type      = "legislation"
+title     = "Directive 2000/84/EC of the European Parliament and of the Council of 19 January 2001 on summer-time arrangements"
+publisher = "Official Journal of the European Union"
+issued    = "2001-01-19"
+url       = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32000L0084"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "uk-si-2002-262"
+type      = "legislation"
+title     = "The Summer Time Order 2002"
+publisher = "legislation.gov.uk"
+number    = "SI 2002/262"
+issued    = "2002"
+url       = "https://www.legislation.gov.uk/uksi/2002/262/article/2/made"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "us-15-usc-260a"
+type      = "legislation"
+title     = "15 U.S. Code § 260a — Advancement of time or changeover dates"
+publisher = "Legal Information Institute, Cornell Law School"
+url       = "https://www.law.cornell.edu/uscode/text/15/260a"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "eu-regulation-2017-459"
+type      = "legislation"
+title     = "Commission Regulation (EU) 2017/459 of 16 March 2017 establishing a network code on capacity allocation mechanisms in gas transmission systems"
+publisher = "Official Journal of the European Union"
+issued    = "2017-03-16"
+url       = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0459"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "iso-10383"
+type      = "standard"
+title     = "ISO 10383 — Market Identifier Codes"
+publisher = "ISO 20022 Registration Authority (SWIFT)"
+url       = "https://www.iso20022.org/market-identifier-codes"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "gov-uk-bank-holidays"
+type      = "webpage"
+title     = "UK bank holidays"
+publisher = "GOV.UK"
+url       = "https://www.gov.uk/bank-holidays"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "nodatime-resolvers"
+type      = "webpage"
+title     = "Resolvers class (NodaTime.TimeZones), Noda Time 3.2.x API"
+publisher = "Noda Time"
+url       = "https://nodatime.org/3.2.x/api/NodaTime.TimeZones.Resolvers.html"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "nodatime-tzdb"
+type      = "webpage"
+title     = "Updating the time zone database, Noda Time 3.2.x user guide"
+publisher = "Noda Time"
+url       = "https://nodatime.org/3.2.x/userguide/tzdb"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+# --- Domain: contract specifications (AB#46) ---
+
+[[source]]
+id        = "ice-brn"
+type      = "webpage"
+title     = "Brent Crude Futures"
+publisher = "Intercontinental Exchange (ICE)"
+url       = "https://www.ice.com/products/219/Brent-Crude-Futures"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ice-tfm"
+type      = "webpage"
+title     = "Dutch TTF Natural Gas Futures (ICE Endex)"
+publisher = "Intercontinental Exchange (ICE)"
+url       = "https://www.ice.com/products/27996665/Dutch-TTF-Gas-Futures"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ice-tfm-spec"
+type      = "webpage"
+title     = "Dutch TTF Natural Gas Futures, contract specification"
+publisher = "ICE Endex"
+url       = "https://www.ice.com/api/productguide/spec/27996665/pdf"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ice-tfe-spec"
+type      = "webpage"
+title     = "Dutch TTF Natural Gas Daily Futures, contract specification"
+publisher = "ICE Endex"
+url       = "https://www.ice.com/api/productguide/spec/45436633/pdf"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ice-tfn"
+type      = "webpage"
+title     = "ICE Futures Europe Dutch TTF Natural Gas Futures"
+publisher = "Intercontinental Exchange (ICE)"
+url       = "https://www.ice.com/products/82843860/ICE-Futures-Europe-Dutch-TTF-Natural-Gas-Futures"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ice-jkm"
+type      = "webpage"
+title     = "JKM LNG (Platts) Future"
+publisher = "Intercontinental Exchange (ICE)"
+url       = "https://www.ice.com/products/6753280/JKM-LNG-PLATTS-Future"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ice-german-power-peak"
+type      = "webpage"
+title     = "German Power Financial Peak Futures"
+publisher = "Intercontinental Exchange (ICE)"
+url       = "https://www.ice.com/products/57609953/German-Power-Financial-Peak-Futures"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "eex-contract-specifications-0105a"
+type      = "report"
+title     = "Contract Specifications, release 0105a"
+publisher = "European Energy Exchange (EEX)"
+issued    = "2026-10-02"
+url       = "https://www.eex.com/fileadmin/EEX/Downloads/Rules/Contract_Specifications/20261002_EEX_Contract_Spezifications_0105a_E_FINAL.pdf"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "ecc-circular-2021-13"
+type      = "report"
+title     = "ECC Clearing Circular 13/2021: further information related to the German gas market merger on 1 October 2021"
+publisher = "European Commodity Clearing (ECC)"
+issued    = "2021-03-24"
+url       = "https://www.ecc.de/fileadmin/Global/News/ECC/ECC_Circulars/2021/20210324_ECC_Clearing_Circular_No._13_Further_information_related_to_German_Gas_Market_Merger_on_1_October_2021.pdf"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "eex-power-futures"
+type      = "webpage"
+title     = "Power Futures"
+publisher = "European Energy Exchange (EEX)"
+url       = "https://eex.com/en/markets/power/power-futures"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "trading-hub-europe-2021-10-01"
+type      = "report"
+title     = "Press release: start of the market area Trading Hub Europe"
+publisher = "Trading Hub Europe (THE)"
+issued    = "2021-10-01"
+url       = "https://www.tradinghub.eu/Portals/0/DLC%20Presse/20211001_Press%20Release.pdf"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "spglobal-jkm"
+type      = "webpage"
+title     = "JKM (Japan Korea Marker) gas price explained"
+publisher = "S&P Global Commodity Insights"
+url       = "https://www.spglobal.com/energy/en/pricing-benchmarks/assessments/lng/jkm-japan-korea-marker-gas-price-explained"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+# --- Domain: power market conventions (AB#46) ---
+
+[[source]]
+id        = "epex-2025-09-30-15-minute"
+type      = "post-weblog"
+title     = "15-minute products live on EPEX SPOT Day-Ahead markets"
+publisher = "EPEX SPOT"
+issued    = "2025-09-30"
+url       = "https://www.epexspot.com/en/news/15-minute-products-live-epex-spot-day-ahead-markets"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "epex-trading-products"
+type      = "webpage"
+title     = "Trading products"
+publisher = "EPEX SPOT"
+url       = "https://www.epexspot.com/en/tradingproducts"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "epex-indices-2020-07"
+type      = "report"
+title     = "EPEX SPOT Indices"
+publisher = "EPEX SPOT"
+issued    = "2020-07"
+url       = "https://webshop.eex-group.com/sites/default/files/2020-07/EPEX%20SPOT%20Indices%202020-07_5.pdf"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "epex-sftp-specifications"
+type      = "webpage"
+title     = "EPEX SPOT sFTP server file specifications"
+publisher = "EPEX SPOT"
+url       = "https://www.epexspot.com/sites/default/files/download_center_files/SFTP_specifications_2020-07.pdf"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+note      = "the address names 2020-07, but the file held the edition of February 2025, updated October 2025"
+
+[[source]]
+id        = "montel-15-minute-sdac"
+type      = "webpage"
+title     = "Transition to 15-Minute Power Day-Ahead Auctions"
+publisher = "Montel"
+url       = "https://support.montel.energy/transition-to-15-minute-sdac"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "elexon-2023-10-29-long-day"
+type      = "post-weblog"
+title     = "Volume Notification on 'Long' Clock Change Day: Sunday 29 October 2023"
+publisher = "Elexon"
+issued    = "2023-10"
+url       = "https://www.elexon.co.uk/event/volume-notification-on-long-clock-change-day/"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "elexon-2022-03-27-short-day"
+type      = "post-weblog"
+title     = "Treatment of Volume Notifications on the 'short' clock change day 27 March 2022"
+publisher = "Elexon"
+issued    = "2022-03"
+url       = "https://www.elexon.co.uk/event/treatment-of-volume-notifications-on-the-short-clock-change-day/"
+tier      = 1
+stability = "pinned"
+
+# --- Domain: market data sources (AB#46) ---
+
+[[source]]
+id        = "databento-2024-01-18-ice"
+type      = "post-weblog"
+title     = "ICE Futures Europe and ICE Endex now available on Databento"
+publisher = "Databento"
+issued    = "2024-01-18"
+url       = "https://databento.com/blog/ice-futures-market-data"
+tier      = 2
+stability = "pinned"
+
+[[source]]
+id        = "databento-ndex-impact"
+type      = "webpage"
+title     = "ICE Endex: Data feed specifications"
+publisher = "Databento"
+url       = "https://databento.com/docs/venues-and-datasets/ndex-impact"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "databento-venues"
+type      = "webpage"
+title     = "Venues"
+publisher = "Databento"
+url       = "https://app0.databento.com/venues"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "databento-schemas"
+type      = "webpage"
+title     = "Schemas and data formats"
+publisher = "Databento"
+url       = "https://databento.com/docs/schemas-and-data-formats"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "databento-common-fields"
+type      = "webpage"
+title     = "Common fields, enums and types"
+publisher = "Databento"
+url       = "https://databento.com/docs/standards-and-conventions/common-fields-enums-types"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "databento-dbn"
+type      = "webpage"
+title     = "Databento Binary Encoding"
+publisher = "Databento"
+url       = "https://databento.com/docs/standards-and-conventions/databento-binary-encoding"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "databento-pricing-credits"
+type      = "webpage"
+title     = "Usage pricing and data credits"
+publisher = "Databento"
+url       = "https://databento.com/docs/faqs/usage-pricing-and-data-credits"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "b2bits-impact-multicast"
+type      = "webpage"
+title     = "ICE iMpact MD Handler Multicast Feed Configuration"
+publisher = "B2BITS"
+url       = "https://b2bits.atlassian.net/wiki/spaces/B2BITS/pages/6080809/ICE+iMpact+MD+Handler+Multicast+Feed+Configuration"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "onixs-impact-net"
+type      = "webpage"
+title     = "OnixS.NET.ICE.iMpact namespace, ICE iMpact Multicast Price Feed Handler for .NET"
+publisher = "OnixS"
+url       = "https://ref.onixs.biz/net-ice-impact-handler-guide/n-onixs-net-ice-impact.html"
+accessed  = "2026-11-20"
+tier      = 2
+stability = "living"
+
+[[source]]
+id        = "deutsche-boerse-2017-10-05-interfaces"
+type      = "report"
+title     = "Recent developments in market and reference data interfaces"
+publisher = "Deutsche Börse"
+issued    = "2017-10-05"
+url       = "https://www.mds.deutsche-boerse.com/resource/blob/1336012/5cca065c005cdb086eef8773f201a8b5/data/Recent%20developments%20in%20market%20and%20reference%20data%20interfaces.pdf"
+tier      = 1
+stability = "pinned"
+note      = "slides of Open Day 2017"
+
+[[source]]
+id        = "cme-mdp3-market-data"
+type      = "webpage"
+title     = "CME MDP 3.0 Market Data"
+publisher = "CME Group Client Systems Wiki"
+url       = "https://cmegroupclientsite.atlassian.net/wiki/spaces/EPICSANDBOX/pages/457219613"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "cme-mdp3-message-schema"
+type      = "webpage"
+title     = "MDP 3.0 - Message Schema"
+publisher = "CME Group Client Systems Wiki"
+url       = "https://cmegroupclientsite.atlassian.net/wiki/spaces/EPICSANDBOX/pages/457225459"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "eex-datasource"
+type      = "webpage"
+title     = "EEX Group DataSource"
+publisher = "European Energy Exchange (EEX)"
+url       = "https://www.eex.com/de/market-data/eex-group-datasource"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ice-consolidated-feed"
+type      = "report"
+title     = "ICE Consolidated Feed, fact sheet"
+publisher = "Intercontinental Exchange (ICE)"
+issued    = "2023"
+url       = "https://www.ice.com/publicdocs/ICE_Consolidated_Feed_FactSheet.pdf"
+tier      = 2
+stability = "pinned"
+
+[[source]]
+id        = "ice-endex-regulation"
+type      = "webpage"
+title     = "ICE Endex regulation"
+publisher = "Intercontinental Exchange (ICE)"
+url       = "https://www.ice.com/endex/regulation"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ice-futures-europe-regulation"
+type      = "webpage"
+title     = "ICE Futures Europe regulation"
+publisher = "Intercontinental Exchange (ICE)"
+url       = "https://www.ice.com/futures-europe/regulation"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ice-2023-01-27-mcm"
+type      = "report"
+title     = "ICE Announces Plans to Implement EU Market Correction Mechanism and Related Price Cap on TTF Natural Gas"
+publisher = "Intercontinental Exchange (ICE)"
+issued    = "2023-01-27"
+url       = "https://ir.theice.com/press/news-details/2023/ICE-Announces-Plans-to-Implement-EU-Market-Correction-Mechanism-and-Related-Price-Cap-on-TTF-Natural-Gas/default.aspx"
+tier      = 1
+stability = "pinned"
+note      = "press release"
+
+[[source]]
+id        = "acer-2025-01-31-mcm"
+type      = "report"
+title     = "31 January 2025 marks the final day of the Market Correction Mechanism (MCM)"
+publisher = "European Union Agency for the Cooperation of Energy Regulators (ACER)"
+issued    = "2025-01-31"
+url       = "https://www.acer.europa.eu/news-and-events/news/31-january-2025-marks-final-day-market-correction-mechanism-mcm"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "eex-2024-06-26-nasdaq"
+type      = "report"
+title     = "EEX announces termination of agreement with Nasdaq"
+publisher = "European Energy Exchange (EEX)"
+issued    = "2024-06-26"
+url       = "https://eex.com/fileadmin/Global/News/EEX/EEX_Press_Release/2024/EEX_Press_Release-EEX_announces_termination_of_agreement_with_Nasdaq.pdf"
+tier      = 1
+stability = "pinned"
+note      = "press release"
+
+[[source]]
+id        = "spglobal-2023-02-20-ttf-london"
+type      = "article-newspaper"
+title     = "ICE launches new TTF gas futures, options market in London as planned"
+author    = ["Stuart Elliott"]
+publisher = "S&P Global Commodity Insights"
+issued    = "2023-02-20"
+url       = "https://www.spglobal.com/energy/en/news-research/latest-news/natural-gas/022023-ice-launches-new-ttf-gas-futures-options-market-in-london-as-planned"
+tier      = 3
+stability = "pinned"
+
+[[source]]
+id        = "fow-2025-07-31-euronext"
+type      = "article-newspaper"
+title     = "Euronext completes Nasdaq Nordic futures acquisition"
+author    = ["Luke Jeffs"]
+publisher = "FOW"
+issued    = "2025-07-31"
+url       = "https://www.fow.com/insights/euronext-completes-nasdaq-nordic-futures-acquisition"
+tier      = 3
+stability = "pinned"
+
+[[source]]
+id        = "entsoe-edi-library"
+type      = "webpage"
+title     = "Electronic Data Interchange (EDI) Library"
+publisher = "ENTSO-E"
+url       = "https://www.entsoe.eu/publications/electronic-data-interchange-edi-library/"
+accessed  = "2026-11-20"
+tier      = 1
+stability = "living"

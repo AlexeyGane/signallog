@@ -52,7 +52,7 @@ SKIPPED_FOLDERS = {"bin", "obj", "node_modules", "TestResults"}
 URL = re.compile(r"https?://[^\s<>()\[\]\"'`|]+")
 TRAILING = ".,;:!?"
 FOOTNOTE_DEFINITION = re.compile(r"^ {0,3}\[\^([^\]\s]+)\]:", re.M)
-FOOTNOTE_REFERENCE = re.compile(r"\[\^([^\]\s]+)\](?!:)")
+FOOTNOTE_REFERENCE = re.compile(r"\[\^([^\]\s]+)\]")
 EXPLICIT_ANCHOR = re.compile(r"<a\s+id=\"([^\"]+)\"\s*>\s*</a>")
 HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
 CONCEPT_LINK = re.compile(r"(?:[\w./-]*/)?concepts-and-sources\.md#([a-z0-9-]+)")
@@ -132,7 +132,9 @@ def check_page(root: pathlib.Path, page: str, legacy: bool) -> list[Finding]:
     findings = []
     defined = {m.group(1): m.start() for m in FOOTNOTE_DEFINITION.finditer(text)}
     used = {}
-    for m in FOOTNOTE_REFERENCE.finditer(text):
+    # Blank the labels of the definitions (same length, so positions and lines stay), then every label left is a use
+    references = FOOTNOTE_DEFINITION.sub(lambda m: " " * len(m.group(0)), text)
+    for m in FOOTNOTE_REFERENCE.finditer(references):
         used.setdefault(m.group(1), m.start())
     for key in sorted(set(defined) - set(used)):
         findings.append(Finding(page, line_of(text, defined[key]), "footnote", f"footnote [^{key}] is defined but not used", legacy))

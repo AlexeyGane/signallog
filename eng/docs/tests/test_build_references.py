@@ -163,7 +163,7 @@ class CitationTests(unittest.TestCase):
         text = br.render(br.load(self.docs / "references" / "sources.toml"), br.citations(self.docs, page), page)
         self.assertIn('<a id="rfc-9562"></a>K. Davis. *UUIDs*. IETF.', text)
         self.assertIn('<a id="smith-2020"></a>A. Smith. *A paper*. Journal 3(2), pp. 10–20. [doi:10.1000/xyz](https://doi.org/10.1000/xyz).', text)
-        self.assertLess(text.index("## Standards and specifications"), text.index("## Books, papers and reports"))
+        self.assertLess(text.index("## Standards, specifications and legislation"), text.index("## Books, papers and reports"))
         self.assertNotIn("## Documentation and web pages", text)
         self.assertIn("cited in [A page](../domain/page.md)", text)
         self.assertIn("`smith-2020` · tier 1 · pinned · further reading", text)
