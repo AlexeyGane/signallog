@@ -120,7 +120,7 @@ classDiagram
 
 | Element | Source of truth | Notes |
 |---|---|---|
-| `Venue` | `contracts/reference/instruments.json` | MIC, name, zone |
+| `Venue` | `contracts/reference/instruments.json` | [MIC](../standards/concepts-and-sources.md#mic), name, [zone](../standards/concepts-and-sources.md#tzdb) |
 | `Product` with `TradingSession`, `DeliveryRule`, `LastTradingDayRule` | `contracts/reference/instruments.json` | Each product records its specification URL and check date |
 | `MarketConvention` with versions and windows | `contracts/reference/market-conventions.json` (planned) | Effective-dated; see [market conventions](market-conventions.md) |
 | Calibration parameters | `contracts/reference/calibration.json` (planned) | Derived statistics only; never raw licensed prices |
@@ -129,7 +129,7 @@ classDiagram
 
 | Element | Where | Notes |
 |---|---|---|
-| `PriceTick` | Service Bus `price-ticks`, Cosmos DB `price-ticks` | CloudEvents envelope, UUIDv7 `eventId`, UTC timestamps (ADR 0012); schema [`contracts/schemas/price-tick/v1.json`](https://github.com/AlexeyGane/signallog/blob/main/contracts/schemas/price-tick/v1.json), .NET types in `SignalLog.Contracts` |
+| `PriceTick` | Service Bus `price-ticks`, Cosmos DB `price-ticks` | [CloudEvents](../standards/concepts-and-sources.md#cloudevents) envelope, [UUIDv7](../standards/concepts-and-sources.md#uuidv7) `eventId`, UTC timestamps (ADR 0012); schema [`contracts/schemas/price-tick/v1.json`](https://github.com/AlexeyGane/signallog/blob/main/contracts/schemas/price-tick/v1.json), .NET types in `SignalLog.Contracts` |
 
 ### Computed (never stored as source of truth)
 
@@ -153,7 +153,7 @@ classDiagram
 4. A delivery day's length is the elapsed time between its two UTC boundaries; volumes follow BR-TIME-01.
 5. A tick belongs to the trading day of the session that contains its `eventTime`; a tick outside every session is flagged, not silently assigned.
 6. Market conventions are effective-dated; a report uses the version valid for its delivery date and records that version and the tzdb version.
-7. NodaTime types do not cross the domain boundary; contracts use ISO 8601 strings and `DateTimeOffset`.
+7. NodaTime types do not cross the domain boundary; contracts use [ISO 8601](../standards/concepts-and-sources.md#iso-8601) strings and `DateTimeOffset`.
 
 ## Open questions
 

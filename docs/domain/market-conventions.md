@@ -1,28 +1,28 @@
 # Market conventions
 
-How exchanges divide time: trading sessions, settlement periods, peak windows and indices. Decisions on how SignalLog stores and applies these rules are in [ADR 0017](../adr/0017-time-and-timezones.md) (sections 5 and 6). Facts were checked on the dates given; anything inferred or unconfirmed is marked.
+How exchanges divide time: trading sessions, settlement periods, peak windows and indices. Decisions on how SignalLog stores and applies these rules are in [ADR 0017](../adr/0017-time-and-timezones.md) (sections 5 and 6). Terms are explained in the [glossary](glossary.md); the sources are in the [bibliography](../references/index.md), with the date each was checked. Anything inferred or unconfirmed is marked.
 
 ## 1. Instruments in the starter set
 
-Source of truth: `contracts/reference/instruments.json` (added with the replay adapter). Checked 2026-10-30; sessions rechecked 2026-11-07 (section 1.1).
+Source of truth: `contracts/reference/instruments.json` (added with the replay adapter). The rows follow the exchanges' product pages and specifications.[^ice-brn][^ice-tfm][^ice-jkm][^eex-contract-specifications-0105a]
 
 | Product | MIC | Code | Quote | Tick | Contract size | Settlement | Session (anchor zone) |
 |---|---|---|---|---|---|---|---|
-| Brent Crude Futures | IFEU | `BRN` | USD/bbl | 0.01 | 1,000 bbl | EFP, optional cash vs ICE Brent Index | 20:00–18:00 New York (**Inferred** anchor, section 1.1) |
+| Brent Crude Futures | IFEU | `BRN` | USD/[bbl](../standards/concepts-and-sources.md#units) | 0.01 | 1,000 bbl | EFP, optional cash vs ICE Brent Index | 20:00–18:00 New York (**Inferred** anchor, section 1.1) |
 | Dutch TTF Natural Gas Futures | NDEX | `TFM` | EUR/MWh | 0.005 | 1 MW × hours of delivery | physical, TTF | 00:50–22:00 London (**Inferred** anchor, section 1.1) |
-| JKM LNG (Platts) Futures | IFEU | `JKM` | USD/MMBtu | 0.001 | 10,000 MMBtu | cash vs Platts JKM average | 00:50–22:00 London (**Inferred** anchor, section 1.1) |
-| EEX THE Natural Gas Month Futures | XEEE | `G0BM` | EUR/MWh | 0.005 | 1 MW × hours of delivery | physical, THE | 08:00–18:00 Berlin (**unverified**) |
+| JKM LNG (Platts) Futures | IFEU | `JKM` | USD/MMBtu | 0.001 | 10,000 MMBtu | cash vs Platts JKM average[^spglobal-jkm] | 00:50–22:00 London (**Inferred** anchor, section 1.1) |
+| EEX THE Natural Gas Month Futures | XEEE | `G0BM`[^ecc-circular-2021-13] | EUR/MWh | 0.005 | 1 MW × hours of delivery | physical, THE[^trading-hub-europe-2021-10-01] | 08:00–18:00 Berlin (**unverified**) |
 
 Last trading day rules:
 
-- **Brent:** last business day of the second month preceding the contract month (earlier if that is the business day before Christmas or New Year's Day).
-- **TTF:** 18:00 CET two UK business days before the first day of the delivery month.
-- **JKM:** 15th calendar day of the month before the contract month, or the preceding business day.
-- **THE month:** second exchange day before the first delivery day.
+- **Brent:** last business day of the second month preceding the contract month (earlier if that is the business day before Christmas or New Year's Day).[^ice-brn]
+- **TTF:** 18:00 CET two UK business days before the first day of the delivery month.[^ice-tfm]
+- **JKM:** 15th calendar day of the month before the contract month, or the preceding business day.[^ice-jkm]
+- **THE month:** second exchange day before the first delivery day.[^eex-contract-specifications-0105a]
 
 ### 1.1 Session anchor zones
 
-ICE product pages give each session in New York, London and Singapore time without naming the zone it is defined in. Twice a year US and UK clocks change on different dates; in those weeks only the anchor column keeps its value. The pages were read on 2026-10-30, when London was already on GMT and New York still on EDT (four hours apart), and on 2026-11-07, when both were on standard time (five hours apart):
+ICE product pages give each session in New York, London and Singapore time without naming the zone it is defined in.[^ice-brn][^ice-tfm][^ice-jkm] Twice a year US and UK clocks change on different dates ([time and delivery](time-and-delivery.md#2-dst-transitions-used-in-the-examples)); in those weeks only the anchor column keeps its value. The pages were read on 2026-10-30, when London was already on GMT and New York still on EDT (four hours apart), and on 2026-11-07, when both were on standard time (five hours apart):
 
 | Product | New York, 2026-10-30 | New York, 2026-11-07 | London, 2026-11-07 | Column that stayed fixed |
 |---|---|---|---|---|
@@ -40,11 +40,10 @@ Power is not in the current scope (oil, gas, LNG). These conventions are recorde
 
 ### European day-ahead (SDAC, EPEX SPOT)
 
-- From delivery day **2025-10-01** the Single Day-Ahead Coupling clears prices per **15-minute** Market Time Unit: 96 periods on a normal day. On EPEX SPOT this covers 11 countries; Great Britain and Switzerland are not part of it.
-- Orders of 60, 30 and 15 minutes are still accepted and matched against each other; the clearing price is per quarter-hour.
-- A 60-minute price index is the arithmetic average of the four quarter-hour prices of that hour.
-- Before 2025-10-01 the auction was hourly. Hourly labels count local hours from 1 to 24; on the long day hour 3 (02:00–03:00) occurs twice and is labelled `3A` and `3B`; on the short day there is no hour 3.
-- **Open question:** labels of the quarter-hours inside a repeated hour on the long day (current EPEX file specifications).
+- From delivery day **2025-10-01** the Single Day-Ahead Coupling clears prices per **15-minute** Market Time Unit: 96 periods on a normal day. On EPEX SPOT this covers 11 countries; Great Britain and Switzerland are not part of it.[^epex-2025-09-30-15-minute]
+- 60-minute contracts remain available to trading members; the clearing price is per quarter-hour.[^epex-2025-09-30-15-minute]
+- **Unverified:** whether EPEX SPOT publishes a 60-minute index after 2025-10-01 and how. One data vendor computes EPEX 60-minute values as the average of the four quarter-hour prices.[^montel-15-minute-sdac]
+- Before 2025-10-01 the auction was hourly. Hourly labels count local hours from 1 to 24; on the long day hour 3 (02:00–03:00) occurs twice and is labelled `3A` and `3B`; on the short day there is no hour 3. Quarter-hours inside the repeated hour are labelled `3A Q1` to `3A Q4` and `3B Q1` to `3B Q4`.[^epex-sftp-specifications]
 
 Example, Berlin, delivery day 2026-10-25 (25 hours, 22:00Z on 24 Oct to 23:00Z on 25 Oct), hourly labels:
 
@@ -60,8 +59,8 @@ Delivery day 2026-03-29 (23 hours, 23:00Z on 28 Mar to 22:00Z on 29 Mar): hour 2
 
 ### Great Britain settlement periods
 
-- Half-hourly settlement periods numbered from the start of the local day (Europe/London) by **elapsed** time: SP1, SP2, …; 48 on a normal day, 46 on the short day, 50 on the long day.
-- GB runs its own half-hourly day-ahead auction outside SDAC.
+- Half-hourly settlement periods numbered from the start of the local day (Europe/London) by **elapsed** time: SP1, SP2, …; 48 on a normal day, 46 on the short day, 50 on the long day.[^elexon-2023-10-29-long-day][^elexon-2022-03-27-short-day]
+- GB runs its own half-hourly day-ahead auction outside SDAC.[^epex-trading-products][^epex-2025-09-30-15-minute]
 
 Example, long day 2026-10-25 (02:00 BST → 01:00 GMT at 01:00Z):
 
@@ -80,15 +79,15 @@ Short day 2026-03-29: SP2 = 00:30Z (00:30 GMT), SP3 = 01:00Z (02:00 BST), …, S
 
 There is no separate "peak price" in the day-ahead auction: each period has one clearing price per bidding zone, and peak periods are expensive because of supply and demand, not because of product rules. "Peak" exists in three other forms, all built on the same period prices:
 
-1. **Block orders** in the auction: a set of periods offered at one price (classic, linked, exclusive, loop, curtailable blocks). An order mechanism, not a separate price.
-2. **Indices (Phelix-DE):** *Day Base* = arithmetic mean of day-ahead clearing prices for periods 00:00–24:00; *Day Peak* = periods from 08:00 (inclusive) to 20:00 (exclusive); *Month Peak* = the same window on weekdays only. Simple averages, not volume-weighted.
-3. **Peak futures**, for example ICE German Power Financial Peak Futures: peak = every 15-minute period from 08:00 to 20:00 CET on weekdays, public holidays included; cash settlement = arithmetic mean of those German day-ahead quarter-hour prices; size 1 MW × 12 hours per weekday.
+1. **Block orders** in the auction: a set of periods offered at one price (classic, linked, exclusive, loop, curtailable blocks).[^epex-trading-products] An order mechanism, not a separate price.
+2. **Indices (Phelix-DE):** *Day Base* = arithmetic mean of day-ahead clearing prices for periods 00:00–24:00; *Day Peak* = periods from 08:00 (inclusive) to 20:00 (exclusive); *Month Peak* = the same window on weekdays only. Simple averages, not volume-weighted.[^epex-indices-2020-07]
+3. **Peak futures**, for example ICE German Power Financial Peak Futures: peak = every 15-minute period from 08:00 to 20:00 CET on weekdays, public holidays included; cash settlement = arithmetic mean of those German day-ahead quarter-hour prices; size 1 MW × 12 hours per weekday.[^ice-german-power-peak]
 
-Off-peak (Belgium, Netherlands, Great Britain) = 00:00–08:00 plus 20:00–24:00 CET. The GB "EFA day" runs 23:00–23:00 UK time, which equals 00:00–24:00 CET.
+Off-peak (Belgium, Netherlands, Great Britain) = 00:00–08:00 plus 20:00–24:00 CET. The GB "EFA day" runs 23:00–23:00 UK time, which equals 00:00–24:00 CET.[^epex-indices-2020-07]
 
 DST does not affect peak windows: 08:00–20:00 never contains a transition, so a peak day always has 12 hours (48 quarter-hours). Base days have 23/24/25 hours (92/96/100 quarter-hours).
 
-**Inferred:** exchange documents write "CET" all year; this is read as the local time of the zone (CET in winter, CEST in summer). Windows are therefore stored with the IANA zone `Europe/Berlin`, not a fixed `+01:00`.
+**Inferred:** exchange documents write "CET" all year; this is read as the local time of the zone (CET in winter, CEST in summer). Windows are therefore stored with the [IANA zone](../standards/concepts-and-sources.md#tzdb) `Europe/Berlin`, not a fixed `+01:00`.
 
 ## 4. How SignalLog stores conventions
 
@@ -120,23 +119,22 @@ A market convention is reference data with effective-dated versions (ADR 0017, s
 |---|---|---|
 | Confirm the inferred session anchors (section 1.1) and the zone of the Sunday opens | Session boundaries and staleness alerts during US/UK mismatch weeks | ICE product pages between 2027-03-14 and 2027-03-28, when US clocks have changed and UK clocks have not; ICE trading-hours notices |
 | EEX continuous trading hours for gas futures | Staleness alerts for `G0BM` | EEX trading-hours document (chart not machine-readable) |
-| Current EEX product code list | `G0BM` comes from a 2021 ECC circular | EEX product list |
-| Quarter-hour labels on the long day (EPEX) | Report labels if power is added | EPEX SPOT sFTP file specifications |
+| Current EEX product code list | `G0BM` comes from a 2021 ECC circular; the 2026 contract specifications were read without their table of codes | EEX product list |
 | EEX Phelix-DE Peak futures specification | Only the ICE equivalent was checked | EEX contract specifications |
 | Open, licence-clean daily price series for TTF and JKM | Calibration of the replay generator | Regulator publications (e.g. ACER) |
 
-## Sources
-
-- ICE, Brent Crude Futures — https://www.ice.com/products/219/Brent-Crude-Futures (checked 2026-10-30 and 2026-11-07)
-- ICE, Dutch TTF Natural Gas Futures — https://www.ice.com/products/27996665/Dutch-TTF-Gas-Futures (checked 2026-10-30 and 2026-11-07)
-- S&P Global Commodity Insights, JKM (Japan Korea Marker) price explained — https://www.spglobal.com/energy/en/pricing-benchmarks/assessments/lng/jkm-japan-korea-marker-gas-price-explained (checked 2026-11-04)
-- Trading Hub Europe, press release on the start of the THE market area (2021-10-01) — https://www.tradinghub.eu/Portals/0/DLC%20Presse/20211001_Press%20Release.pdf (checked 2026-11-04)
-- ICE, Dutch TTF Natural Gas Daily Futures, contract specification (TTF Virtual Trading Point, GTS) — https://www.ice.com/api/productguide/spec/45436633/pdf (checked 2026-11-01)
-- ICE, JKM LNG (Platts) Future — https://www.ice.com/products/6753280/JKM-LNG-PLATTS-Future (checked 2026-10-30 and 2026-11-07)
-- EEX Contract Specifications 0105a — https://www.eex.com/fileadmin/EEX/Downloads/Rules/Contract_Specifications/20261002_EEX_Contract_Spezifications_0105a_E_FINAL.pdf
-- ECC Clearing Circular 13/2021 (THE product codes) — https://www.ecc.de/fileadmin/Global/News/ECC/ECC_Circulars/2021/20210324_ECC_Clearing_Circular_No._13_Further_information_related_to_German_Gas_Market_Merger_on_1_October_2021.pdf
-- EPEX SPOT, 15-minute products live on day-ahead markets — https://www.epexspot.com/en/news/15-minute-products-live-epex-spot-day-ahead-markets (checked 2026-11-01)
-- EPEX SPOT, 15-minute products in market coupling — https://www.epexspot.com/en/15-minute-products-market-coupling (checked 2026-11-01)
-- EPEX SPOT, trading products — https://www.epexspot.com/en/tradingproducts (checked 2026-11-01)
-- EPEX SPOT, description of market indices (July 2020) — https://webshop.eex-group.com/sites/default/files/2020-07/EPEX%20SPOT%20Indices%202020-07_5.pdf
-- ICE, German Power Financial Peak Futures — https://www.ice.com/products/57609953/German-Power-Financial-Peak-Futures (checked 2026-11-01)
+[^ice-brn]: [ICE, Brent Crude Futures](../references/index.md#ice-brn).
+[^ice-tfm]: [ICE, TTF futures on ICE Endex](../references/index.md#ice-tfm).
+[^ice-jkm]: [ICE, JKM LNG (Platts) Future](../references/index.md#ice-jkm).
+[^eex-contract-specifications-0105a]: [EEX contract specifications 0105a](../references/index.md#eex-contract-specifications-0105a), sections 1.2.1.1 (1 MW), 1.2.5 (volume), B.1 (tick) and C.1.2 (last trading day).
+[^spglobal-jkm]: [S&P Global, JKM explained](../references/index.md#spglobal-jkm): the Platts benchmark for spot LNG cargoes delivered ex-ship into Japan, South Korea, China and Taiwan.
+[^ecc-circular-2021-13]: [ECC Clearing Circular 13/2021](../references/index.md#ecc-circular-2021-13).
+[^trading-hub-europe-2021-10-01]: [Trading Hub Europe, 2021-10-01](../references/index.md#trading-hub-europe-2021-10-01): the German market area THE started on that day.
+[^epex-2025-09-30-15-minute]: [EPEX SPOT, 2025-09-30](../references/index.md#epex-2025-09-30-15-minute).
+[^montel-15-minute-sdac]: [Montel, transition to 15-minute day-ahead auctions](../references/index.md#montel-15-minute-sdac).
+[^epex-sftp-specifications]: [EPEX SPOT sFTP file specifications](../references/index.md#epex-sftp-specifications).
+[^elexon-2023-10-29-long-day]: [Elexon, long clock change day 2023](../references/index.md#elexon-2023-10-29-long-day): 50 settlement periods, SP3 and SP4 at 01:00 and 01:30 BST.
+[^elexon-2022-03-27-short-day]: [Elexon, short clock change day 2022](../references/index.md#elexon-2022-03-27-short-day): 46 settlement periods, SP3 at 02:00 BST.
+[^epex-trading-products]: [EPEX SPOT, trading products](../references/index.md#epex-trading-products): block orders; GB half-hourly day-ahead auction.
+[^epex-indices-2020-07]: [EPEX SPOT Indices, 2020-07](../references/index.md#epex-indices-2020-07), sections 2.3 and 2.7 to 2.9.
+[^ice-german-power-peak]: [ICE, German Power Financial Peak Futures](../references/index.md#ice-german-power-peak).
