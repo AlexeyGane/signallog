@@ -29,5 +29,6 @@
   <ItemGroup Label="Architecture fitness functions (ADR 0012, ADR 0017)">
     <!-- The analyzer package itself is a GlobalPackageReference in Directory.Packages.props. -->
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" Visible="false" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Visible="false" />
   </ItemGroup>
 </Project>
