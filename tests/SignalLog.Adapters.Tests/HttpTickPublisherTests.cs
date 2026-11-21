@@ -41,7 +41,7 @@ public sealed class HttpTickPublisherTests
         using HttpClient client = new(handler);
         IReadOnlyList<CloudEvent<PriceTickData>> events = await NewEventsAsync();
 
-        _ = await Assert.ThrowsAsync<HttpRequestException>(() => new HttpTickPublisher(client, Endpoint).PublishAsync(events, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<HttpRequestException>(() => new HttpTickPublisher(client, Endpoint).PublishAsync(events, TestContext.Current.CancellationToken));
         Assert.Single(handler.Requests);
     }
 
@@ -50,7 +50,7 @@ public sealed class HttpTickPublisherTests
     {
         using HttpClient client = new();
 
-        _ = Assert.Throws<ArgumentException>(() => new HttpTickPublisher(client, new Uri("/v1/ticks", UriKind.Relative)));
+        Assert.Throws<ArgumentException>(() => new HttpTickPublisher(client, new Uri("/v1/ticks", UriKind.Relative)));
     }
 
     private static async Task<IReadOnlyList<CloudEvent<PriceTickData>>> NewEventsAsync()

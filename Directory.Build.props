@@ -12,6 +12,9 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- Needed for two rules of the coding standard: CS1591 (an XML comment on every public member) and IDE0005
+         (no unused using directive), which the build reports only when it generates documentation files. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Supply chain (NFR-SEC-03): audit direct and transitive packages; high and critical advisories fail the build. -->
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>

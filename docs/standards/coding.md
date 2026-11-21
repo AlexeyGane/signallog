@@ -15,11 +15,13 @@ A rule is enforced by one of three things. The difference matters: a rule that o
 
 | Enforcer | What it is | What it catches |
 |---|---|---|
-| **Build** | `dotnet build` with `TreatWarningsAsErrors`, `AnalysisLevel` `latest-recommended`, `EnforceCodeStyleInBuild`, `Nullable` and the banned-API analyzer (`Directory.Build.props`) | Every compiler and analyzer diagnostic at warning or error severity: nullability, the recommended .NET code-quality rules (`CA*`), the code-style rules whose severity in `.editorconfig` is `warning` (`IDE*`), banned APIs (`RS0030`), the xUnit analyzers in test projects |
+| **Build** | `dotnet build` with `TreatWarningsAsErrors`, `AnalysisLevel` `latest-recommended`, `EnforceCodeStyleInBuild`, `GenerateDocumentationFile`, `Nullable` and the banned-API analyzer (`Directory.Build.props`) | Every compiler and analyzer diagnostic at warning or error severity: nullability, the recommended .NET code-quality rules (`CA*`) and the ones `.editorconfig` raises to `warning`, the code-style rules whose severity in `.editorconfig` is `warning` (`IDE*`, including the naming rules), missing XML comments on public members (`CS1591`), banned APIs (`RS0030`), the xUnit analyzers in test projects |
 | **Format** | `dotnet format SignalLog.slnx --verify-no-changes` | Whitespace (indentation, braces on their own lines, trailing spaces, blank lines between `using` groups) and the order of `using` directives |
 | **Review** | The owner reading the pull request, file by file ([change workflow, section 5](change-workflow.md#5-review-gate-a-resolved-thread-per-file)) | Everything else, including every `.editorconfig` preference at severity `silent` or `suggestion`: the editor may show it, nothing blocks it |
 
-Both Build and Format run in the `build` job of `ci.yml`, which every pull request must pass, and on the owner's machine before every commit (`Invoke-SolutionCheck`). The *Enforced by* entries below were checked on 2026-11-15 with .NET SDK 10.0.402: each rule was broken on purpose in a probe file and the build or `dotnet format` was run; [Appendix A](#appendix-a-how-the-enforcement-was-checked) lists every probe and its result.
+Both Build and Format run in the `build` job of `ci.yml`, which every pull request must pass, and on the owner's machine before every commit (`Invoke-SolutionCheck`). The *Enforced by* entries below were checked with .NET SDK 10.0.402, on 2026-11-15 and again on 2026-11-19 after rules were moved from the review to the build: each rule was broken on purpose in a probe file and the build or `dotnet format` was run; [Appendix A](#appendix-a-how-the-enforcement-was-checked) lists every probe and its result.
+
+A code-style rule (`IDE*`) is raised to the build by the severity suffix of its option in `.editorconfig`, for example `csharp_style_namespace_declarations = file_scoped:warning`. A line `dotnet_diagnostic.IDE0161.severity = warning` alone did not make the rule fail the build in the probes.
 
 ## 2. Layout
 
@@ -27,9 +29,9 @@ Both Build and Format run in the `build` job of `ci.yml`, which every pull reque
 |---|---|
 | Four spaces, no tabs; every brace on its own line (Allman style); a final newline; no trailing whitespace | Format |
 | `using` directives outside the namespace, `System` first, groups separated by a blank line, sorted within a group | Format (order and blank lines); placement: review |
-| One file-scoped namespace per file (`namespace SignalLog.Contracts;`), matching the folder | Review (`.editorconfig` suggestion; a block-scoped namespace builds and formats clean) |
-| Braces on every `if`, `else`, `for`, `foreach` and `while` body, also for one statement | Review |
-| Methods, constructors and local functions have block bodies; properties, accessors, indexers and lambdas are expression-bodied | Review |
+| One file-scoped namespace per file (`namespace SignalLog.Contracts;`), matching the folder | Build (`IDE0161`) for the namespace form; the match with the folder: review |
+| Braces on every `if`, `else`, `for`, `foreach` and `while` body, also for one statement | Build (`IDE0011`) |
+| Methods, constructors and local functions have block bodies; properties, accessors, indexers and lambdas are expression-bodied | Build for methods, constructors and local functions (`IDE0022`, `IDE0021`, `IDE0061`); the rest: review |
 | One public type per file, named like the file; a small type that exists only for the main type (a result record, for example) may share its file | Review |
 
 ```csharp
@@ -46,8 +48,8 @@ A public method or constructor checks its preconditions first and leaves early w
 
 | Rule | Enforced by |
 |---|---|
-| Reference parameters of public members are checked with `ArgumentNullException.ThrowIfNull`; other preconditions throw `ArgumentException` or `ArgumentOutOfRangeException` with `nameof(parameter)` and a message that says what was expected and what came | Review. The build does not check this: CA1062 ("Validate arguments of public methods"), the analyzer rule that would, is not part of the `latest-recommended` set we build with, and a public method that uses a parameter without checking it builds clean ([Appendix A](#appendix-a-how-the-enforcement-was-checked)) |
-| A blank line after the last guard clause | Review (`dotnet format` neither adds nor requires it) |
+| Reference parameters of public members are checked with `ArgumentNullException.ThrowIfNull`; other preconditions throw `ArgumentException` or `ArgumentOutOfRangeException` with `nameof(parameter)` and a message that says what was expected and what came | Build for the null check: CA1062 ("Validate arguments of public methods") is not part of the `latest-recommended` set, so `.editorconfig` raises it to `warning`. It also fires for a parameter of type `string` when nullable reference types are on. It is off for tests, whose methods get their arguments from the test framework. The messages: review |
+| A blank line after the last guard clause | Build when the guard clause is a block, such as `if (...) { return; }` (`IDE2003`, an experimental rule that requires a blank line after a block); review after a `ThrowIfNull` line, which is not a block |
 | Inside a method, an early `return` or `continue` for a case that needs no work, instead of nesting the main path in an `if` | Review |
 
 ```csharp
@@ -68,15 +70,15 @@ public AdapterRunner(IMarketDataSource source, ITickPublisher publisher, TimePro
 | Rule | Enforced by |
 |---|---|
 | Nullable reference types are on in every project; a nullability warning is an error | Build (`CS8602` and the other nullability diagnostics) |
-| Explicit types everywhere: no `var`. The type on the left is the documentation of the line | Review (`.editorconfig` sets `var` to `false:silent`; `var` builds and formats clean) |
-| `new()` without the type name when the type is already on the left: `List<CloudEvent<PriceTickData>> events = new(ticks.Count);` | Review |
-| A return value that is ignored on purpose is discarded explicitly: `_ = activity.SetTag(...)` | Review |
-| Language keywords for built-in types (`string`, `int`), not `String`, `Int32` | Review |
-| No `this.` qualification | Review |
+| Explicit types everywhere: no `var`. The type on the left is the documentation of the line | Build (`IDE0008`) |
+| `new()` without the type name when the type is already on the left: `List<CloudEvent<PriceTickData>> events = new(ticks.Count);` | Build (`IDE0090`) |
+| A return value that is ignored on purpose is discarded explicitly: `_ = activity.SetTag(...)` | Build (`IDE0058`); off for `tests/**`, where `Assert` methods return the checked value and a test needs only the check |
+| Language keywords for built-in types (`string`, `int`), not `String`, `Int32` | Review (`IDE0049` did not fail the build in the probe) |
+| No `this.` qualification | Review (`IDE0003` did not fail the build in the probe) |
 
 ## 5. Naming
 
-The `.editorconfig` naming rules are suggestions: the editor marks a wrong name, the build does not. One naming rule is enforced: the recommended analyzers forbid underscores in identifiers (CA1707), except in test projects, whose method names are sentences.
+The naming rules in `.editorconfig` have the severity `warning`, so a wrong name fails the build (`IDE1006`). The recommended analyzers also forbid underscores in identifiers (CA1707). Both have exceptions for test projects, whose method names are sentences.
 
 | Element | Style | Example |
 |---|---|---|
@@ -91,9 +93,9 @@ The `.editorconfig` naming rules are suggestions: the editor marks a wrong name,
 
 | Rule | Enforced by |
 |---|---|
-| The styles in the table | Review (editor suggestion) |
+| The styles in the table | Build (`IDE1006`) |
 | No underscores in identifiers outside test projects | Build (`CA1707`; turned off for `tests/**` in `.editorconfig`) |
-| `Async` suffix | Review |
+| `Async` suffix | Build (`IDE1006`, naming rule `async_methods_should_end_in_async`); off for `tests/**`, where a test method is named by the behaviour it proves |
 
 ## 6. Classes, records and members
 
@@ -105,8 +107,8 @@ The `.editorconfig` naming rules are suggestions: the editor marks a wrong name,
 | Fields that are assigned only in the constructor are `readonly` | Build (`IDE0044`, severity `warning`) |
 | A member that uses no instance state is `static` | Build (`CA1822`) |
 | Local functions that capture nothing are `static` | Build (`IDE0062`, severity `warning`) |
-| Lambdas that capture nothing are `static`: `Select(static e => e.Id)` | Review |
-| Accessibility modifiers are always written | Review |
+| Lambdas that capture nothing are `static`: `Select(static e => e.Id)` | Review (`IDE0320` did not fail the build in the probe) |
+| Accessibility modifiers are always written | Build (`IDE0040`) |
 
 ## 7. Numbers, text and culture
 
@@ -157,7 +159,7 @@ The banned list is `BannedSymbols.txt`; each entry carries its reason and ADR, w
 
 | Rule | Enforced by |
 |---|---|
-| A pattern known at compile time is a `[GeneratedRegex]` on a `static partial` method: the source generator checks it when the project is built and produces matching code without run-time compilation | Review (`new Regex(...)` builds clean) |
+| A pattern known at compile time is a `[GeneratedRegex]` on a `static partial` method: the source generator checks it when the project is built and produces matching code without run-time compilation | Build (`SYSLIB1045`, raised to `warning` in `.editorconfig`) |
 | `RegexOptions.CultureInvariant`, and `\z`, not `$`, at the end: `$` also matches before a final line feed | Review |
 
 ```csharp
@@ -171,7 +173,7 @@ private static partial Regex AdapterSourcePattern();
 |---|---|
 | An asynchronous method takes a `CancellationToken` as its **last** parameter, named `cancellationToken` | Build (`CA1068` for the position); the name: review |
 | The token is passed on to every call that accepts one | Build (`CA2016`) |
-| Code under `src/` awaits with `ConfigureAwait(false)` | Review (`CA2007`, which would require it, is not in the recommended set) |
+| Code under `src/` awaits with `ConfigureAwait(false)` | Build (`CA2007`, raised to `warning` in `.editorconfig`; off for `tests/**`) |
 | Tests await without `ConfigureAwait(false)` and pass `TestContext.Current.CancellationToken` to every call that takes a token | Build (`xUnit1030`, `xUnit1051`) |
 | No `async void`, except event handlers | Review |
 
@@ -195,14 +197,14 @@ private static readonly Action<ILogger, int, string, Exception?> LogRun = Logger
 | Rule | Enforced by |
 |---|---|
 | An exception message says what was expected and what came: `$"Expected a UUID version 7, got version {id.Version}."` | Review |
-| Catch the exceptions you can handle; no `catch (Exception)` that hides a failure | Review (a catch-all builds clean) |
+| Catch the exceptions you can handle; no `catch (Exception)` that hides a failure | Build (`CA1031`, raised to `warning` in `.editorconfig`) |
 | `InvalidOperationException` for a state that should be impossible, with the reason: `activity.Id ?? throw new InvalidOperationException("The adapter run has no trace context.")` | Review |
 
 ## 14. Comments
 
 | Rule | Enforced by |
 |---|---|
-| Every public type and member has an XML `<summary>`. It says what the member is for and refers to the ADR, NFR or business rule behind it | Review (the build does not generate documentation files, so missing comments are not reported) |
+| Every public type and member has an XML `<summary>`. It says what the member is for and refers to the ADR, NFR or business rule behind it | Build for the presence of the comment (`CS1591`; `GenerateDocumentationFile` is on; off for `tests/**`); its content: review |
 | A code comment explains **why** or names a source (an ADR, an RFC, a paper), not what the next line does | Review |
 | Units and examples are part of the comment where they help: "Price in `Currency` per `Unit`", "for example `NDEX.TFM.2026-12`" | Review |
 
@@ -225,46 +227,55 @@ There is no suppression in the code today, and a new one is an exception that th
 |---|---|
 | A diagnostic is fixed, not suppressed. When it cannot be, `#pragma warning disable <id>` around the smallest possible span, a comment on the same line with the reason and the ADR or issue, and `#pragma warning restore <id>` right after | Review |
 | A banned API that has to be used carries `#pragma warning disable RS0030` with a comment that references the ADR (the rule at the top of `BannedSymbols.txt`) | Review |
-| A severity is changed only in `.editorconfig`, with a comment that gives the reason, like the two changes there today: `RS0030` raised to error, `CA1707` turned off for tests | Review |
+| A severity is changed only in `.editorconfig`, with a comment that gives the reason, like the changes there today: `RS0030` raised to error, the rules raised from review to the build, and the exceptions for tests | Review |
 | No `[SuppressMessage]` without `Justification` | Review |
 
 ## Appendix A. How the enforcement was checked
 
-On 2026-11-15, with .NET SDK 10.0.402, each rule below was broken on purpose in a probe file added to a copy of the repository (`src/SignalLog.Adapters.Core`, `src/SignalLog.Adapters` for logging, `tests/SignalLog.Adapters.Tests` for the xUnit rules), and the project was built in Release or checked with `dotnet format --verify-no-changes`. *Clean* means the build or the format check passed: only the review catches that rule.
+On 2026-11-15 and 2026-11-19, with .NET SDK 10.0.402, each rule below was broken on purpose in a probe file added to a copy of the repository (`src/SignalLog.Adapters.Core`, `src/SignalLog.Adapters` for logging, `tests/SignalLog.Adapters.Tests` for the xUnit rules), and the project was built in Release or checked with `dotnet format --verify-no-changes`. *Clean* means the build or the format check passed: only the review catches that rule.
 
 | Probe | Build | `dotnet format` |
 |---|---|---|
-| `var x = 1;` | clean | clean |
-| `await t;` without `ConfigureAwait(false)` | clean | — |
+| `var x = 1;` | error `IDE0008` | clean |
+| `await t;` without `ConfigureAwait(false)` in `src` | error `CA2007` | — |
 | A field assigned only at declaration, not `readonly` | error `IDE0044` | — |
-| A private field named `x` instead of `_x` | clean | clean |
-| A block-scoped namespace | clean | clean |
+| A private field named `x` instead of `_x` | error `IDE1006` | clean |
+| A block-scoped namespace | error `IDE0161` | clean |
 | An internal class that is not sealed | error `CA1852` | — |
 | An instance method that uses no instance state | error `CA1822` | — |
-| `new Regex("a+")` | clean | — |
+| `new Regex("a+")` | error `SYSLIB1045` | — |
 | `l.LogInformation($"n {n}")` | errors `CA1848`, `CA1873`, `CA2254` | — |
 | `l.LogInformation("n {N}", n)` | errors `CA1848`, `CA1873` | — |
 | A call that takes a token, without passing it | error `CA2016` | — |
 | `CancellationToken` as the first parameter | error `CA1068` | — |
-| A public method that dereferences an unchecked parameter | clean | — |
+| A public method that dereferences an unchecked parameter | error `CA1062` | — |
 | A local function that captures nothing, not `static` | error `IDE0062` | — |
 | `this._x` | clean | — |
+| `Int32` instead of `int` | clean | — |
+| A lambda that captures nothing, not `static` | clean | — |
 | `Guid.NewGuid()`, `DateTime.UtcNow` | error `RS0030` | — |
-| An ignored return value without `_ =` | clean | — |
+| An ignored return value without `_ =` in `src` | error `IDE0058` | — |
 | Dereferencing a `string?` | error `CS8602` | — |
 | A method named `Do_it` in `src` | error `CA1707` | — |
 | A record with a `double Price` | clean | — |
-| `catch (Exception)` | clean | — |
+| `catch (Exception)` | error `CA1031` | — |
 | A number literal in an expression, `0.6 * hourly` | clean | clean |
 | `async void` | clean | — |
 | `a.ToLower() == "x"` | errors `CA1304`, `CA1311`, `CA1862` | — |
 | `d.ToString()` on a `decimal` | error `CA1305` | — |
-| An unused `using` | clean | — |
+| An unused `using` | error `IDE0005` | — |
+| A public member without an XML comment in `src` | error `CS1591` | — |
+| An `if` without braces | error `IDE0011` | — |
+| An expression-bodied method, constructor or local function | errors `IDE0022`, `IDE0021`, `IDE0061` | — |
+| A member without an accessibility modifier | error `IDE0040` | — |
+| `List<int> l = new List<int>();` | error `IDE0090` | — |
+| An `async` method in `src` named without `Async` | error `IDE1006` | — |
+| A statement right after a block `}` | error `IDE2003` | — |
 | `using` directives out of order | clean | error `IMPORTS` |
 | `System` and `SignalLog` usings without a blank line between them | clean | error `WHITESPACE` |
 | An opening brace at the end of the line, two-space indentation | clean | error `WHITESPACE` |
 | Trailing spaces | clean | error `WHITESPACE` |
-| No blank line after a guard clause | clean | clean |
+| No blank line after a `ThrowIfNull` guard clause | clean | clean |
 | `ConfigureAwait(false)` in a test | error `xUnit1030` | — |
 | A test call without `TestContext.Current.CancellationToken` | error `xUnit1051` | — |
 | A test method named `Method_condition_expected` | clean | — |
