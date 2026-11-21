@@ -77,7 +77,7 @@ public sealed class AdapterRunnerTests
     {
         AdapterRunner runner = new(new ReplaySource(new ReplayOptions(), new FakeTimeProvider(Now)), new FailingPublisher(), new FakeTimeProvider(Now));
 
-        _ = await Assert.ThrowsAsync<HttpRequestException>(() => runner.RunAsync(TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<HttpRequestException>(() => runner.RunAsync(TestContext.Current.CancellationToken));
     }
 
     private static AdapterRunner NewRunner(ITickPublisher publisher)

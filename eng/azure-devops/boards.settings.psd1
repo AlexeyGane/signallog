@@ -362,6 +362,13 @@
                             Tags               = 'ADR-0004; ADR-0012; ADR-0017'
                             AcceptanceCriteria = 'docs/standards/coding.md records the C# rules of the project and, for each, whether the build, dotnet format or the review enforces it: layout and usings, guard clauses followed by a blank line, explicit types, naming, sealed types and records, decimal prices, TimeProvider, UUIDv7 ids, regular expressions, async and cancellation, logging, comments, tests and suppressions; the rules match .editorconfig, Directory.Build.props and BannedSymbols.txt; the page is in the site navigation, the cover note and the concepts page link it, and the strict site build passes.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Move the coding rules from review to the build'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0004'
+                            AcceptanceCriteria = 'The 16 rules of the coding standard that built-in .NET analyzers can check fail the build: the code-style options in .editorconfig use the severity suffix :warning, and CA1062, CA2007, CA1031, SYSLIB1045, IDE0005 and IDE2003 are warnings; a naming rule requires the Async suffix in src.<br><br>Tests are exempt from CA2007, CS1591 and the Async suffix, with a comment that says why; GenerateDocumentationFile is on in Directory.Build.props.<br><br>The 13 current violations are fixed; every rule moved has a probe in Appendix A of the coding standard, and its Enforced by entry says Build; the solution check and CI pass.'
+                        }
                     )
                 }
                 @{
