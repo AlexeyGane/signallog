@@ -407,7 +407,8 @@ function Test-WorkingTreeChange {
 function Test-ChangeBranch {
     <# Branch mode: the change branch is checked out and adds no commits to main yet. #>
     param([Parameter(Mandatory)] [string] $Branch)
-    $current = ([string] @((Invoke-Git @('branch', '--show-current')).Output)[0]).Trim()
+    $current = "$(@((Invoke-Git @('branch', '--show-current')).Output) | Select-Object -First 1)".Trim()
+    if (-not $current) { $current = 'a detached HEAD' }
     if ($current -ne $Branch) { throw "The working copy is on '$current', expected $Branch. Run the start script of this change first." }
     $r = Invoke-Git @('fetch', '--quiet', 'origin', 'main')
     if ($r.ExitCode -ne 0) { throw "git fetch origin main failed: $($r.Output -join ' ')" }
@@ -537,8 +538,42 @@ function Invoke-SolutionCheck {
     return [pscustomobject]@{ Passed = ($failed.Count -eq 0); Failed = $failed; Tests = $tests; Tooling = $tooling }
 }
 
+function Test-MainInOtherWorktree {
+    <#
+        True when another working copy of the repository (git worktree) has main checked out. Git keeps a branch in
+        one worktree only, so that copy owns main and this one waits on origin/main instead.
+    #>
+    $r = Invoke-Git @('worktree', 'list', '--porcelain')
+    if ($r.ExitCode -ne 0) { throw "git worktree list failed: $($r.Output -join ' ')" }
+    $here = "$(@((Invoke-Git @('rev-parse', '--show-toplevel')).Output) | Select-Object -First 1)".Trim()
+    $path = $null
+    foreach ($line in @($r.Output)) {
+        $text = [string] $line
+        if ($text.StartsWith('worktree ')) { $path = $text.Substring(9) }
+        elseif ($text -eq 'branch refs/heads/main' -and $path -and $here -and -not (Test-SamePath -Left $path -Right $here)) { return $true }
+    }
+    return $false
+}
+
+function Test-SamePath {
+    # git prints D:/src/SignalLog on Windows; compare full paths without trailing separators, ignoring case on Windows
+    param([Parameter(Mandatory)] [string] $Left, [Parameter(Mandatory)] [string] $Right)
+    $normalize = { param([string] $p) [System.IO.Path]::GetFullPath($p).TrimEnd('\', '/') }
+    $comparison = if ($IsWindows -or $env:OS -eq 'Windows_NT') { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
+    return [string]::Equals((& $normalize $Left), (& $normalize $Right), $comparison)
+}
+
 function Update-MainBranch {
-    foreach ($arguments in @(@('switch', 'main'), @('pull', '--prune'))) {
+    <#
+        Brings the working copy to the newest main between changes. The copy that owns main switches to it and pulls;
+        a second working copy, whose main is checked out elsewhere, waits on origin/main with a detached HEAD.
+    #>
+    $r = Invoke-Git @('fetch', '--quiet', '--prune', 'origin', 'main')
+    if ($r.ExitCode -ne 0) { throw "git fetch origin main failed (another working copy may hold a lock; run again): $($r.Output -join ' ')" }
+    # Assigned in each branch: an if expression would unroll a one-element array of arrays into its strings
+    if (Test-MainInOtherWorktree) { $steps = @(, @('switch', '--detach', 'origin/main')) }
+    else { $steps = @(@('switch', 'main'), @('pull', '--prune')) }
+    foreach ($arguments in $steps) {
         $r = Invoke-Git $arguments
         if ($r.ExitCode -ne 0) { throw "git $($arguments -join ' ') failed: $($r.Output -join ' ')" }
     }
@@ -740,7 +775,8 @@ function Start-Change {
     $branch = Expand-ChangeText $Change.Branch @{ id = $id }
 
     Write-ChangeStep '2. Branch'
-    $current = ([string] @((Invoke-Git @('branch', '--show-current')).Output)[0]).Trim()
+    # Empty on a detached HEAD (a second working copy between changes): index 0 of an empty array throws under strict mode
+    $current = "$(@((Invoke-Git @('branch', '--show-current')).Output) | Select-Object -First 1)".Trim()
     if ($current -eq $branch) { Write-ChangeSkip "already on $branch" }
     else {
         if (@((Invoke-Git @('status', '--porcelain', '--untracked-files=all')).Output | Where-Object { $_ })) {
@@ -748,10 +784,11 @@ function Start-Change {
         }
         Update-MainBranch
         $exists = [bool] (Invoke-Git @('branch', '--list', $branch)).Output
-        $arguments = if ($exists) { @('switch', $branch) } else { @('switch', '-c', $branch) }
+        # A new branch starts from origin/main, which is current in both working copies after Update-MainBranch
+        $arguments = if ($exists) { @('switch', $branch) } else { @('switch', '-c', $branch, 'origin/main') }
         $r = Invoke-Git $arguments
         if ($r.ExitCode -ne 0) { throw "git $($arguments -join ' ') failed: $($r.Output -join ' ')" }
-        Write-ChangeOk "$(if ($exists) { 'switched to' } else { 'created' }) $branch from main"
+        Write-ChangeOk "$(if ($exists) { 'switched to' } else { 'created' }) $branch from origin/main"
     }
     Write-Host ''
     Write-Host "Ready: AB#$id on $branch. The files of the change go into the working copy next; then run the publish script." -ForegroundColor Green
@@ -894,6 +931,6 @@ Export-ModuleMember -Function @(
     'Get-ToolingTestCommand', 'ConvertFrom-ToolingTestOutput', 'Invoke-ToolingTest', 'Copy-ChangeTestTree',
     'Expand-ChangeText', 'Get-StagedSourcePath', 'Resolve-CheckRun', 'ConvertFrom-RunList', 'Format-ReviewProgress', 'Invoke-ResultCheck',
     'Find-BoardItem', 'New-BoardItem', 'Get-BoardItem', 'Set-BoardItemField', 'Set-BoardItemState', 'Test-BoardComment', 'Add-BoardComment', 'Add-BoardAttachment',
-    'Get-BlobId', 'Test-Baseline', 'Test-StagedBlob', 'Test-PullRequestHead', 'Test-WorkingTreeChange', 'Test-ChangeBranch', 'Update-MainBranch', 'Reset-PreparedFile', 'Copy-StagedFile', 'New-SignedCommit',
+    'Get-BlobId', 'Test-Baseline', 'Test-StagedBlob', 'Test-PullRequestHead', 'Test-WorkingTreeChange', 'Test-ChangeBranch', 'Update-MainBranch', 'Test-MainInOtherWorktree', 'Reset-PreparedFile', 'Copy-StagedFile', 'New-SignedCommit',
     'Get-ChangePullRequest', 'New-ChangePullRequest', 'Wait-PullRequestCheck', 'Get-ReviewThreadCount', 'Wait-ReviewAndMerge', 'Wait-Deployment'
 )
