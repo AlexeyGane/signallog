@@ -252,7 +252,7 @@
                             Title              = 'Cite sources by key in the requirements and standards'
                             Area               = 'Architecture'
                             Tags               = 'ADR-0021; NFR-DOC-01'
-                            AcceptanceCriteria = 'The requirements README, the NFR catalogue, the business rules, the branching and release standard, the change workflow standard and the C# coding standard cite external sources by footnotes; their Sources lists are footnotes or Further reading; the pages are removed from the legacy list.'
+                            AcceptanceCriteria = 'The requirements README, the NFR catalogue, the business rules, the branching and release standard, the change workflow standard and the C# coding standard cite external sources by footnotes; their Sources lists are footnotes or Further reading; the example in section 8 of the coding standard links to the explicit anchor #two-layers instead of #6-two-layers; the pages are removed from the legacy list.'
                         }
                         @{
                             Type               = 'User Story'
@@ -273,7 +273,7 @@
                             Title              = 'Document the replay constants and link them to the documentation'
                             Area               = 'Adapters'
                             Tags               = 'ADR-0021; ADR-0011'
-                            AcceptanceCriteria = 'Every number literal with a meaning in ReplaySource is a named constant with a summary, its unit or no unit, the bibliography key of its source where it comes from a specification, and a seealso href to an explicit anchor of the replay generator page; EventIds cites rfc-9562 and the currency summaries cite iso-4217 by key; section 8 of the coding standard links to an explicit anchor and describes constants from specifications and source keys in comments; the replay tests give the same prices as before; links from code are checked as errors; build and tests pass.'
+                            AcceptanceCriteria = 'Every number literal with a meaning in ReplaySource is a named constant with a summary, its unit or no unit, the bibliography key of its source where it comes from a specification, and a seealso href to an explicit anchor of the replay generator page; the same holds for the other magic numbers in src: the GUID size (16 bytes) and the UUID version (7) in SignalLog.Contracts/EventIds.cs, the lengths and offsets of the traceparent parts in SignalLog.Contracts/Identifiers.cs, and the connection lifetime of the HTTP client (2 minutes) in SignalLog.Adapters/Program.cs; EventIds cites rfc-9562, the traceparent checks cite the W3C Trace Context recommendation and the currency summaries cite iso-4217 by key; section 8 of the coding standard describes constants from specifications and source keys in comments; the replay tests give the same prices as before; links from code are checked as errors; build and tests pass.'
                         }
                         @{
                             Type               = 'User Story'
@@ -368,6 +368,13 @@
                             Area               = 'Platform'
                             Tags               = 'ADR-0004'
                             AcceptanceCriteria = 'The 16 rules of the coding standard that built-in .NET analyzers can check fail the build: the code-style options in .editorconfig use the severity suffix :warning, and CA1062, CA2007, CA1031, SYSLIB1045, IDE0005 and IDE2003 are warnings; a naming rule requires the Async suffix in src.<br><br>Tests are exempt from CA2007, CS1591 and the Async suffix, with a comment that says why; GenerateDocumentationFile is on in Directory.Build.props.<br><br>The 13 current violations are fixed; every rule moved has a probe in Appendix A of the coding standard, and its Enforced by entry says Build; the solution check and CI pass.'
+                        }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Run two changes at once in two working copies'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0002; ADR-0003'
+                            AcceptanceCriteria = 'Two changes can run at the same time in two working copies (git worktree) of one repository: Update-MainBranch fetches origin/main, then switches to main and pulls in the copy that has main checked out, or detaches HEAD at origin/main when another copy has main; Start-Change creates a new change branch from origin/main and works from a detached HEAD; Test-ChangeBranch names a detached HEAD in its message; Pester tests cover the copy that owns main, the second copy, a single copy, a failed fetch and the start from a detached HEAD; docs/standards/change-workflow.md describes the two copies, the rule that two open changes share no file, locks and merge order; boards.settings.psd1 carries the acceptance criteria of AB#50 and AB#53 that are on the board; the tooling tests pass.'
                         }
                     )
                 }

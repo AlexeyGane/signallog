@@ -409,6 +409,10 @@ Describe 'Test-ChangeBranch' {
         }
         { Test-ChangeBranch -Branch 'feature/AB9-x' 6>$null } | Should -Not -Throw
     }
+    It 'names a detached HEAD instead of failing on an empty branch name' {
+        Mock -ModuleName SignalLog.Change Invoke-Git { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+        { Test-ChangeBranch -Branch 'feature/AB9-x' } | Should -Throw "*on 'a detached HEAD'*"
+    }
     It 'throws on another branch' {
         Mock -ModuleName SignalLog.Change Invoke-Git { [pscustomobject]@{ ExitCode = 0; Output = @('main') } }
         { Test-ChangeBranch -Branch 'feature/AB9-x' } | Should -Throw "*on 'main', expected feature/AB9-x*"
@@ -440,7 +444,21 @@ Describe 'Start-Change' {
         $r.Branch | Should -Be 'feature/AB9-x'
         Should -Invoke -ModuleName SignalLog.Change Set-BoardItemState -ParameterFilter { $Id -eq 9 -and $State -eq 'Active' } -Times 1
         Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'pull' } -Times 1
-        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' -and $Arguments[1] -eq '-c' -and $Arguments[2] -eq 'feature/AB9-x' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' -and $Arguments[1] -eq '-c' -and $Arguments[2] -eq 'feature/AB9-x' -and $Arguments[3] -eq 'origin/main' } -Times 1
+    }
+    It 'starts from a detached HEAD in a second working copy without touching main' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'branch' { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+                'worktree' { [pscustomobject]@{ ExitCode = 0; Output = @('worktree /repos/SignalLog', 'HEAD 1111', 'branch refs/heads/main', '', 'worktree /repos/SignalLog-docs', 'HEAD 2222', 'detached') } }
+                'rev-parse' { [pscustomobject]@{ ExitCode = 0; Output = @('/repos/SignalLog-docs') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        (Start-Change @{ Story = 9; Branch = 'docs/AB{id}-x' } 6>$null).Branch | Should -Be 'docs/AB9-x'
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' -and $Arguments[1] -eq 'main' } -Times 0
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'pull' } -Times 0
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' -and $Arguments[1] -eq '-c' -and $Arguments[2] -eq 'docs/AB9-x' -and $Arguments[3] -eq 'origin/main' } -Times 1
     }
     It 'refuses to leave uncommitted changes behind' {
         Mock -ModuleName SignalLog.Change Invoke-Git {
@@ -459,6 +477,51 @@ Describe 'Start-Change' {
             else { throw "unexpected git $($Arguments -join ' ')" }
         }
         (Start-Change @{ Story = 9; Branch = 'feature/AB{id}-x' } 6>$null).Branch | Should -Be 'feature/AB9-x'
+    }
+}
+
+Describe 'Update-MainBranch with two working copies' {
+    It 'switches to main and pulls in the working copy that owns main' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'worktree' { [pscustomobject]@{ ExitCode = 0; Output = @('worktree /repos/SignalLog', 'branch refs/heads/main', '', 'worktree /repos/SignalLog-docs', 'detached') } }
+                'rev-parse' { [pscustomobject]@{ ExitCode = 0; Output = @('/repos/SignalLog/') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        Update-MainBranch
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'fetch' -and $Arguments -contains 'main' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' -and $Arguments[1] -eq 'main' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'pull' } -Times 1
+    }
+    It 'detaches at origin/main when another working copy has main checked out' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'worktree' { [pscustomobject]@{ ExitCode = 0; Output = @('worktree /repos/SignalLog', 'branch refs/heads/main', '', 'worktree /repos/SignalLog-docs', 'branch refs/heads/docs/AB9-x') } }
+                'rev-parse' { [pscustomobject]@{ ExitCode = 0; Output = @('/repos/SignalLog-docs') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        Update-MainBranch
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' -and $Arguments[1] -eq '--detach' -and $Arguments[2] -eq 'origin/main' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' -and $Arguments[1] -eq 'main' } -Times 0
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'pull' } -Times 0
+    }
+    It 'works as before with a single working copy' {
+        Mock -ModuleName SignalLog.Change Invoke-Git {
+            switch ($Arguments[0]) {
+                'worktree' { [pscustomobject]@{ ExitCode = 0; Output = @('worktree /repos/SignalLog', 'branch refs/heads/docs/AB9-x') } }
+                'rev-parse' { [pscustomobject]@{ ExitCode = 0; Output = @('/repos/SignalLog') } }
+                default { [pscustomobject]@{ ExitCode = 0; Output = @() } }
+            }
+        }
+        Update-MainBranch
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'switch' -and $Arguments[1] -eq 'main' } -Times 1
+        Should -Invoke -ModuleName SignalLog.Change Invoke-Git -ParameterFilter { $Arguments[0] -eq 'pull' } -Times 1
+    }
+    It 'says that a failed fetch may be a lock of the other working copy' {
+        Mock -ModuleName SignalLog.Change Invoke-Git { [pscustomobject]@{ ExitCode = 1; Output = @("error: cannot lock ref 'refs/remotes/origin/main'") } } -ParameterFilter { $Arguments[0] -eq 'fetch' }
+        { Update-MainBranch } | Should -Throw '*another working copy may hold a lock*'
     }
 }
 

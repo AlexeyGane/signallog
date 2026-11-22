@@ -106,13 +106,13 @@ The ruleset itself is kept as code in [`eng/github/repository.settings.psd1`](ht
 
 Every change is applied on the owner's machine by scripts that never merge and never close a work item; each is safe to run again, skipping steps already done. There are two ways to bring the files of a change in:
 
-- **Branch mode** (the default): a start script makes the work item Active, updates `main` and checks out the change branch. The files of the change are then written straight into the working copy on that branch, where the owner can read them in the editor before anything is committed, and a publish script takes it from there.
+- **Branch mode** (the default): a start script makes the work item Active, updates `main` and creates the change branch from `origin/main`. The files of the change are then written straight into the working copy on that branch, where the owner can read them in the editor before anything is committed, and a publish script takes it from there.
 - **Staging mode**: the files are prepared in a staging folder (`<staging>\tree`, with `.github` as `github`) and the publish script copies them in. It remains for files that cannot be written into the working copy directly, such as `.github`.
 
 The publish script runs these steps:
 
 1. **Work item.** The work item exists and is Active (step 1 is done before the change is prepared).
-2. **Base.** Branch mode: the change branch is checked out and carries no commits beyond `origin/main`. Staging mode: `git switch main`, `git pull --prune`; files left by an interrupted run are restored only if they are byte-identical to the staged copies, and any other uncommitted change stops the script.
+2. **Base.** Branch mode: the change branch is checked out and carries no commits beyond `origin/main`. Staging mode: the working copy is brought to the newest `main` (`Update-MainBranch`, see Two working copies below); files left by an interrupted run are restored only if they are byte-identical to the staged copies, and any other uncommitted change stops the script.
 3. **Baseline.** Each file the change touches must have, on `main` (`origin/main` in branch mode), the git blob id the change was verified against; a new file must be absent.
 4. **Files and evidence.** Branch mode: the working copy must hold exactly the files of the change, each hashing (`git hash-object`) to its verified blob id, and nothing else. Staging mode: the staged files are copied in. Then the evidence comment and screenshots go into the work item.
 5. **Commit and pull request.** The staged blob ids are checked again, the commit is signed (an unsigned commit stops the script), pushed, and the pull request is created; the work item moves to Resolved. When a run finds its pull request already open, steps 2–5 are skipped, and the script first checks that the branch carries exactly the files of the change with their verified blob ids; any difference stops it before the CI wait.
@@ -123,6 +123,17 @@ The publish script runs these steps:
 10. **Clean-up.** The staging folder (in branch mode it holds only the scripts and the screenshots) is removed.
 
 Before the publish script commits anything, it usually runs `Invoke-SolutionCheck`: the build job of `ci.yml` on the owner's machine (restore, Release build with warnings as errors, tests, format check, banned API fitness function, PowerShell tooling tests), with the result in the evidence. The build runs with `--disable-build-servers`, so no MSBuild or compiler process stays behind holding build output locked.
+
+### Two working copies
+
+Two changes can run at the same time in two working copies of one repository, made with `git worktree` and sharing one `.git` folder. Each copy has its own change scripts, its own staging folder and one change at a time.
+
+- **One copy owns `main`.** Git checks out a branch in one worktree only. Between changes, `Update-MainBranch` fetches `origin/main`; the copy that has `main` switches to it and pulls, and the other copy switches to `origin/main` with a detached HEAD. Either way a new change branch starts from `origin/main`.
+- **No shared files.** Two open changes must not touch the same file. If they do, the second one waits for the first to be merged and is rebuilt on the new `main`. Step 3 (baseline) stops a change whose files `main` has changed since they were verified, so a missed overlap cannot overwrite the other change.
+- **Locks.** Both copies write to the same `.git`. When two scripts fetch at the same moment, one can fail on a lock file of a ref; the scripts are safe to run again.
+- **Merge order.** If GitHub requires a branch to be up to date before merging, the second pull request is updated from `main` after the first one is merged, and its checks run again.
+
+The second copy is created once from the first: `git worktree add <path> --detach origin/main`.
 
 The tooling tests (Pester, `eng/scripts/tests` and `eng/github/tests`) always run in a new `pwsh` process without the profile (`Invoke-ToolingTest`). Change scripts run one after another in the same session, and what an earlier script loaded stays there: a module imported inside a `Precheck` becomes a nested module of `SignalLog.Change`, and a test that mocks that module then finds two copies of it ("Multiple script or manifest modules named ... are currently loaded"). In a new process the result depends only on the files. A change in staging mode tests a copy of the working copy with the staged files applied (`Copy-ChangeTestTree`, in `<staging>/build`), so the tests see the change before it is committed.
 
@@ -167,7 +178,7 @@ Invoke-Change @{
 | No work item, or not Active | Work without an agreed goal and acceptance criteria | Create the work item first, then prepare the change |
 | Blob id on `main` differs from the verified one | Overwriting someone else's change; an untested combination | Rebuild the change on the new `main` |
 | Staged blob id differs after `git add` | A damaged copy or stray edits in the working tree | Stage the files again |
-| Branch mode: another branch is checked out, the branch already has commits, or the working copy holds other files or other content than the change | Committing something nobody verified, or an edit made by hand in the editor that the evidence does not cover | Put the working copy right (or have the files written again) and run again |
+| Branch mode: another branch or a detached HEAD is checked out, the branch already has commits, or the working copy holds other files or other content than the change | Committing something nobody verified, or an edit made by hand in the editor that the evidence does not cover | Put the working copy right (or have the files written again) and run again |
 | A run finds its pull request already open, but the branch carries other blobs or other files than the change | Merging an earlier version of the change while the staged files have moved on (AB#26: PR #29 was merged without the review follow-ups prepared after it was opened) | Do not merge; close the pull request and delete the branch, then run again, or put the difference into a new work item |
 | No evidence comment before the pull request | A pull request with nothing checkable behind it | The script writes the comment before it pushes |
 | Unsigned commit | Commits without a verifiable author | Check `gpg.format`, `user.signingkey`, `gpg.ssh.allowedSignersFile` |
