@@ -27,5 +27,6 @@
 *[TTF]: Title Transfer Facility, the Dutch virtual gas trading point (glossary)
 *[tzdb]: The IANA time zone database (glossary)
 *[UTC]: Coordinated Universal Time
+*[WAF]: Azure Well-Architected Framework
 *[WDNW]: Working days next week (glossary)
 *[WE]: Weekend: gas delivery from Saturday 06:00 to Monday 06:00, longer with adjoining UK bank holidays (glossary)

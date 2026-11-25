@@ -4,7 +4,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 
 **Origin.** Until 2026-11-04 one rule had an identifier (`BR-TIME-01`, defined inside [ADR 0017](../adr/0017-time-and-timezones.md)); the others were stated in ADR decision sections, the [domain model](../domain/model.md) invariants and the domain pages without an identifier. This catalogue gives each of them an identifier and one place. The ADR remains the authority for *why* a rule was chosen; this page states *what* the rule is.
 
-**Business rule versus NFR.** A business rule describes the domain: it would hold in any implementation and a domain expert can check it (a long gas day delivers 25 MWh per MW). A non-functional requirement describes a quality of the system: speed, security, cost ([NFR catalogue](nfr.md)). Several NFRs exist to verify business rules, for example [NFR-DATA-05](nfr.md#nfr-data-05) verifies BR-TIME-01.
+**Business rule versus NFR.** A business rule describes the domain: it would hold in any implementation and a domain expert can check it (a long [gas day](../domain/glossary.md#gas-day) delivers 25 MWh per MW). A non-functional requirement describes a quality of the system: speed, security, cost ([NFR catalogue](nfr.md)). Several NFRs exist to verify business rules, for example [NFR-DATA-05](nfr.md#nfr-data-05) verifies BR-TIME-01.
 
 ## Summary
 
@@ -43,8 +43,8 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-time-01"></a>
 #### BR-TIME-01 — Delivered energy
 
-- **Rule:** delivered energy = capacity × elapsed duration of the delivery period, where the period is bounded by the product's local delivery-day start in the delivery zone and the duration is measured between the two UTC instants. Volumes are computed over settlement periods enumerated in UTC, so no special formula exists for transition days.
-- **Example:** 1 MW delivers 24 MWh on a normal day, 23 on a short day, 25 on a long day; TTF October 2026 = 745 MWh per MW; the TTF weekend starting 2026-10-24 = 49 MWh.
+- **Rule:** delivered energy = capacity × elapsed duration of the [delivery period](../domain/glossary.md#delivery-period), where the period is bounded by the product's local delivery-day start in the delivery zone and the duration is measured between the two UTC instants. Volumes are computed over settlement periods enumerated in UTC, so no special formula exists for transition days.
+- **Example:** 1 MW delivers 24 MWh on a normal day, 23 on a [short day](../domain/glossary.md#short-day), 25 on a long day; TTF October 2026 = 745 MWh per MW; the TTF weekend starting 2026-10-24 = 49 MWh.
 - **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §3; extended to all period kinds in [ADR 0014](../adr/0014-instrument-domain-model.md) §2.
 - **Verified by:** unit tests with the real-date tables in ADR 0017 and ADR 0014 ([NFR-DATA-05](nfr.md#nfr-data-05)).
 - **Status:** Agreed.
@@ -52,7 +52,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-time-02"></a>
 #### BR-TIME-02 — Delivery day boundaries and labels
 
-- **Rule:** a gas delivery day runs from 06:00 to 06:00 local time of the delivery zone (TTF, THE); a power delivery day runs from 00:00 to 24:00 local time. A delivery day is labelled with the date on which it starts.
+- **Rule:** a gas [delivery day](../domain/glossary.md#delivery-day) runs from 06:00 to 06:00 local time of the delivery zone (TTF, THE); a power delivery day runs from 00:00 to 24:00 local time. A delivery day is labelled with the date on which it starts.
 - **Example:** gas day 2026-10-24 runs from 2026-10-24 06:00 to 2026-10-25 06:00 and lasts 25 hours, because the October transition falls inside it; gas day 2026-03-28 lasts 23 hours.
 - **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §3; glossary: [delivery day](../domain/glossary.md#delivery-day), [gas day](../domain/glossary.md#gas-day).
 - **Verified by:** unit tests of delivery-day enumeration across both transitions.
@@ -79,7 +79,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-time-05"></a>
 #### BR-TIME-05 — Trading day
 
-- **Rule:** a tick belongs to the trading day of the session that contains its venue event time, not to its UTC date. Daily bars are keyed by instrument and trading date. A tick outside every session is flagged, not silently assigned.
+- **Rule:** a tick belongs to the [trading day](../domain/glossary.md#trading-day) of the session that contains its venue event time, not to its UTC date. Daily bars are keyed by [instrument](../domain/glossary.md#instrument) and trading date. A tick outside every session is flagged, not silently assigned.
 - **Example:** an ICE Brent session opening on Sunday 20:00 New York time belongs to Monday's trading day; a bar on a transition day covers 21 or 23 hours of a 22-hour session, which is correct.
 - **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §4; [domain model](../domain/model.md#invariants), invariant 5.
 - **Verified by:** unit tests of trading-day assignment for Sunday sessions and transition days.
@@ -88,7 +88,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-time-06"></a>
 #### BR-TIME-06 — Effective-dated market conventions
 
-- **Rule:** how a market divides time (zone, delivery-day start, period length, labels, windows) is versioned reference data with a `validFrom` delivery date. A calculation uses the version valid for the delivery date it concerns. What is stored is the rule, not enumerated periods; period labels received from an exchange are stored as received.
+- **Rule:** how a market divides time (zone, delivery-day start, period length, labels, windows) is versioned [reference data](../domain/glossary.md#reference-data) with a `validFrom` delivery date. A calculation uses the version valid for the delivery date it concerns. What is stored is the rule, not enumerated periods; period labels received from an exchange are stored as received.
 - **Example:** the European day-ahead auction moved from 60-minute to 15-minute periods for delivery from 2025-10-01; a report for 2025-09-30 uses the 60-minute version.
 - **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §5; [market conventions](../domain/market-conventions.md).
 - **Verified by:** unit test selecting the version on either side of a `validFrom` date.
@@ -106,7 +106,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-time-08"></a>
 #### BR-TIME-08 — Peak and base windows
 
-- **Rule:** base = every period of the delivery day; peak = periods from 08:00 (inclusive) to 20:00 (exclusive) local time, on weekdays for monthly products. Windows are stored as named windows of a market convention (BR-TIME-06), with the IANA zone, not a fixed offset.
+- **Rule:** base = every period of the delivery day; peak = periods from 08:00 (inclusive) to 20:00 (exclusive) local time, on weekdays for monthly products. Windows are stored as named windows of a [market convention](../domain/glossary.md#market-convention) (BR-TIME-06), with the IANA zone, not a fixed offset.
 - **Example:** a peak day always has 12 hours (48 quarter-hours), because 08:00–20:00 never contains a transition; a base day has 23, 24 or 25 hours.
 - **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §5 (windows as reference data); values in [market conventions](../domain/market-conventions.md#3-peak-base-and-off-peak).
 - **Verified by:** unit tests when power products enter scope.
@@ -117,7 +117,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-inst-01"></a>
 #### BR-INST-01 — Instrument identity
 
-- **Rule:** every price belongs to exactly one tradable contract, identified as `{MIC}.{productCode}.{deliveryPeriodId}`. The MIC and product code must exist in reference data, the product must list the period kind, and the period id contains no `.`.
+- **Rule:** every price belongs to exactly one tradable contract, identified as `{MIC}.{productCode}.{deliveryPeriodId}`. The MIC and [product code](../domain/glossary.md#product-code) must exist in reference data, the product must list the period kind, and the period id contains no `.`.
 - **Example:** `NDEX.TFM.2026-12` (TTF December 2026 on ICE Endex), `NDEX.TFM.2026-11-07-WE` (TTF weekend). TTF on ICE Endex and a TTF contract on ICE Futures Europe are different instruments.
 - **Decided in:** [ADR 0014](../adr/0014-instrument-domain-model.md) §1–2; [domain model](../domain/model.md#invariants), invariant 2.
 - **Verified by:** ingestion rejects unknown ids ([NFR-DATA-03](nfr.md#nfr-data-03)).
@@ -126,7 +126,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-inst-02"></a>
 #### BR-INST-02 — Extent of a delivery period
 
-- **Rule:** the extent of a contract (first and last delivery day, inclusive) is reference data, not derived from its id. Kinds whose length depends on a venue holiday calendar (weekend, balance of week, balance of month, working days) are identified by their first delivery day.
+- **Rule:** the [extent](../domain/glossary.md#extent) of a contract (first and last delivery day, inclusive) is reference data, not derived from its id. Kinds whose length depends on a venue holiday calendar (weekend, balance of week, balance of month, working days) are identified by their first delivery day.
 - **Example:** the TTF weekend starting 2026-12-25 covers four gas days, to 2026-12-29 06:00, because 25 and 28 December 2026 are UK bank holidays; its id is `2026-12-25-WE`.
 - **Decided in:** [ADR 0014](../adr/0014-instrument-domain-model.md) §2; [tenors and delivery periods](../domain/tenors-and-delivery-periods.md).
 - **Verified by:** unit tests of extents and hours ([ADR 0014](../adr/0014-instrument-domain-model.md) Confirmation).
@@ -144,7 +144,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-inst-04"></a>
 #### BR-INST-04 — Resolving M+n and longer tenors
 
-- **Rule:** `M+n`, `Q+n`, seasons, gas years and `Cal+n` resolve to the n-th period of that kind, ordered by start of delivery, that is still tradable at the given instant (listed and not past its last trading day). A strip is tradable only while every leg is.
+- **Rule:** `M+n`, `Q+n`, seasons, gas years and `Cal+n` resolve to the n-th period of that kind, ordered by start of delivery, that is still tradable at the given instant (listed and not past its [last trading day](../domain/glossary.md#last-trading-day)). A [strip](../domain/glossary.md#strip) is tradable only while every leg is.
 - **Example:** on 2026-11-02, TTF `M+1` = `NDEX.TFM.2026-12` (November stopped trading on 2026-10-29), while Brent `M+1` = `IFEU.BRN.2027-01` (December expired on 2026-10-30). "Next calendar month" would be wrong for both.
 - **Decided in:** [ADR 0014](../adr/0014-instrument-domain-model.md) §4.
 - **Verified by:** unit tests on both examples.
@@ -171,7 +171,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-inst-07"></a>
 #### BR-INST-07 — Continuous series and rolls
 
-- **Rule:** a continuous series for a tenor is the price of the contract the tenor resolves to over time. It rolls where the resolved contract changes, and roll points are shown. Prices are not back-adjusted by default; a difference- or ratio-adjusted series is a display option and is labelled as adjusted.
+- **Rule:** a [continuous series](../domain/glossary.md#continuous-series) for a [tenor](../domain/glossary.md#tenor) is the price of the contract the tenor resolves to over time. It rolls where the resolved contract changes, and roll points are shown. Prices are not back-adjusted by default; a difference- or ratio-adjusted series is a display option and is labelled as adjusted.
 - **Example:** TTF `M+1` rolls from November to December 2026 after trading stops on 2026-10-29; the price jump at the roll is real and stays visible.
 - **Decided in:** [ADR 0014](../adr/0014-instrument-domain-model.md) §4.
 - **Verified by:** unit test of roll points for a replayed month.
@@ -182,7 +182,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-price-01"></a>
 #### BR-PRICE-01 — Exact prices with units
 
-- **Rule:** a price is an exact decimal, never floating point, and a multiple of the product's tick size. It carries the product's currency and unit.
+- **Rule:** a price is an exact decimal, never floating point, and a multiple of the product's [tick size](../domain/glossary.md#tick-size). It carries the product's currency and unit.
 - **Example:** TTF in EUR per MWh with tick 0.005; JKM in USD per MMBtu with tick 0.001; 38.4153 EUR/MWh is not a valid TTF price.
 - **Decided in:** [ADR 0012](../adr/0012-message-contract-and-versioning.md) (decimal, currency and unit in the contract); [ADR 0014](../adr/0014-instrument-domain-model.md) (units and currencies per product); [domain model](../domain/model.md#invariants), invariant 3.
 - **Verified by:** contract tests; ingestion validation of the tick size.
@@ -210,7 +210,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 <a id="br-fresh-01"></a>
 #### BR-FRESH-01 — Staleness
 
-- **Rule:** the staleness of an instrument is the time since its last tick. It is separate from adapter liveness (the adapter runs) and from latency (how fast a tick arrived).
+- **Rule:** the [staleness](../domain/glossary.md#staleness) of an instrument is the time since its last tick. It is separate from adapter liveness (the adapter runs) and from latency (how fast a tick arrived).
 - **Reference clock — Proposed:** measure from the venue event time of the last tick, not from the time it was received, so that a source replaying old prices after an outage is recognised as stale. To be confirmed when the metric is implemented.
 - **Decided in:** [ADR 0013](../adr/0013-adapter-control-plane.md) (health model); metric in [ADR 0007](../adr/0007-observability.md).
 - **Verified by:** runbook exercise in ADR 0013.
@@ -245,7 +245,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 #### BR-FRESH-05 — Threshold per product
 
 - **Rule:** the staleness threshold is set per product from that product's own in-session tick gaps: p99 of the gaps × 2, at least 1 minute. Until measured, 5 minutes is a placeholder.
-- **Example:** Brent front month trades almost continuously; JKM can go several minutes without a trade, so one threshold for both is wrong.
+- **Example:** Brent [front month](../domain/glossary.md#front-month) trades almost continuously; JKM can go several minutes without a trade, so one threshold for both is wrong.
 - **Decided in:** [ADR 0018](../adr/0018-latency-and-freshness-targets.md) (calibration procedure).
 - **Verified by:** calibration run in ADR 0018.
 - **Status:** Proposed until calibrated.

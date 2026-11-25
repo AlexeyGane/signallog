@@ -56,7 +56,7 @@ A branch that cannot be merged within two days signals that the story is too lar
 ## 3. Commits and pull requests
 
 - **Merge method:** squash merge only (enforced by repository settings and the `main-protection` ruleset).
-- **PR title** becomes the single commit on `main`, so it must follow [Conventional Commits](https://www.conventionalcommits.org/) and reference the work item:
+- **PR title** becomes the single commit on `main`, so it must follow Conventional Commits[^conventional-commits-1-0-0] and reference the work item:
 
   ```text
   <type>(<scope>): <summary> AB#<id>
@@ -86,10 +86,10 @@ Work that cannot be completed within the branch lifetime is merged **disabled**,
 
 ## 6. Versioning and releases
 
-- [Semantic Versioning](https://semver.org/): `vMAJOR.MINOR.PATCH`. The project stays on `0.x` until the first employer-facing demo, which becomes `v1.0.0`.
+- Semantic Versioning:[^semver-2-0-0] tags are `vMAJOR.MINOR.PATCH`, the semantic version with the usual `v` prefix, which is not itself part of the version. The project stays on `0.x`, the major version zero that the specification reserves for initial development, until the first employer-facing demo, which becomes `v1.0.0`.
 - A release is an annotated tag on a commit of `main` plus a GitHub Release.
 - Release notes are generated from Conventional Commits: `feat` → Features, `fix` → Bug Fixes, `!` → Breaking Changes.
-- Version bump rule: `feat` → MINOR, `fix`/`perf` → PATCH, breaking change → MAJOR (MINOR while on `0.x`).
+- Version bump rule: `feat` → MINOR, `fix`/`perf` → PATCH, breaking change → MAJOR, as Conventional Commits maps them;[^conventional-commits-1-0-0-semver] `perf` → PATCH and a breaking change → MINOR while on `0.x` are this project's choices.
 - The traceability chain from [ADR 0003](../adr/0003-application-lifecycle-management.md) closes at the release: User Story → PR → commit on `main` → tag → deployment.
 
 ## 7. Hotfixes and rollback
@@ -120,3 +120,7 @@ The ruleset and the repository settings are kept as code in [`eng/github/reposit
 | Work item, evidence, merge and closure by the owner | [Change workflow](change-workflow.md) and its change scripts |
 | Branch name format | Not enforced automatically; checked in self-review |
 | Branch age ≤ 2 days | Visible on the Scrumban board (story cycle time) |
+
+[^conventional-commits-1-0-0]: [Conventional Commits 1.0.0](../references/index.md#conventional-commits-1-0-0), specification: `<type>[optional scope]: <description>`; `!` before the colon marks a breaking change.
+[^semver-2-0-0]: [Semantic Versioning 2.0.0](../references/index.md#semver-2-0-0), rule 4 and the FAQ entry on the `v` prefix.
+[^conventional-commits-1-0-0-semver]: [Conventional Commits 1.0.0](../references/index.md#conventional-commits-1-0-0), section on the relation to SemVer: `fix` → PATCH, `feat` → MINOR, a breaking change → MAJOR.
