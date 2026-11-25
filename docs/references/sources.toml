@@ -756,3 +756,321 @@ url       = "https://www.entsoe.eu/publications/electronic-data-interchange-edi-
 accessed  = "2026-11-20"
 tier      = 1
 stability = "living"
+
+# --- Requirements and standards (AB#50) ---
+
+[[source]]
+id        = "iso-iec-25010-2023"
+type      = "standard"
+title     = "ISO/IEC 25010:2023 Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — Product quality model"
+publisher = "ISO/IEC"
+issued    = "2023-11"
+url       = "https://www.iso.org/standard/78176.html"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "pinned"
+note      = "the catalogue page says the model has nine characteristics but does not name them; the foreword of the free preview names the 2023 changes"
+
+[[source]]
+id        = "ms-azure-waf"
+type      = "webpage"
+title     = "Azure Well-Architected Framework"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/azure/well-architected/"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-nuget-auditing"
+type      = "webpage"
+title     = "Auditing package dependencies for security vulnerabilities"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/nuget/concepts/auditing-packages"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "gh-actions-secure-use"
+type      = "webpage"
+title     = "Secure use reference"
+publisher = "GitHub Docs"
+url       = "https://docs.github.com/en/actions/reference/security/secure-use"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "gh-2026-10-14-workflow-lockfiles"
+type      = "post-weblog"
+title     = "GitHub Actions workflow lockfiles in public preview"
+publisher = "GitHub Changelog"
+issued    = "2026-10-14"
+url       = "https://github.blog/changelog/2026-10-14-github-actions-workflow-lockfiles-in-public-preview/"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "gh-2026-10-28-workflow-lockfiles"
+type      = "post-weblog"
+title     = "GitHub Actions workflow lockfiles are generally available"
+publisher = "GitHub Changelog"
+issued    = "2026-10-28"
+url       = "https://github.blog/changelog/2026-10-28-github-actions-workflow-lockfiles-are-generally-available"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "conventional-commits-1-0-0"
+type      = "standard"
+title     = "Conventional Commits 1.0.0"
+publisher = "Conventional Commits"
+url       = "https://www.conventionalcommits.org/en/v1.0.0/"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "semver-2-0-0"
+type      = "standard"
+title     = "Semantic Versioning 2.0.0"
+author    = ["Tom Preston-Werner"]
+url       = "https://semver.org/spec/v2.0.0.html"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "ms-boards-link-github"
+type      = "webpage"
+title     = "Link GitHub commits, pull requests, branches, and issues to work items in Azure Boards"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/azure/devops/boards/github/link-to-from-github?view=azure-devops"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+note      = "release notes of 2018 and 2019 said that AB# in a pull request title creates a link; this page, the newer source, says it does not"
+
+[[source]]
+id        = "pope-2008"
+type      = "post-weblog"
+title     = "A Note About Git Commit Messages"
+author    = ["Tim Pope"]
+publisher = "tbaggery"
+issued    = "2008-04-19"
+url       = "https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html"
+tier      = 2
+stability = "pinned"
+
+[[source]]
+id        = "beck-1997"
+type      = "book"
+title     = "Smalltalk Best Practice Patterns"
+author    = ["Kent Beck"]
+publisher = "Prentice Hall"
+issued    = "1997"
+isbn      = "978-0-13-476904-2"
+tier      = 1
+stability = "pinned"
+
+[[source]]
+id        = "ms-dotnet-code-analysis"
+type      = "webpage"
+title     = "Code analysis in .NET"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/overview"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-dotnet-code-analysis-options"
+type      = "webpage"
+title     = "Configuration options for code analysis"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/configuration-options"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-ide0055"
+type      = "webpage"
+title     = "Formatting rule (IDE0055)"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0055"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-ide0049"
+type      = "webpage"
+title     = "Use language keywords instead of framework type names for type references (IDE0049)"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0049"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-ide0003-ide0009"
+type      = "webpage"
+title     = "this and Me preferences (IDE0003 and IDE0009)"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0003-ide0009"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-ide0320"
+type      = "webpage"
+title     = "Make anonymous function static (IDE0320)"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0320"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-ide2003"
+type      = "webpage"
+title     = "Blank line required between block and subsequent statement (IDE2003)"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide2003"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-ca1062"
+type      = "webpage"
+title     = "CA1062: Validate arguments of public methods"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1062"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-dotnet-format"
+type      = "webpage"
+title     = "dotnet format"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/core/tools/dotnet-format"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-xmldoc-recommended-tags"
+type      = "webpage"
+title     = "Recommended XML tags for C# documentation comments"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/csharp/language-reference/xmldoc/recommended-tags"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-high-performance-logging"
+type      = "webpage"
+title     = "High-performance logging in .NET"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/core/extensions/high-performance-logging"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-regex-source-generators"
+type      = "webpage"
+title     = ".NET regular expression source generators"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/standard/base-types/regular-expression-source-generators"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-timeprovider"
+type      = "webpage"
+title     = "TimeProvider Class"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/api/system.timeprovider"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "ms-guid-createversion7"
+type      = "webpage"
+title     = "Guid.CreateVersion7 Method"
+publisher = "Microsoft Learn"
+url       = "https://learn.microsoft.com/dotnet/api/system.guid.createversion7"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "xunit-analyzers"
+type      = "webpage"
+title     = "xUnit.net analyzer rules"
+publisher = "xUnit.net"
+url       = "https://xunit.net/xunit.analyzers/rules/"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "vs-threading-vsthrd100"
+type      = "webpage"
+title     = "VSTHRD100 Avoid async void methods"
+publisher = "Microsoft (vs-threading)"
+url       = "https://microsoft.github.io/vs-threading/analyzers/VSTHRD100.html"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "stylecop-sa1402"
+type      = "webpage"
+title     = "SA1402: File may only contain a single type"
+publisher = "StyleCop Analyzers"
+url       = "https://dotnetanalyzers.github.io/StyleCopAnalyzers/SA1402.html"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "stylecop-sa1649"
+type      = "webpage"
+title     = "SA1649: File name should match first type name"
+publisher = "StyleCop Analyzers"
+url       = "https://dotnetanalyzers.github.io/StyleCopAnalyzers/SA1649.html"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "roslyn-76222"
+type      = "webpage"
+title     = "IDE0320 not enabled when dotnet_analyzer_diagnostic.severity = error (dotnet/roslyn#76222)"
+publisher = "GitHub"
+url       = "https://github.com/dotnet/roslyn/issues/76222"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "roslyn-9d42b6a"
+type      = "software"
+title     = "Respect the configured severity for IDE0320 (#86568)"
+publisher = "dotnet/roslyn on GitHub"
+issued    = "2026-11-23"
+url       = "https://github.com/dotnet/roslyn/commit/9d42b6a3daa5f222206978ef2bd59ebd14d3926b"
+tier      = 1
+stability = "pinned"
+note      = "the commit of pull request #86568 on main; the pull request page fetched on 2026-11-25 still showed it open"

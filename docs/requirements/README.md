@@ -10,7 +10,7 @@ This folder holds SignalLog's quality requirements and business rules. Functiona
 ## How NFRs are written
 
 - **Identifier:** `NFR-<AREA>-<NN>`. The identifier never changes once an ADR references it; a retired NFR keeps its number with status `Retired`.
-- **Areas:** `COST`, `PERF`, `SEC`, `REL` (reliability), `OPS` (operability), `MNT` (maintainability), `DATA`, `LEGAL`, `GOV` (governance), `DOC`, `DEMO`, `DEL` (delivery). Each maps to an [ISO/IEC 25010](https://www.iso.org/standard/78176.html) quality characteristic or an [Azure Well-Architected Framework](https://learn.microsoft.com/azure/well-architected/) pillar, given in the catalogue.
+- **Areas:** `COST`, `PERF`, `SEC`, `REL` (reliability), `OPS` (operability), `MNT` (maintainability), `DATA`, `LEGAL`, `GOV` (governance), `DOC`, `DEMO`, `DEL` (delivery). The catalogue gives each NFR a quality characteristic of ISO/IEC 25010:2023,[^iso-iec-25010-2023] with a subcharacteristic where one fits, or a pillar of the Azure Well-Architected Framework (WAF).[^ms-azure-waf] Compliance (`LEGAL`) and governance (`GOV`) map to neither and are named as they are.
 - **Scenario first:** each NFR states a [quality-attribute scenario](../standards/concepts-and-sources.md#quality-attribute-scenario) (stimulus, environment, expected response) before its target, so that the target can be tested.
 - **Measurable target:** a number with a unit and a percentile where it applies, or a binary rule that a check can evaluate.
 - **Verification:** how the target is proven — a unit or integration test, a CI check, an alert, a periodic review — and when.
@@ -37,3 +37,6 @@ This folder holds SignalLog's quality requirements and business rules. Functiona
 
 - An NFR target changes only through a pull request that also updates the ADRs whose *Traces to* field references it, if their reasoning depends on the old target.
 - A new NFR identifier is added here before any ADR or work item references it.
+
+[^iso-iec-25010-2023]: [ISO/IEC 25010:2023](../references/index.md#iso-iec-25010-2023): nine characteristics, each divided into subcharacteristics.
+[^ms-azure-waf]: [Azure Well-Architected Framework](../references/index.md#ms-azure-waf): five pillars — Reliability, Security, Cost Optimization, Operational Excellence and Performance Efficiency.

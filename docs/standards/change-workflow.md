@@ -53,9 +53,9 @@ A red check sends the work back to the same branch; the evidence is updated with
 
 ## 3. Linking pull requests to work items
 
-- A link from a pull request to a work item is created only by `AB#<id>` in the pull request **description** or in a commit message; `AB#` in the pull request title or in a comment creates no link ([Microsoft Learn](https://learn.microsoft.com/azure/devops/boards/github/link-to-from-github?view=azure-devops#use-ab-to-link-from-github-to-azure-boards-work-items), checked 2026-11-06). The title keeps `AB#<id>` as well, because the CI title check requires it and the squash commit takes the title.
-- No transition keyword precedes `AB#`: not `fix`, `fixes`, `fixed`, and no state or category name (`Resolved`, `Closed`, `Done`). Such a keyword moves the work item to another state on merge (same source), which would bypass step 9.
-- After the merge, the integration links the merge commit to the work item by itself ([Microsoft Learn](https://learn.microsoft.com/azure/devops/boards/github/features-timeline?view=azure-devops#delivered-features), checked 2026-11-06).
+- A link from a pull request to a work item is created only by `AB#<id>` in the pull request **description** or in a commit message; `AB#` in the pull request title or in a comment creates no link.[^ms-boards-link-github] The title keeps `AB#<id>` as well, because the CI title check requires it and the squash commit takes the title.
+- No transition keyword precedes `AB#`: not `fix`, `fixes`, `fixed`, and no state or category name (`Resolved`, `Closed`, `Done`). Such a keyword moves the work item to another state on merge, which would bypass step 9.[^ms-boards-link-github]
+- After the merge, the integration links the merge commit to the work item by itself.[^ms-boards-link-github-merge]
 
 ## 4. Pull request description
 
@@ -78,7 +78,7 @@ Work item: AB#<id>
 - Evidence: <link to the evidence comment in the work item>.
 ```
 
-A commit message body is wrapped at about 72 characters and its subject kept to about 50 ([T. Pope, 2008](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)); the squash commit takes the pull request title as its subject.
+A commit message body is wrapped at about 72 characters and its subject kept to about 50;[^pope-2008] the squash commit takes the pull request title as its subject.
 
 ## 5. Review gate: a resolved thread per file
 
@@ -188,3 +188,7 @@ Invoke-Change @{
 | Result check fails after deployment | "Merged" taken for "works" | Wait for the Pages CDN and check by hand; the work item stays open |
 
 Two rules hold by the split of roles rather than by the script: nothing outside the owner's machine runs git commands that write to the owner's working copy, and credentials (`az login`, the signing key, `gh auth`) exist only on the owner's machine.
+
+[^ms-boards-link-github]: [Microsoft Learn, Link GitHub commits, pull requests, branches, and issues to work items](../references/index.md#ms-boards-link-github), section "Use AB# to link from GitHub to Azure Boards work items".
+[^ms-boards-link-github-merge]: [Microsoft Learn, Link GitHub commits, pull requests, branches, and issues to work items](../references/index.md#ms-boards-link-github), section "Automatic link updates".
+[^pope-2008]: [T. Pope, A Note About Git Commit Messages](../references/index.md#pope-2008).

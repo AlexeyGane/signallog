@@ -252,7 +252,7 @@
                             Title              = 'Cite sources by key in the requirements and standards'
                             Area               = 'Architecture'
                             Tags               = 'ADR-0021; NFR-DOC-01'
-                            AcceptanceCriteria = 'The requirements README, the NFR catalogue, the business rules, the branching and release standard, the change workflow standard and the C# coding standard cite external sources by footnotes; their Sources lists are footnotes or Further reading; the example in section 8 of the coding standard links to the explicit anchor #two-layers instead of #6-two-layers; the pages are removed from the legacy list.'
+                            AcceptanceCriteria = 'The requirements README, the NFR catalogue, the business rules, the branching and release standard, the change workflow standard and the C# coding standard cite external sources by footnotes to the bibliography; no external URL and no checked date remains on these pages, and the date of a fact stays in the text; every source is read again and its accessed date set, and a statement that its source does not support is cited to a primary source, or removed where none is found; their Sources lists become footnotes or Further reading; terms are linked to the glossary at first use; the example in section 8 of the coding standard links to the explicit anchor #two-layers instead of #6-two-layers; the pages are removed from the legacy list; the strict build and check_references.py report no errors.'
                         }
                         @{
                             Type               = 'User Story'

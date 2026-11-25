@@ -27,10 +27,4 @@ docs/adr/README.md
 docs/fun-facts/index.md
 docs/fun-facts/ru.md
 docs/note.md
-docs/requirements/README.md
-docs/requirements/business-rules.md
-docs/requirements/nfr.md
-docs/standards/branching-and-release.md
-docs/standards/change-workflow.md
-docs/standards/coding.md
 docs/standards/concepts-and-sources.md

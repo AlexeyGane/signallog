@@ -15,13 +15,13 @@ A rule is enforced by one of three things. The difference matters: a rule that o
 
 | Enforcer | What it is | What it catches |
 |---|---|---|
-| **Build** | `dotnet build` with `TreatWarningsAsErrors`, `AnalysisLevel` `latest-recommended`, `EnforceCodeStyleInBuild`, `GenerateDocumentationFile`, `Nullable`, `WarningsAsErrors` for `IDE0320` and the banned-API analyzer (`Directory.Build.props`); two rules of StyleCop.Analyzers and one of Microsoft.VisualStudio.Threading.Analyzers (`Directory.Packages.props`) | Every compiler and analyzer diagnostic at warning or error severity: nullability, the recommended .NET code-quality rules (`CA*`) and the ones `.editorconfig` raises to `warning`, the code-style rules whose severity in `.editorconfig` is `warning` (`IDE*`, including the naming rules), lambdas that can be `static` (`IDE0320`, raised in the compiler options), missing XML comments on public members (`CS1591`), banned APIs (`RS0030`), one type per file (`SA1402`, `SA1649`), no `async void` (`VSTHRD100`), the xUnit analyzers in test projects |
-| **Format** | `dotnet format SignalLog.slnx --verify-no-changes` | Whitespace (indentation, braces on their own lines, trailing spaces, blank lines between `using` groups), the order of `using` directives, and the code-style rules `IDE0049` and `IDE0003`, which the build cannot report: Microsoft Learn says they only surface in the IDE, even with code-style analysis on build |
-| **Review** | The owner reading the pull request, file by file ([change workflow, section 5](change-workflow.md#5-review-gate-a-resolved-thread-per-file)) | Everything else, including every `.editorconfig` preference at severity `silent` or `suggestion`: the editor may show it, nothing blocks it |
+| **Build** | `dotnet build` with `TreatWarningsAsErrors`, `AnalysisLevel` `latest-recommended`, `EnforceCodeStyleInBuild`, `GenerateDocumentationFile`, `Nullable`, `WarningsAsErrors` for `IDE0320` and the banned-API analyzer (`Directory.Build.props`); two rules of StyleCop.Analyzers and one of Microsoft.VisualStudio.Threading.Analyzers (`Directory.Packages.props`)[^ms-dotnet-code-analysis] | Every compiler and analyzer diagnostic at warning or error severity: nullability, the recommended .NET code-quality rules (`CA*`) and the ones `.editorconfig` raises to `warning`, the code-style rules whose severity in `.editorconfig` is `warning` (`IDE*`, including the naming rules), lambdas that can be `static` (`IDE0320`, raised in the compiler options), missing XML comments on public members (`CS1591`), banned APIs (`RS0030`), one type per file (`SA1402`, `SA1649`), no `async void` (`VSTHRD100`), the xUnit analyzers in test projects |
+| **Format** | `dotnet format SignalLog.slnx --verify-no-changes`, which fails when a file would change[^ms-dotnet-format] | Whitespace (indentation, braces on their own lines, trailing spaces, blank lines between `using` groups), the order of `using` directives, and the code-style rules `IDE0049` and `IDE0003`, which the build cannot report: they only surface in the IDE, even with code-style analysis on build[^ms-ide0049][^ms-ide0003-ide0009] |
+| **Review** | The owner reading the pull request, file by file ([change workflow, section 5](change-workflow.md#5-review-gate-a-resolved-thread-per-file)) | Everything else, including every `.editorconfig` preference at severity `silent` or `suggestion`: the editor may show it, nothing blocks it[^ms-dotnet-code-analysis-options] |
 
 Both Build and Format run in the `build` job of `ci.yml`, which every pull request must pass, and on the owner's machine before every commit (`Invoke-SolutionCheck`). The *Enforced by* entries below were checked with .NET SDK 10.0.402, on 2026-11-15, on 2026-11-19 after rules were moved from the review to the build, on 2026-11-22 after the review of that change, and on 2026-11-25 for `IDE0320`: each rule was broken on purpose in a probe file and the build or `dotnet format` was run; [Appendix A](#appendix-a-how-the-enforcement-was-checked) lists every probe and its result.
 
-A code-style rule (`IDE*`) is raised to the build by the severity suffix of its option in `.editorconfig`, for example `csharp_style_namespace_declarations = file_scoped:warning`. A line `dotnet_diagnostic.IDE0161.severity = warning` alone did not make the rule fail the build in the probes.
+A code-style rule (`IDE*`) is enforced on build only at the severity `warning` or `error`.[^ms-ide0055] Here the severity is the suffix of the rule's option in `.editorconfig`, for example `csharp_style_namespace_declarations = file_scoped:warning`. Microsoft Learn also shows the form `dotnet_diagnostic.IDE0040.severity = warning`,[^ms-dotnet-code-analysis-enable] but in the probes a line `dotnet_diagnostic.IDE0161.severity = warning` alone did not make the rule fail the build, so this standard uses the option suffix.
 
 ## 2. Layout
 
@@ -32,7 +32,7 @@ A code-style rule (`IDE*`) is raised to the build by the severity suffix of its 
 | One file-scoped namespace per file (`namespace SignalLog.Contracts;`), matching the folder | Build (`IDE0161` for the namespace form, `IDE0130` for the match with the folder) |
 | Braces on every `if`, `else`, `for`, `foreach` and `while` body, also for one statement | Build (`IDE0011`) |
 | Methods, constructors and local functions have block bodies; properties, accessors, indexers and lambdas are expression-bodied | Build for methods, constructors and local functions (`IDE0022`, `IDE0021`, `IDE0061`); the rest: review |
-| One type per file, named like the file, with no exceptions: a class, record, interface, struct, enum or delegate gets its own file. A nested type, such as a test double inside a test class, is a member of its type and stays in its file | Build (`SA1402`, `SA1649` of StyleCop.Analyzers; `stylecop.json` lists the kinds of type that count) |
+| One type per file, named like the file, with no exceptions: a class, record, interface, struct, enum or delegate gets its own file. A nested type, such as a test double inside a test class, is a member of its type and stays in its file | Build (`SA1402`, `SA1649` of StyleCop.Analyzers; `stylecop.json` lists the kinds of type that count, because by default `SA1402` lets a delegate, enum, struct or interface share a file with a class)[^stylecop-sa1402][^stylecop-sa1649] |
 
 ```csharp
 using System.Diagnostics;
@@ -44,12 +44,12 @@ namespace SignalLog.Adapters.Core;
 
 ## 3. Guard clauses
 
-A public method or constructor checks its preconditions first and leaves early when they fail: the [guard clause](concepts-and-sources.md#guard-clause). The checks stand together at the top, and **one blank line** separates them from the rest of the body, so the reader sees at a glance where the preconditions end and the work begins.
+A public method or constructor checks its preconditions first and leaves early when they fail: the [guard clause](concepts-and-sources.md#guard-clause).[^beck-1997] The checks stand together at the top, and **one blank line** separates them from the rest of the body, so the reader sees at a glance where the preconditions end and the work begins.
 
 | Rule | Enforced by |
 |---|---|
-| Reference parameters of public members are checked with `ArgumentNullException.ThrowIfNull`; other preconditions throw `ArgumentException` or `ArgumentOutOfRangeException` with `nameof(parameter)` and a message that says what was expected and what came | Build for the null check: CA1062 ("Validate arguments of public methods") is not part of the `latest-recommended` set, so `.editorconfig` raises it to `warning`. It also fires for a parameter of type `string` when nullable reference types are on. It is off for tests, whose methods get their arguments from the test framework. The messages: review |
-| A blank line after the last guard clause | Build when the guard clause is a block, such as `if (...) { return; }` (`IDE2003`, an experimental rule that requires a blank line after a block); review after a `ThrowIfNull` line, which is not a block |
+| Reference parameters of public members are checked with `ArgumentNullException.ThrowIfNull`; other preconditions throw `ArgumentException` or `ArgumentOutOfRangeException` with `nameof(parameter)` and a message that says what was expected and what came | Build for the null check: CA1062 ("Validate arguments of public methods") is not enabled by default,[^ms-ca1062] and `latest-recommended` does not raise it either, so `.editorconfig` raises it to `warning`. It also fires for a parameter of type `string` when nullable reference types are on. It is off for tests, whose methods get their arguments from the test framework. The messages: review |
+| A blank line after the last guard clause | Build when the guard clause is a block, such as `if (...) { return; }` (`IDE2003`, an experimental rule that requires a blank line after a block[^ms-ide2003]); review after a `ThrowIfNull` line, which is not a block |
 | Inside a method, an early `return` or `continue` for a case that needs no work, instead of nesting the main path in an `if` | Review |
 
 ```csharp
@@ -107,7 +107,7 @@ The naming rules in `.editorconfig` have the severity `warning`, so a wrong name
 | Fields that are assigned only in the constructor are `readonly` | Build (`IDE0044`, severity `warning`) |
 | A member that uses no instance state is `static` | Build (`CA1822`) |
 | Local functions that capture nothing are `static` | Build (`IDE0062`, severity `warning`) |
-| Lambdas that capture nothing are `static`: `Select(static e => e.Id)` | Build (`IDE0320`). The analyzer reports it at the severity Hidden whatever `.editorconfig` says (dotnet/roslyn#76222), so `Directory.Build.props` adds `IDE0320` to `WarningsAsErrors`, and the option keeps the severity `true:warning`, without which the analyzer skips the analysis (Appendix A). `dotnet format` does not report it |
+| Lambdas that capture nothing are `static`: `Select(static e => e.Id)` | Build (`IDE0320`). The analyzer reports it at the severity Hidden whatever `.editorconfig` says (dotnet/roslyn#76222;[^roslyn-76222] the fix was merged into Roslyn on 2026-11-23 and is not in SDK 10.0.402[^roslyn-9d42b6a]), so `Directory.Build.props` adds `IDE0320` to `WarningsAsErrors`, and the option keeps the severity `true:warning`, without which the analyzer skips the analysis (Appendix A). `dotnet format` does not report it |
 | Accessibility modifiers are always written | Build (`IDE0040`) |
 
 ## 7. Numbers, text and culture
@@ -139,7 +139,7 @@ A magic number is a number literal whose meaning the code does not say. Every su
 /// Weight of the hourly noise layer in the replay price, as a share of the whole noise (no unit).
 /// The daily layer has the rest (<see cref="DailyWeight"/>), so the two weights add up to 1.
 /// </summary>
-/// <seealso href="https://alexeygane.github.io/signallog/domain/replay-price-generator/#6-two-layers"/>
+/// <seealso href="https://alexeygane.github.io/signallog/domain/replay-price-generator/#two-layers"/>
 private const double HourlyWeight = 0.6;
 ```
 
@@ -149,8 +149,8 @@ The code on `main` does not follow this rule everywhere yet: the replay generato
 
 | Rule | Enforced by |
 |---|---|
-| The current time comes from an injected `TimeProvider` (`GetUtcNow()`); `DateTime.Now`, `DateTime.UtcNow`, `DateTime.Today`, `DateTimeOffset.Now` and `DateTimeOffset.UtcNow` are banned (ADR 0017). Tests use `FakeTimeProvider` with a fixed, real calendar date | Build (`RS0030`, an error in `.editorconfig`) |
-| Event ids are UUID version 7: `Guid.CreateVersion7(timeProvider.GetUtcNow())`; `Guid.NewGuid()` is banned (ADR 0012) | Build (`RS0030`) |
+| The current time comes from an injected `TimeProvider` (`GetUtcNow()`); `DateTime.Now`, `DateTime.UtcNow`, `DateTime.Today`, `DateTimeOffset.Now` and `DateTimeOffset.UtcNow` are banned (ADR 0017). Tests use `FakeTimeProvider` with a fixed, real calendar date[^ms-timeprovider] | Build (`RS0030`, an error in `.editorconfig`) |
+| Event ids are UUID version 7: `Guid.CreateVersion7(timeProvider.GetUtcNow())`, which creates a version 7 GUID under RFC 9562 from the given time;[^ms-guid-createversion7] `Guid.NewGuid()` is banned (ADR 0012) | Build (`RS0030`) |
 | Bytes of a GUID in RFC 9562 order: `ToByteArray(bigEndian: true)`; the parameterless `ToByteArray()` is banned | Build (`RS0030`) |
 
 The banned list is `BannedSymbols.txt`; each entry carries its reason and ADR, which the build error repeats. `eng/Test-BannedApi.ps1` is the [fitness function](concepts-and-sources.md#fitness-function) that proves the analyzer is active: it builds a probe project that calls every banned API and fails unless each of those lines fails with `RS0030`.
@@ -159,7 +159,7 @@ The banned list is `BannedSymbols.txt`; each entry carries its reason and ADR, w
 
 | Rule | Enforced by |
 |---|---|
-| A pattern known at compile time is a `[GeneratedRegex]` on a `static partial` method: the source generator checks it when the project is built and produces matching code without run-time compilation | Build (`SYSLIB1045`, raised to `warning` in `.editorconfig`) |
+| A pattern known at compile time is a `[GeneratedRegex]` on a `static partial` method: the source generator checks it when the project is built and produces matching code without run-time compilation[^ms-regex-source-generators] | Build (`SYSLIB1045`, raised to `warning` in `.editorconfig`) |
 | `RegexOptions.CultureInvariant`, and `\z`, not `$`, at the end: `$` also matches before a final line feed | Review |
 
 ```csharp
@@ -174,8 +174,8 @@ private static partial Regex AdapterSourcePattern();
 | An asynchronous method takes a `CancellationToken` as its **last** parameter, named `cancellationToken` | Build (`CA1068` for the position); the name: review |
 | The token is passed on to every call that accepts one | Build (`CA2016`) |
 | Code under `src/` awaits with `ConfigureAwait(false)` | Build (`CA2007`, raised to `warning` in `.editorconfig`; off for `tests/**`) |
-| Tests await without `ConfigureAwait(false)` and pass `TestContext.Current.CancellationToken` to every call that takes a token | Build (`xUnit1030`, `xUnit1051`) |
-| No `async void`, also not for event handlers. An event handler that has to await is an exception under [section 16](#16-suppressions): `#pragma warning disable VSTHRD100` with the reason | Build (`VSTHRD100` of Microsoft.VisualStudio.Threading.Analyzers) |
+| Tests await without `ConfigureAwait(false)` and pass `TestContext.Current.CancellationToken` to every call that takes a token | Build (`xUnit1030`, `xUnit1051`)[^xunit-analyzers] |
+| No `async void`, also not for event handlers. An event handler that has to await is an exception under [section 16](#16-suppressions): `#pragma warning disable VSTHRD100` with the reason | Build (`VSTHRD100` of Microsoft.VisualStudio.Threading.Analyzers)[^vs-threading-vsthrd100] |
 
 ## 12. Logging and tracing
 
@@ -192,6 +192,8 @@ private static readonly Action<ILogger, int, string, Exception?> LogRun = Logger
     "Replay adapter published {Count} price ticks in trace {TraceId}");
 ```
 
+Microsoft Learn recommends the `[LoggerMessage]` source generator for new code: it avoids boxing and parses the template at compile time. `LoggerMessage.Define`, which the example uses, stays supported for existing code.[^ms-high-performance-logging]
+
 ## 13. Errors
 
 | Rule | Enforced by |
@@ -204,7 +206,7 @@ private static readonly Action<ILogger, int, string, Exception?> LogRun = Logger
 
 | Rule | Enforced by |
 |---|---|
-| Every public type and member has an XML `<summary>`. It says what the member is for and refers to the ADR, NFR or business rule behind it | Build for the presence of the comment (`CS1591`; `GenerateDocumentationFile` is on; off for `tests/**`); its content: review |
+| Every public type and member has an XML `<summary>`.[^ms-xmldoc-recommended-tags] It says what the member is for and refers to the ADR, NFR or business rule behind it | Build for the presence of the comment (`CS1591`; `GenerateDocumentationFile` is on; off for `tests/**`); its content: review |
 | A code comment explains **why** or names a source (an ADR, an RFC, a paper), not what the next line does | Review |
 | Units and examples are part of the comment where they help: "Price in `Currency` per `Unit`", "for example `NDEX.TFM.2026-12`" | Review |
 
@@ -252,7 +254,7 @@ On 2026-11-15, 2026-11-19, 2026-11-22 and 2026-11-25, with .NET SDK 10.0.402, ea
 | A local function that captures nothing, not `static` | error `IDE0062` | — |
 | `this._x` | clean | error `IDE0003` |
 | `Int32` instead of `int` | clean | error `IDE0049` |
-| A lambda that captures nothing, not `static` (`M(x => x + 1)`, the example of the `IDE0320` page), with `WarningsAsErrors` for `IDE0320` | error `IDE0320` | clean |
+| A lambda that captures nothing, not `static` (`M(x => x + 1)`, the example of the `IDE0320` page[^ms-ide0320]), with `WarningsAsErrors` for `IDE0320` | error `IDE0320` | clean |
 | The same lambda without `WarningsAsErrors` (2026-11-22, before the workaround) | clean | clean |
 | The same lambda with `WarningsAsErrors`, and the option `true`, `true:suggestion` or `true:silent` instead of `true:warning` | clean | — |
 | `Guid.NewGuid()`, `DateTime.UtcNow` | error `RS0030` | — |
@@ -287,23 +289,25 @@ On 2026-11-15, 2026-11-19, 2026-11-22 and 2026-11-25, with .NET SDK 10.0.402, ea
 
 A rule whose probe is clean stays a review rule until someone decides to raise its severity in `.editorconfig`; that is a change to this standard and to the code, made in the same pull request.
 
-## Sources
-
-Checked on 2026-11-15.
-
-- Microsoft Learn, *Code analysis in .NET* (code style analysis on build, `EnforceCodeStyleInBuild`, `AnalysisLevel`): https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/overview
-- Microsoft Learn, *Configuration options for code analysis* (severity levels: `silent` is hidden, `suggestion` is info): https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/configuration-options
-- Microsoft Learn, *Formatting rule (IDE0055)* (a severity must be `warning` or `error` to be enforced on build): https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0055
-- Microsoft Learn, *dotnet format*: https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-format
-- Microsoft Learn, *Recommended XML tags for C# documentation comments* (`<summary>`, `<see>`, `<seealso>`): https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/recommended-tags
-- Microsoft Learn, *High-performance logging in .NET* (`LoggerMessage`): https://learn.microsoft.com/en-us/dotnet/core/extensions/high-performance-logging
-- Microsoft Learn, *.NET regular expression source generators*: https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-source-generators
-- Microsoft Learn, `TimeProvider` class: https://learn.microsoft.com/en-us/dotnet/api/system.timeprovider
-- Microsoft Learn, `Guid.CreateVersion7` method: https://learn.microsoft.com/en-us/dotnet/api/system.guid.createversion7
-- xUnit.net analyzers, xUnit1030 "Do not call ConfigureAwait in test method" and xUnit1051 "Calls to methods which accept CancellationToken should use TestContext.Current.CancellationToken": https://xunit.net/xunit.analyzers/rules/
-- Microsoft Learn, *Make anonymous function static (IDE0320)*, checked on 2026-11-22: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0320
-- Microsoft Learn, *Use language keywords instead of framework type names for type references (IDE0049)* and *Member-access qualification preferences (IDE0003 and IDE0009)* (the rules only surface in the IDE), checked on 2026-11-25: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0049, https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0003-ide0009
-- GitHub, *dotnet/roslyn#76222 IDE0320 not enabled when dotnet_analyzer_diagnostic.severity = error* and the fix *dotnet/roslyn#86568 Respect the configured severity for IDE0320* (merged on 2026-11-23, after SDK 10.0.402), checked on 2026-11-25: https://github.com/dotnet/roslyn/issues/76222, https://github.com/dotnet/roslyn/pull/86568
-- Microsoft, vs-threading analyzers, *VSTHRD100 Avoid async void methods*, checked on 2026-11-22: https://microsoft.github.io/vs-threading/analyzers/VSTHRD100.html
-- StyleCop Analyzers, *SA1402 FileMayOnlyContainASingleType* and *SA1649 FileNameMustMatchTypeName*, checked on 2026-11-22: https://dotnetanalyzers.github.io/StyleCopAnalyzers/SA1402.html, https://dotnetanalyzers.github.io/StyleCopAnalyzers/SA1649.html
-- K. Beck, *Smalltalk Best Practice Patterns*, Prentice Hall, 1997, ISBN 978-0-13-476904-2, "Guard Clause"
+[^ms-dotnet-code-analysis]: [Microsoft Learn, Code analysis in .NET](../references/index.md#ms-dotnet-code-analysis): `EnforceCodeStyleInBuild` and `AnalysisLevel` `latest-Recommended`.
+[^ms-dotnet-format]: [Microsoft Learn, dotnet format](../references/index.md#ms-dotnet-format), option `--verify-no-changes`.
+[^ms-ide0049]: [Microsoft Learn, IDE0049](../references/index.md#ms-ide0049), note on build enforcement.
+[^ms-ide0003-ide0009]: [Microsoft Learn, IDE0003 and IDE0009](../references/index.md#ms-ide0003-ide0009), note on build enforcement.
+[^ms-dotnet-code-analysis-options]: [Microsoft Learn, Configuration options for code analysis](../references/index.md#ms-dotnet-code-analysis-options), table of severity levels: `suggestion` is a build message, `silent` is not shown.
+[^ms-ide0055]: [Microsoft Learn, IDE0055](../references/index.md#ms-ide0055): the severity must be `warning` or `error` to be enforced on build.
+[^ms-dotnet-code-analysis-enable]: [Microsoft Learn, Code analysis in .NET](../references/index.md#ms-dotnet-code-analysis), section on code-style analysis on build.
+[^stylecop-sa1402]: [StyleCop Analyzers, SA1402](../references/index.md#stylecop-sa1402).
+[^stylecop-sa1649]: [StyleCop Analyzers, SA1649](../references/index.md#stylecop-sa1649).
+[^beck-1997]: [K. Beck, Smalltalk Best Practice Patterns](../references/index.md#beck-1997), pattern "Guard Clause".
+[^ms-ca1062]: [Microsoft Learn, CA1062](../references/index.md#ms-ca1062), rule properties: not enabled by default in .NET 10.
+[^ms-ide2003]: [Microsoft Learn, IDE2003](../references/index.md#ms-ide2003): the rule is experimental and subject to change or removal.
+[^roslyn-76222]: [dotnet/roslyn#76222](../references/index.md#roslyn-76222).
+[^roslyn-9d42b6a]: [dotnet/roslyn, commit 9d42b6a](../references/index.md#roslyn-9d42b6a), pull request #86568.
+[^ms-timeprovider]: [Microsoft Learn, TimeProvider Class](../references/index.md#ms-timeprovider), remarks: `FakeTimeProvider` for testing time-dependent code.
+[^ms-guid-createversion7]: [Microsoft Learn, Guid.CreateVersion7](../references/index.md#ms-guid-createversion7).
+[^ms-regex-source-generators]: [Microsoft Learn, .NET regular expression source generators](../references/index.md#ms-regex-source-generators).
+[^xunit-analyzers]: [xUnit.net analyzer rules](../references/index.md#xunit-analyzers): xUnit1030 and xUnit1051.
+[^vs-threading-vsthrd100]: [vs-threading, VSTHRD100](../references/index.md#vs-threading-vsthrd100).
+[^ms-high-performance-logging]: [Microsoft Learn, High-performance logging in .NET](../references/index.md#ms-high-performance-logging).
+[^ms-xmldoc-recommended-tags]: [Microsoft Learn, Recommended XML tags](../references/index.md#ms-xmldoc-recommended-tags): at a minimum, types and members have a `<summary>`.
+[^ms-ide0320]: [Microsoft Learn, IDE0320](../references/index.md#ms-ide0320), example.

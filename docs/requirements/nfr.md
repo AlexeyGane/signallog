@@ -6,32 +6,32 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 
 ## Summary
 
-| ID | Title | Area / quality characteristic | Target (short) | Status | Addressed by |
+| ID | Title | Quality characteristic (ISO/IEC 25010) or pillar (WAF) | Target (short) | Status | Addressed by |
 |---|---|---|---|---|---|
 | [NFR-COST-01](#nfr-cost-01) | Monthly run cost | Cost optimization (WAF) | ≤ USD 20/month; ≤ USD 30 in demo window | Agreed | [0000](../adr/0000-cost-optimization-strategy.md), [0006](../adr/0006-compute-hosting.md), [0007](../adr/0007-observability.md), [0008](../adr/0008-data-storage.md) |
 | [NFR-PERF-01](#nfr-perf-01) | Tick-to-screen latency | Performance efficiency — time behaviour | p95 ≤ 3 s | Proposed | [0015](../adr/0015-ui-and-real-time-push.md), [0018](../adr/0018-latency-and-freshness-targets.md) |
 | [NFR-PERF-02](#nfr-perf-02) | Tick-to-store latency | Performance efficiency — time behaviour | p95 ≤ 2 s warm; p99 ≤ 10 s with cold starts | Proposed | [0006](../adr/0006-compute-hosting.md), [0007](../adr/0007-observability.md), [0018](../adr/0018-latency-and-freshness-targets.md) |
 | [NFR-SEC-01](#nfr-sec-01) | No static secrets | Security — confidentiality | 0 secrets in code, config or pipelines for Azure access | Agreed | [0005](../adr/0005-identity-and-access.md), [0010](../adr/0010-api-management-ingestion-gateway.md) |
-| [NFR-SEC-02](#nfr-sec-02) | Least privilege | Security — authorization | Every role assignment declared in IaC at the narrowest scope | Agreed | [0005](../adr/0005-identity-and-access.md), [0015](../adr/0015-ui-and-real-time-push.md), [0016](../adr/0016-environments-and-infrastructure-as-code.md) |
+| [NFR-SEC-02](#nfr-sec-02) | Least privilege | Security — confidentiality, integrity | Every role assignment declared in IaC at the narrowest scope | Agreed | [0005](../adr/0005-identity-and-access.md), [0015](../adr/0015-ui-and-real-time-push.md), [0016](../adr/0016-environments-and-infrastructure-as-code.md) |
 | [NFR-SEC-03](#nfr-sec-03) | Supply-chain security | Security — integrity | No known high/critical vulnerability merged; dependencies and actions monitored | Agreed | [0002](../adr/0002-source-control-platform.md), [0004](../adr/0004-ci-cd-platform.md) |
 | [NFR-SEC-04](#nfr-sec-04) | Input validation at the boundary | Security — integrity | 100 % of ingress messages schema-validated before enqueue | Agreed | [0010](../adr/0010-api-management-ingestion-gateway.md) |
 | [NFR-REL-01](#nfr-rel-01) | No tick loss | Reliability — fault tolerance | 0 accepted ticks lost | Agreed | [0009](../adr/0009-event-driven-ingestion.md) |
 | [NFR-REL-02](#nfr-rel-02) | Resilience policies | Reliability — fault tolerance | Timeout, retry with jitter and circuit breaker on every upstream call | Agreed | [0013](../adr/0013-adapter-control-plane.md) |
-| [NFR-OPS-01](#nfr-ops-01) | End-to-end tracing | Operational excellence — observability | ≥ 99 % of stored ticks carry trace context end to end | Proposed | [0007](../adr/0007-observability.md), [0018](../adr/0018-latency-and-freshness-targets.md) |
-| [NFR-OPS-02](#nfr-ops-02) | Data freshness alerting | Operational excellence — monitoring | Alert ≤ 5 min after staleness breach while open; 0 alerts out of session or during venue halts | Proposed | [0007](../adr/0007-observability.md), [0013](../adr/0013-adapter-control-plane.md), [0017](../adr/0017-time-and-timezones.md), [0018](../adr/0018-latency-and-freshness-targets.md), [0019](../adr/0019-market-status-events.md) |
-| [NFR-OPS-03](#nfr-ops-03) | Operator can stop and start a source | Operational excellence — operability | ≤ 2 min, no deployment | Agreed | [0013](../adr/0013-adapter-control-plane.md) |
+| [NFR-OPS-01](#nfr-ops-01) | End-to-end tracing | Operational excellence (WAF) — observability | ≥ 99 % of stored ticks carry trace context end to end | Proposed | [0007](../adr/0007-observability.md), [0018](../adr/0018-latency-and-freshness-targets.md) |
+| [NFR-OPS-02](#nfr-ops-02) | Data freshness alerting | Operational excellence (WAF) — monitoring | Alert ≤ 5 min after staleness breach while open; 0 alerts out of session or during venue halts | Proposed | [0007](../adr/0007-observability.md), [0013](../adr/0013-adapter-control-plane.md), [0017](../adr/0017-time-and-timezones.md), [0018](../adr/0018-latency-and-freshness-targets.md), [0019](../adr/0019-market-status-events.md) |
+| [NFR-OPS-03](#nfr-ops-03) | Operator can stop and start a source | Operational excellence (WAF) — operability | ≤ 2 min, no deployment | Agreed | [0013](../adr/0013-adapter-control-plane.md) |
 | [NFR-MNT-01](#nfr-mnt-01) | Reviewability | Maintainability — analysability | 100 % of changes to `main` via PR with green checks | Agreed | [0002](../adr/0002-source-control-platform.md) |
 | [NFR-MNT-02](#nfr-mnt-02) | Backward-compatible evolution | Maintainability — modifiability | No consumer breaks on a minor contract version | Agreed | [0012](../adr/0012-message-contract-and-versioning.md) |
-| [NFR-DATA-01](#nfr-data-01) | Idempotent processing | Reliability — data integrity | N deliveries of one event → exactly 1 stored tick | Agreed | [0008](../adr/0008-data-storage.md), [0009](../adr/0009-event-driven-ingestion.md), [0012](../adr/0012-message-contract-and-versioning.md) |
-| [NFR-DATA-02](#nfr-data-02) | History retention | Functional suitability — completeness | Raw ticks 90 days; daily bars indefinitely | Agreed | [0008](../adr/0008-data-storage.md) |
-| [NFR-DATA-03](#nfr-data-03) | Unambiguous instrument identity | Functional suitability — correctness | 100 % of stored ticks resolve to one contract | Agreed | [0014](../adr/0014-instrument-domain-model.md) |
-| [NFR-DATA-04](#nfr-data-04) | Unambiguous timestamps | Functional suitability — correctness | 100 % of stored and transported timestamps are UTC instants | Agreed | [0017](../adr/0017-time-and-timezones.md) |
-| [NFR-DATA-05](#nfr-data-05) | Correct delivery volumes on DST days | Functional suitability — correctness | Volumes equal capacity × elapsed hours on 23/24/25-hour days | Agreed | [0014](../adr/0014-instrument-domain-model.md), [0017](../adr/0017-time-and-timezones.md) |
+| [NFR-DATA-01](#nfr-data-01) | Idempotent processing | Functional suitability — functional correctness | N deliveries of one event → exactly 1 stored tick | Agreed | [0008](../adr/0008-data-storage.md), [0009](../adr/0009-event-driven-ingestion.md), [0012](../adr/0012-message-contract-and-versioning.md) |
+| [NFR-DATA-02](#nfr-data-02) | History retention | Functional suitability — functional completeness | Raw ticks 90 days; daily bars indefinitely | Agreed | [0008](../adr/0008-data-storage.md) |
+| [NFR-DATA-03](#nfr-data-03) | Unambiguous instrument identity | Functional suitability — functional correctness | 100 % of stored ticks resolve to one contract | Agreed | [0014](../adr/0014-instrument-domain-model.md) |
+| [NFR-DATA-04](#nfr-data-04) | Unambiguous timestamps | Functional suitability — functional correctness | 100 % of stored and transported timestamps are UTC instants | Agreed | [0017](../adr/0017-time-and-timezones.md) |
+| [NFR-DATA-05](#nfr-data-05) | Correct delivery volumes on DST days | Functional suitability — functional correctness | Volumes equal capacity × elapsed hours on 23/24/25-hour days | Agreed | [0014](../adr/0014-instrument-domain-model.md), [0017](../adr/0017-time-and-timezones.md) |
 | [NFR-LEGAL-01](#nfr-legal-01) | Licensed data only | Compliance | 0 sources enabled without a recorded terms review | Agreed | [0011](../adr/0011-market-data-sourcing-and-licensing.md) |
 | [NFR-GOV-01](#nfr-gov-01) | Requirement-to-release traceability | Governance | 100 % of merged PRs linked to a work item | Agreed | [0003](../adr/0003-application-lifecycle-management.md) |
-| [NFR-DOC-01](#nfr-doc-01) | Public, versioned documentation | Maintainability — documentation | Docs built strictly and published from `main` | Agreed | [0020](../adr/0020-documentation-site.md) |
+| [NFR-DOC-01](#nfr-doc-01) | Public, versioned documentation | Maintainability — analysability | Docs built strictly and published from `main` | Agreed | [0020](../adr/0020-documentation-site.md) |
 | [NFR-DEMO-01](#nfr-demo-01) | Demo always works | Reliability — availability (demo) | Demo runs with no live source; smoke test green before every demo | Agreed | [0011](../adr/0011-market-data-sourcing-and-licensing.md) |
-| [NFR-DEL-01](#nfr-del-01) | Automated, repeatable deployment and environments | Operational excellence — deployment | Environment from scratch with 0 manual portal steps | Agreed | [0004](../adr/0004-ci-cd-platform.md), [0016](../adr/0016-environments-and-infrastructure-as-code.md) |
+| [NFR-DEL-01](#nfr-del-01) | Automated, repeatable deployment and environments | Operational excellence (WAF) — deployment | Environment from scratch with 0 manual portal steps | Agreed | [0004](../adr/0004-ci-cd-platform.md), [0016](../adr/0016-environments-and-infrastructure-as-code.md) |
 
 ## Definitions
 
@@ -85,9 +85,9 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 #### NFR-SEC-03 — Supply-chain security
 
 - **Scenario:** a dependency (NuGet package, GitHub Action) has a published vulnerability or is changed upstream.
-- **Target:** no pull request merges with a known high or critical vulnerability (NuGet audit `NU1903`/`NU1904` fail the build, [NuGet auditing](https://learn.microsoft.com/nuget/concepts/auditing-packages)); Dependabot monitors NuGet and GitHub Actions; secret scanning and push protection are on; CodeQL runs on pull requests ([ADR 0002](../adr/0002-source-control-platform.md), [ADR 0004](../adr/0004-ci-cd-platform.md)).
+- **Target:** no pull request merges with a known high or critical vulnerability (NuGet audit warnings `NU1903` and `NU1904`, high and critical, fail the build under `TreatWarningsAsErrors`, while `NU1901` and `NU1902` stay warnings[^ms-nuget-auditing]); Dependabot monitors NuGet and GitHub Actions; secret scanning and push protection are on; CodeQL runs on pull requests ([ADR 0002](../adr/0002-source-control-platform.md), [ADR 0004](../adr/0004-ci-cd-platform.md)).
 - **Verification:** CI build (NuGet audit, `TreatWarningsAsErrors`); repository security settings; CodeQL workflow.
-- **Action pinning:** every action is pinned to a full-length commit SHA and the repository policy requires it ([ADR 0004](../adr/0004-ci-cd-platform.md), pull request #6), as GitHub's [secure use reference](https://docs.github.com/en/actions/reference/security/secure-use) recommends. Workflow dependency lockfiles (public preview since 2026-10-14) are a review trigger in ADR 0004. *Updated 2026-11-04: the earlier "known gap" (major tags) was closed by pull request #6.*
+- **Action pinning:** every action is pinned to a full-length commit SHA and the repository policy requires it ([ADR 0004](../adr/0004-ci-cd-platform.md), pull request #6). GitHub's secure use reference recommends a SHA for repositories that do not use a workflow lockfile, and calls the lockfile the strongest protection, which supersedes SHA pinning.[^gh-actions-secure-use] Workflow dependency lockfiles entered public preview on 2026-10-14[^gh-2026-10-14-workflow-lockfiles] and became generally available, also on the Free plan, on 2026-10-28;[^gh-2026-10-28-workflow-lockfiles] they are a review trigger in ADR 0004. *Updated 2026-11-04: the earlier "known gap" (major tags) was closed by pull request #6.*
 - **Status:** Agreed.
 
 <a id="nfr-sec-04"></a>
@@ -129,9 +129,9 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 <a id="nfr-ops-02"></a>
 #### NFR-OPS-02 — Data freshness alerting
 
-- **Labels in ADRs:** "data freshness alerting" ([0007](../adr/0007-observability.md)); "staleness only during sessions" ([0017](../adr/0017-time-and-timezones.md)). Both are this requirement.
-- **Scenario:** an instrument stops receiving ticks.
-- **Target:** an alert fires within 5 minutes after the instrument's staleness exceeds its threshold (5 minutes as a placeholder until the per-product threshold is measured) **while its effective market status is `OPEN`** (trading session from reference data, overridden by venue-reported status, [0019](../adr/0019-market-status-events.md)); 0 alerts fire outside sessions, on weekends, on venue holidays or during a reported venue halt. Implemented as a metric alert evaluated every minute over a 5-minute window. **Proposed** — thresholds and their calibration in [ADR 0018](../adr/0018-latency-and-freshness-targets.md).
+- **Labels in ADRs:** "data freshness alerting" ([0007](../adr/0007-observability.md)); "[staleness](../domain/glossary.md#staleness) only during sessions" ([0017](../adr/0017-time-and-timezones.md)). Both are this requirement.
+- **Scenario:** an [instrument](../domain/glossary.md#instrument) stops receiving ticks.
+- **Target:** an alert fires within 5 minutes after the instrument's staleness exceeds its threshold (5 minutes as a placeholder until the per-product threshold is measured) **while its effective market status is `OPEN`** ([trading session](../domain/glossary.md#trading-session) from [reference data](../domain/glossary.md#reference-data), overridden by venue-reported status, [0019](../adr/0019-market-status-events.md)); 0 alerts fire outside sessions, on weekends, on venue holidays or during a reported venue halt. Implemented as a metric alert evaluated every minute over a 5-minute window. **Proposed** — thresholds and their calibration in [ADR 0018](../adr/0018-latency-and-freshness-targets.md).
 - **Verification:** replay a full month including a DST weekend and a venue holiday and count alerts (confirmation in [ADR 0017](../adr/0017-time-and-timezones.md)); runbook exercise from [ADR 0013](../adr/0013-adapter-control-plane.md).
 - **Status:** Proposed.
 
@@ -175,7 +175,7 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 #### NFR-DATA-02 — History retention
 
 - **Scenario:** a user asks for history of a contract.
-- **Target:** raw ticks are kept for 90 days (container TTL); daily bars per trading day are kept indefinitely ([ADR 0008](../adr/0008-data-storage.md)).
+- **Target:** raw ticks are kept for 90 days (container TTL); daily bars per [trading day](../domain/glossary.md#trading-day) are kept indefinitely ([ADR 0008](../adr/0008-data-storage.md)).
 - **Verification:** TTL setting in IaC; test that bars are produced from the change feed for every trading day with ticks.
 - **Status:** Agreed.
 
@@ -183,8 +183,8 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 #### NFR-DATA-03 — Unambiguous instrument identity
 
 - **Scenario:** a tick is stored or a price is shown.
-- **Target:** 100 % of stored ticks carry an `instrumentId` of the form `{MIC}.{productCode}.{deliveryPeriodId}` that resolves to exactly one contract in reference data, whose product lists that delivery period kind; relative tenors (`DA`, `M+1`, `Cal+1`) never appear in stored data ([ADR 0014](../adr/0014-instrument-domain-model.md)).
-- **Verification:** ingestion rejects unknown ids (integration test); unit tests for id parsing and tenor resolution with real dates.
+- **Target:** 100 % of stored ticks carry an `instrumentId` of the form `{MIC}.{productCode}.{deliveryPeriodId}` that resolves to exactly one contract in reference data, whose product lists that [delivery period](../domain/glossary.md#delivery-period) kind; relative tenors (`DA`, `M+1`, `Cal+1`) never appear in stored data ([ADR 0014](../adr/0014-instrument-domain-model.md)).
+- **Verification:** ingestion rejects unknown ids (integration test); unit tests for id parsing and [tenor](../domain/glossary.md#tenor) resolution with real dates.
 - **Status:** Agreed.
 
 <a id="nfr-data-04"></a>
@@ -199,7 +199,7 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 #### NFR-DATA-05 — Correct delivery volumes on DST days
 
 - **Scenario:** a volume or a number of hours is computed for a delivery period that contains a daylight-saving transition.
-- **Target:** delivered energy equals capacity × elapsed duration between the period's UTC boundaries ([BR-TIME-01](business-rules.md#br-time-01)): 1 MW delivers 23, 24 or 25 MWh per day, and periods of any kind follow from their extent ([ADR 0017](../adr/0017-time-and-timezones.md), [ADR 0014](../adr/0014-instrument-domain-model.md)).
+- **Target:** delivered energy equals capacity × elapsed duration between the period's UTC boundaries ([BR-TIME-01](business-rules.md#br-time-01)): 1 MW delivers 23, 24 or 25 MWh per day, and periods of any kind follow from their [extent](../domain/glossary.md#extent) ([ADR 0017](../adr/0017-time-and-timezones.md), [ADR 0014](../adr/0014-instrument-domain-model.md)).
 - **Verification:** unit tests with the real-date tables in ADR 0017 and ADR 0014 (for example, TTF October 2026 = 745 MWh, weekend starting 2026-10-24 = 49 MWh).
 - **Status:** Agreed.
 
@@ -209,7 +209,7 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 #### NFR-LEGAL-01 — Licensed data only
 
 - **Scenario:** a data source is enabled or price data enters the repository.
-- **Target:** 0 sources enabled without an entry in `docs/legal/data-sources.md` (source, terms URL, permitted use, review date); 0 raw licensed price series stored in the repository; every price shown carries its source kind (`LIVE` or `REPLAY`) ([ADR 0011](../adr/0011-market-data-sourcing-and-licensing.md)).
+- **Target:** 0 sources enabled without an entry in `docs/legal/data-sources.md` (source, terms URL, permitted use, review date); 0 raw licensed price series stored in the repository; every price shown carries its [source kind](../domain/glossary.md#source-kind) (`LIVE` or `REPLAY`) ([ADR 0011](../adr/0011-market-data-sourcing-and-licensing.md)).
 - **Verification:** pull request checklist for adapter changes; review of `contracts/reference/` contents.
 - **Status:** Agreed.
 
@@ -280,8 +280,12 @@ The catalogue of quality requirements referenced by the [ADRs](../adr/README.md)
 |---|---|
 | PERF-01, PERF-02, OPS-01, OPS-02 targets | Run the calibration procedure in [ADR 0018](../adr/0018-latency-and-freshness-targets.md) (User Story "Latency and freshness baseline") once the Azure environment exists; then mark Agreed |
 
-## Sources
+## See also
 
-- ISO/IEC 25010:2023, product quality model: https://www.iso.org/standard/78176.html
-- Azure Well-Architected Framework: https://learn.microsoft.com/azure/well-architected/
+- How characteristics and pillars are assigned: [requirements README](README.md#how-nfrs-are-written).
 - Vendor limits and recommendations behind individual targets are cited in the ADRs listed for each NFR.
+
+[^ms-nuget-auditing]: [Auditing package dependencies](../references/index.md#ms-nuget-auditing): `NU1901`–`NU1904` are low, moderate, high and critical; with `TreatWarningsAsErrors`, `WarningsNotAsErrors` keeps the lower codes from failing the build.
+[^gh-actions-secure-use]: [GitHub, Secure use reference](../references/index.md#gh-actions-secure-use).
+[^gh-2026-10-14-workflow-lockfiles]: [GitHub Changelog, 2026-10-14](../references/index.md#gh-2026-10-14-workflow-lockfiles).
+[^gh-2026-10-28-workflow-lockfiles]: [GitHub Changelog, 2026-10-28](../references/index.md#gh-2026-10-28-workflow-lockfiles).
