@@ -13,12 +13,12 @@ Source of truth: `contracts/reference/instruments.json` (added with the replay a
 | JKM LNG (Platts) Futures | IFEU | `JKM` | USD/MMBtu | 0.001 | 10,000 MMBtu | cash vs Platts JKM average[^spglobal-jkm] | 00:50–22:00 London (**Inferred** anchor, section 1.1) |
 | EEX THE Natural Gas Month Futures | XEEE | `G0BM`[^ecc-circular-2021-13] | EUR/MWh | 0.005 | 1 MW × hours of delivery | physical, THE[^trading-hub-europe-2021-10-01] | 08:00–18:00 Berlin (**unverified**) |
 
-Last trading day rules:
+[Last trading day](glossary.md#last-trading-day) rules:
 
 - **Brent:** last business day of the second month preceding the contract month (earlier if that is the business day before Christmas or New Year's Day).[^ice-brn]
 - **TTF:** 18:00 CET two UK business days before the first day of the delivery month.[^ice-tfm]
 - **JKM:** 15th calendar day of the month before the contract month, or the preceding business day.[^ice-jkm]
-- **THE month:** second exchange day before the first delivery day.[^eex-contract-specifications-0105a]
+- **THE month:** second exchange day before the first [delivery day](glossary.md#delivery-day).[^eex-contract-specifications-0105a]
 
 ### 1.1 Session anchor zones
 
@@ -36,14 +36,14 @@ The pages state the Sunday open in different zones: Brent at 23:00 London (pre-o
 
 ## 2. Power markets: settlement periods and labels
 
-Power is not in the current scope (oil, gas, LNG). These conventions are recorded because they shaped the time model; they become reference data if power products are added.
+Power is not in the current scope (oil, gas, LNG). These conventions are recorded because they shaped the time model; they become [reference data](glossary.md#reference-data) if power products are added.
 
 ### European day-ahead (SDAC, EPEX SPOT)
 
 - From delivery day **2025-10-01** the Single Day-Ahead Coupling clears prices per **15-minute** Market Time Unit: 96 periods on a normal day. On EPEX SPOT this covers 11 countries; Great Britain and Switzerland are not part of it.[^epex-2025-09-30-15-minute]
 - 60-minute contracts remain available to trading members; the clearing price is per quarter-hour.[^epex-2025-09-30-15-minute]
 - **Unverified:** whether EPEX SPOT publishes a 60-minute index after 2025-10-01 and how. One data vendor computes EPEX 60-minute values as the average of the four quarter-hour prices.[^montel-15-minute-sdac]
-- Before 2025-10-01 the auction was hourly. Hourly labels count local hours from 1 to 24; on the long day hour 3 (02:00–03:00) occurs twice and is labelled `3A` and `3B`; on the short day there is no hour 3. Quarter-hours inside the repeated hour are labelled `3A Q1` to `3A Q4` and `3B Q1` to `3B Q4`.[^epex-sftp-specifications]
+- Before 2025-10-01 the auction was hourly. Hourly labels count local hours from 1 to 24; on the long day hour 3 (02:00–03:00) occurs twice and is labelled `3A` and `3B`; on the [short day](glossary.md#short-day) there is no hour 3. Quarter-hours inside the repeated hour are labelled `3A Q1` to `3A Q4` and `3B Q1` to `3B Q4`.[^epex-sftp-specifications]
 
 Example, Berlin, delivery day 2026-10-25 (25 hours, 22:00Z on 24 Oct to 23:00Z on 25 Oct), hourly labels:
 
@@ -91,7 +91,7 @@ DST does not affect peak windows: 08:00–20:00 never contains a transition, so 
 
 ## 4. How SignalLog stores conventions
 
-A market convention is reference data with effective-dated versions (ADR 0017, section 5). Planned file `contracts/reference/market-conventions.json`:
+A [market convention](glossary.md#market-convention) is reference data with effective-dated versions (ADR 0017, section 5). Planned file `contracts/reference/market-conventions.json`:
 
 ```json
 {

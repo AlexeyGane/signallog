@@ -6,10 +6,10 @@ What a gas or power contract delivers, how long that is, and what traders mean b
 
 A trader who says "TTF day-ahead is 82.50 EUR/MWh" (an illustrative price) answers two questions at once:
 
-1. **Which contract?** The gas day of Monday 2026-11-09 on ICE Endex. This is an absolute fact and never changes.
-2. **Why that one?** Because on Friday 2026-11-06 the day-ahead is the next weekday. This is a relative label that points to a different contract every trading day.
+1. **Which contract?** The [gas day](glossary.md#gas-day) of Monday 2026-11-09 on ICE Endex. This is an absolute fact and never changes.
+2. **Why that one?** Because on Friday 2026-11-06 the day-ahead is the next weekday. This is a relative label that points to a different contract every [trading day](glossary.md#trading-day).
 
-SignalLog stores the first and computes the second. A stored price always names an absolute delivery period; "DA", "M+1", "Cal+1" and "front month" are labels resolved at read time.
+SignalLog stores the first and computes the second. A stored price always names an absolute [delivery period](glossary.md#delivery-period); "DA", "M+1", "Cal+1" and "[front month](glossary.md#front-month)" are labels resolved at read time.
 
 ## 2. Delivery periods on the in-scope venues
 
@@ -30,11 +30,11 @@ Up to 92 consecutive daily contracts can be listed. Unit of trading: 1 MW for ea
 
 ### ICE Endex — Dutch TTF Natural Gas Futures (monthly)
 
-Up to 156 consecutive month contracts. "Quarterly, seasonal, calendar, and any period of consecutive monthly contracts can be registered as a strip":[^ice-tfm-spec] a quarter is traded as three month contracts at one price, not as a contract of its own.
+Up to 156 consecutive month contracts. "Quarterly, seasonal, calendar, and any period of consecutive monthly contracts can be registered as a [strip](glossary.md#strip)":[^ice-tfm-spec] a quarter is traded as three month contracts at one price, not as a contract of its own.
 
 ### EEX — power futures
 
-Maturities: day, weekend, week, month, quarter, year, and for some markets season and fiscal year. For German power: the next 11 days, the next 2 weekends, the current and next 4 weeks, months, quarters and years (counts vary by market). EEX power futures use **cascading**, managed by the clearing house ECC:[^eex-power-futures] a year contract is replaced by its quarters and months as delivery approaches, a quarter by its months.
+Maturities: day, weekend, week, month, quarter, year, and for some markets season and fiscal year. For German power: the next 11 days, the next 2 weekends, the current and next 4 weeks, months, quarters and years (counts vary by market). EEX power futures use **[cascading](glossary.md#cascading)**, managed by the clearing house ECC:[^eex-power-futures] a year contract is replaced by its quarters and months as delivery approaches, a quarter by its months.
 
 ### Oil and LNG
 
@@ -58,9 +58,9 @@ The identifier format is defined in ADR 0014. Summary:
 | Gas year | `2026-GY` | October 2026–September 2027 |
 | Calendar year | `2027` | January–December 2027 |
 
-Full instrument ids: `NDEX.TFM.2026-12`, `NDEX.TFM.2026-12-25-WE`, `XEEE.<code>.2027-Q1`.
+Full [instrument](glossary.md#instrument) ids: `NDEX.TFM.2026-12`, `NDEX.TFM.2026-12-25-WE`, `XEEE.<code>.2027-Q1`.
 
-**Why the weekend is anchored on its first day.** The weekend starting Friday 2026-12-25 runs to Tuesday 2026-12-29 06:00, because 25 and 28 December 2026 are UK bank holidays (Boxing Day falls on a Saturday and moves to Monday).[^gov-uk-bank-holidays] Encoding the end date would make the id depend on a holiday calendar; anchoring on the first day keeps it unique and short. The extent is stored with the contract.
+**Why the weekend is anchored on its first day.** The weekend starting Friday 2026-12-25 runs to Tuesday 2026-12-29 06:00, because 25 and 28 December 2026 are UK bank holidays (Boxing Day falls on a Saturday and moves to Monday).[^gov-uk-bank-holidays] Encoding the end date would make the id depend on a holiday calendar; anchoring on the first day keeps it unique and short. The [extent](glossary.md#extent) is stored with the contract.
 
 ## 4. Lengths and volumes
 
@@ -107,7 +107,7 @@ Note the first two rows: on the same day, "M+1" is December for TTF and January 
 
 ### Continuous series and rolls
 
-A continuous series for a tenor is the price of the resolved instrument over time. When the resolved instrument changes, the series **rolls**:
+A [continuous series](glossary.md#continuous-series) for a [tenor](glossary.md#tenor) is the price of the resolved instrument over time. When the resolved instrument changes, the series **rolls**:
 
 ```mermaid
 flowchart LR
@@ -127,7 +127,7 @@ The jump at a roll is real: two different contracts have two different prices. S
 
 ## 7. Out of scope for now
 
-- **Power day-ahead auctions** (EPEX SPOT, SDAC): one price per 15-minute period of a delivery day ([market conventions](market-conventions.md)). The shape of the data is a curve per day, not a price per contract, so it needs its own decision.
+- **Power day-ahead auctions** (EPEX SPOT, SDAC): one price per 15-minute period of a [delivery day](glossary.md#delivery-day) ([market conventions](market-conventions.md)). The shape of the data is a curve per day, not a price per contract, so it needs its own decision.
 - **Within-day gas**: continuous spot trading for the current gas day; deferred with spot markets.
 
 ## 8. Open questions
@@ -141,7 +141,7 @@ The jump at a roll is real: two different contracts have two different prices. S
 
 ## See also
 
-- Last trading day rules of Brent and TTF: [market conventions](market-conventions.md#1-instruments-in-the-starter-set), section 1.
+- [Last trading day](glossary.md#last-trading-day) rules of Brent and TTF: [market conventions](market-conventions.md#1-instruments-in-the-starter-set), section 1.
 
 [^ice-tfe-spec]: [ICE Endex, TTF daily futures specification](../references/index.md#ice-tfe-spec): contract series, number of contracts, unit of trading and last trading day.
 [^ice-tfm-spec]: [ICE Endex, TTF futures specification](../references/index.md#ice-tfm-spec), listing cycle.

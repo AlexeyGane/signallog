@@ -1,6 +1,6 @@
 # Replay price generator
 
-How the replay adapter turns a seed, an instrument and a moment in time into a believable last price: why the price is a pure function rather than a random walk, how the random numbers are made without `System.Random`, how cosine interpolation smooths them, and how the result is kept inside a band and on the tick grid. The decision to use replay as the default source is in [ADR 0011](../adr/0011-market-data-sourcing-and-licensing.md) and on [Market data sources](market-data-sources.md); the code is `ReplaySource` in `src/SignalLog.Adapters.Core`. Figures on this page were computed on 2026-11-12 by running that code.
+How the replay adapter turns a seed, an [instrument](glossary.md#instrument) and a moment in time into a believable last price: why the price is a pure function rather than a random walk, how the random numbers are made without `System.Random`, how cosine interpolation smooths them, and how the result is kept inside a band and on the tick grid. The decision to use replay as the default source is in [ADR 0011](../adr/0011-market-data-sourcing-and-licensing.md) and on [Market data sources](market-data-sources.md); the code is `ReplaySource` in `src/SignalLog.Adapters.Core`. Figures on this page were computed on 2026-11-12 by running that code.
 
 ## 1. The problem: a price without memory
 
@@ -237,7 +237,7 @@ The generator draws a believable line, not a model of the market:
 - There are no jumps (Brent fell more than 8 % on one day in early November 2026), no fat tails and no changes in volatility.
 - There are no trading sessions, weekends, holidays or outages, so the alerting rules of [ADR 0017](../adr/0017-time-and-timezones.md) cannot be exercised yet.
 
-The next replay stories address these: reference data for instruments, calibration from public statistics ([market data sources](market-data-sources.md), section 2), sessions and injected faults. They can replace the formula without touching anything else, because it sits behind `IMarketDataSource`.
+The next replay stories address these: [reference data](glossary.md#reference-data) for instruments, calibration from public statistics ([market data sources](market-data-sources.md), section 2), sessions and injected faults. They can replace the formula without touching anything else, because it sits behind `IMarketDataSource`.
 
 ## See also
 

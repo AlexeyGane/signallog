@@ -22,7 +22,7 @@ The EU and the UK change at the same UTC instant, 01:00 UTC on the last Sundays 
 
 ## 3. Gaps and overlaps
 
-Policy: lenient resolution (NodaTime `InZoneLeniently`): an ambiguous local time resolves to the earlier occurrence, and a skipped one is shifted forward by the length of the gap.[^nodatime-resolvers]
+Policy: [lenient resolution](glossary.md#lenient-resolution) (NodaTime `InZoneLeniently`): an ambiguous local time resolves to the earlier occurrence, and a skipped one is shifted forward by the length of the gap.[^nodatime-resolvers]
 
 **Overlap — Berlin, 2026-10-25.** Local 02:00–02:59 happens twice:
 
@@ -59,7 +59,7 @@ None of SignalLog's current boundaries (06:00, 08:00, 18:00, 20:00, 22:00, 00:00
 
 > Delivered energy = capacity × elapsed duration of the delivery period between its two UTC boundaries.
 
-Gas delivery days run from 06:00 to 06:00 local time: the EU network code defines the gas day as 05:00 to 05:00 UTC in winter and 04:00 to 04:00 UTC in summer.[^eu-regulation-2017-459] The transition at 02:00/03:00 therefore falls into the gas day **labelled with the previous date**:
+Gas delivery days run from 06:00 to 06:00 local time: the EU network code defines the [gas day](glossary.md#gas-day) as 05:00 to 05:00 UTC in winter and 04:00 to 04:00 UTC in summer.[^eu-regulation-2017-459] The transition at 02:00/03:00 therefore falls into the gas day **labelled with the previous date**:
 
 | Gas day | Starts (local → UTC) | Ends (local → UTC) | Length | 1 MW delivers |
 |---|---|---|---|---|
@@ -69,7 +69,7 @@ Gas delivery days run from 06:00 to 06:00 local time: the EU network code define
 
 A month is the sum of its days: October 2026 = 31 × 24 + 1 = 745 MWh per MW; March 2026 = 743 MWh per MW.
 
-The rule is the same for power with a 00:00–24:00 delivery day, and for any settlement period: counting real periods in UTC gives 23/24/25 hours, 46/48/50 half-hours, 92/96/100 quarter-hours.
+The rule is the same for power with a 00:00–24:00 [delivery day](glossary.md#delivery-day), and for any settlement period: counting real periods in UTC gives 23/24/25 hours, 46/48/50 half-hours, 92/96/100 quarter-hours.
 
 ### Computing it: hourly slots in UTC
 
@@ -95,7 +95,7 @@ Each UTC instant maps to exactly one local time, so no gap or overlap ever needs
 
 Group the UTC slots by their local start hour.
 
-**Long day — gas day 2026-10-24, Berlin, 1 MW:**
+**[Long day](glossary.md#short-day) — gas day 2026-10-24, Berlin, 1 MW:**
 
 | Slot (UTC) | Local start | Offset |
 |---|---|---|
@@ -123,7 +123,7 @@ No slot starts at local 02:00 → **0 MWh**: the hour did not exist. The day tot
 - ICE sessions do not share one anchor zone. **Inferred** from ICE product pages read on 2026-10-30 and 2026-11-07[^ice-brn][^ice-tfm][^ice-jkm]: Brent is anchored to New York (20:00–18:00, next day), TTF and JKM to London (00:50–22:00). Evidence and the open check are in [market conventions](market-conventions.md#11-session-anchor-zones). The earlier inference that all ICE energy sessions follow New York time held for Brent only.
 - In the weeks when US and UK clocks change on different dates, a New York-anchored session moves by one hour against London and a London-anchored one against New York.
 - The 22-hour Brent session (20:00–18:00 New York) lasts 21 or 23 hours on a transition night.
-- A tick belongs to the trading day of the session containing it: Sunday 22:30 New York time belongs to Monday.
+- A tick belongs to the [trading day](glossary.md#trading-day) of the session containing it: Sunday 22:30 New York time belongs to Monday.
 - Daily bars are keyed by trading day, not by UTC date.
 
 ## 6. Where conversions happen

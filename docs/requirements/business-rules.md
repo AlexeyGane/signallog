@@ -54,7 +54,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 
 - **Rule:** a gas delivery day runs from 06:00 to 06:00 local time of the delivery zone (TTF, THE); a power delivery day runs from 00:00 to 24:00 local time. A delivery day is labelled with the date on which it starts.
 - **Example:** gas day 2026-10-24 runs from 2026-10-24 06:00 to 2026-10-25 06:00 and lasts 25 hours, because the October transition falls inside it; gas day 2026-03-28 lasts 23 hours.
-- **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §3; [glossary](../domain/glossary.md#time-and-delivery).
+- **Decided in:** [ADR 0017](../adr/0017-time-and-timezones.md) §3; glossary: [delivery day](../domain/glossary.md#delivery-day), [gas day](../domain/glossary.md#gas-day).
 - **Verified by:** unit tests of delivery-day enumeration across both transitions.
 - **Status:** Agreed.
 
@@ -264,7 +264,7 @@ The catalogue of domain rules that SignalLog must obey regardless of technology:
 #### BR-SRC-02 — Derived statistics only
 
 - **Rule:** licensed price data enters the repository only as derived calibration statistics (price level, volatility, tick intervals). Raw licensed series and data of former employers are never stored in the repository.
-- **Decided in:** [ADR 0011](../adr/0011-market-data-sourcing-and-licensing.md); [glossary](../domain/glossary.md#prices-and-data) (calibration parameters); [market data sources](../domain/market-data-sources.md).
+- **Decided in:** [ADR 0011](../adr/0011-market-data-sourcing-and-licensing.md); [glossary: calibration parameters](../domain/glossary.md#calibration-parameters); [market data sources](../domain/market-data-sources.md).
 - **Verified by:** review of `contracts/reference/` contents.
 - **Status:** Agreed.
 

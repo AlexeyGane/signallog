@@ -148,15 +148,15 @@ classDiagram
 ## Invariants
 
 1. Every stored timestamp is an instant in UTC. Local times exist only in reference-data rules and in labels of projections.
-2. `InstrumentId` is `{MIC}.{productCode}.{deliveryPeriodId}`; the MIC and product code must exist in reference data and the product must list the period kind. Relative tenors are never part of an id.
-3. Prices are `decimal`, never floating point; a price is a multiple of the product's tick size.
-4. A delivery day's length is the elapsed time between its two UTC boundaries; volumes follow BR-TIME-01.
-5. A tick belongs to the trading day of the session that contains its `eventTime`; a tick outside every session is flagged, not silently assigned.
+2. `InstrumentId` is `{MIC}.{productCode}.{deliveryPeriodId}`; the MIC and [product code](glossary.md#product-code) must exist in [reference data](glossary.md#reference-data) and the product must list the period kind. Relative tenors are never part of an id.
+3. Prices are `decimal`, never floating point; a price is a multiple of the product's [tick size](glossary.md#tick-size).
+4. A [delivery day](glossary.md#delivery-day)'s length is the elapsed time between its two UTC boundaries; volumes follow BR-TIME-01.
+5. A tick belongs to the [trading day](glossary.md#trading-day) of the session that contains its `eventTime`; a tick outside every session is flagged, not silently assigned.
 6. Market conventions are effective-dated; a report uses the version valid for its delivery date and records that version and the tzdb version.
 7. NodaTime types do not cross the domain boundary; contracts use [ISO 8601](../standards/concepts-and-sources.md#iso-8601) strings and `DateTimeOffset`.
 
 ## Open questions
 
-- Holiday calendars per venue: source and format (needed for staleness and contract expiry).
+- Holiday calendars per venue: source and format (needed for [staleness](glossary.md#staleness) and contract expiry).
 - Venue rules for `DA`, `BOW`, `WDNW` and `BOM` per product beyond TTF (see [tenors and delivery periods](tenors-and-delivery-periods.md)).
 - Whether power products enter scope; if so, conventions for EPEX and GB (see [market conventions](market-conventions.md)).

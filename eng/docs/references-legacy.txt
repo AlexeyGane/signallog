@@ -24,7 +24,6 @@ docs/adr/0018-latency-and-freshness-targets.md
 docs/adr/0019-market-status-events.md
 docs/adr/0020-documentation-site.md
 docs/adr/README.md
-docs/domain/glossary.md
 docs/fun-facts/index.md
 docs/fun-facts/ru.md
 docs/note.md

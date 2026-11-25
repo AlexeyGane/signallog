@@ -261,12 +261,47 @@ tier      = 1
 stability = "pinned"
 
 [[source]]
+id        = "nist-sp-811"
+type      = "report"
+title     = "Guide for the Use of the International System of Units (SI)"
+author    = ["Ambler Thompson", "Barry N. Taylor"]
+publisher = "National Institute of Standards and Technology (NIST)"
+number    = "Special Publication 811"
+issued    = "2008"
+url       = "https://www.nist.gov/pml/special-publication-811"
+tier      = 1
+stability = "pinned"
+note      = "the page says the guide is not yet updated for the SI changes of 2019-05-20"
+
+[[source]]
 id        = "iso-10383"
 type      = "standard"
 title     = "ISO 10383 — Market Identifier Codes"
 publisher = "ISO 20022 Registration Authority (SWIFT)"
 url       = "https://www.iso20022.org/market-identifier-codes"
 accessed  = "2026-11-20"
+tier      = 1
+stability = "living"
+
+[[source]]
+id        = "eu-regulation-2017-590"
+type      = "legislation"
+title     = "Commission Delegated Regulation (EU) 2017/590 of 28 July 2016 supplementing Regulation (EU) No 600/2014 with regard to regulatory technical standards for the reporting of transactions to competent authorities"
+publisher = "Official Journal of the European Union"
+issued    = "2016-07-28"
+url       = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0590"
+accessed  = "2026-11-25"
+tier      = 1
+stability = "pinned"
+note      = "known as RTS 22; read in the UK retained version at legislation.gov.uk/eur/2017/590/annex/I, because EUR-Lex could not be reached"
+
+[[source]]
+id        = "fix-latest-exchange"
+type      = "standard"
+title     = "FIX Latest — datatype Exchange"
+publisher = "FIX Trading Community"
+url       = "https://orchimate.org/fixtrading/fix-latest/datatypes/Exchange"
+accessed  = "2026-11-25"
 tier      = 1
 stability = "living"
 
