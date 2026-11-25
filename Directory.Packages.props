@@ -29,6 +29,6 @@
     <PackageVersion Include="xunit.v3" Version="4.0.3" />
     <!-- JSON Schema 2020-12 validation in the contract tests (ADR 0012); the version is kept current by Dependabot -->
     <PackageVersion Include="JsonSchema.Net" Version="9.7.0" />
-    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="11.0.1" />
   </ItemGroup>
 </Project>
