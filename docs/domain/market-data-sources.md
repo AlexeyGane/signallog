@@ -76,8 +76,8 @@ Every layer above carries the same five kinds of information. SignalLog's contra
 Confirmations of existing decisions:
 
 - **Two timestamps.** Vendors separate venue time (`ts_event`) and capture time (`ts_recv`), as SignalLog separates `eventTimeUtc` and `receivedTimeUtc` (ADR 0017).
-- **Exact prices.** Vendors use fixed-point integers; SignalLog uses `decimal` constrained to the tick size. An adapter converts explicitly (`price × 1e-9`, then validates against the tick size).
-- **Instrument identity by venue.** Vendors key instruments by venue dataset, as SignalLog keys them by MIC.
+- **Exact prices.** Vendors use fixed-point integers; SignalLog uses `decimal` constrained to the [tick size](glossary.md#tick-size). An adapter converts explicitly (`price × 1e-9`, then validates against the tick size).
+- **[Instrument](glossary.md#instrument) identity by venue.** Vendors key instruments by venue dataset, as SignalLog keys them by MIC.
 
 ## 4. Venues, segments and identifiers
 
@@ -114,8 +114,8 @@ They are therefore different instruments: `NDEX.TFM.<period>` and `IFEU.TFN.<per
 Former employer data seen by the project author (volume forecasts and deal prices, not market data) is **not** used in SignalLog: it is confidential and it is not market data. It confirmed requirements that the model must support:
 
 - **Units and currencies per product.** Some gas products are quoted in pence per therm, not in pounds (**Inferred** for ICE UK NBP; to verify in the contract specification before such a product is added). A currency `GBX` and unit `therm` would be required.
-- **Effective-dated reference data.** Hub codes change: French gas zones were merged into a single trading point (**Inferred**: November 2018; to verify), yet older data still carried the old zone codes. Hub reference data needs validity dates, like market conventions in ADR 0017.
-- **Delivery periods as start and end dates.** Forecast observations carried a start and an end date per period, which matches the extent of a `DeliveryPeriod` in ADR 0014.
+- **Effective-dated [reference data](glossary.md#reference-data).** Hub codes change: French gas zones were merged into a single trading point (**Inferred**: November 2018; to verify), yet older data still carried the old zone codes. Hub reference data needs validity dates, like market conventions in ADR 0017.
+- **Delivery periods as start and end dates.** Forecast observations carried a start and an end date per period, which matches the [extent](glossary.md#extent) of a `DeliveryPeriod` in ADR 0014.
 - **IEC 62325 (ENTSO-E).** The IEC framework for energy market communications; ENTSO-E's library lists IEC 62325-451-6 for the publication of market information, which the Transparency Platform uses.[^entsoe-edi-library] Relevant only if power enters scope.
 
 ## 6. Open questions
