@@ -15,11 +15,11 @@ A rule is enforced by one of three things. The difference matters: a rule that o
 
 | Enforcer | What it is | What it catches |
 |---|---|---|
-| **Build** | `dotnet build` with `TreatWarningsAsErrors`, `AnalysisLevel` `latest-recommended`, `EnforceCodeStyleInBuild`, `GenerateDocumentationFile`, `Nullable` and the banned-API analyzer (`Directory.Build.props`); two rules of StyleCop.Analyzers and one of Microsoft.VisualStudio.Threading.Analyzers (`Directory.Packages.props`) | Every compiler and analyzer diagnostic at warning or error severity: nullability, the recommended .NET code-quality rules (`CA*`) and the ones `.editorconfig` raises to `warning`, the code-style rules whose severity in `.editorconfig` is `warning` (`IDE*`, including the naming rules), missing XML comments on public members (`CS1591`), banned APIs (`RS0030`), one type per file (`SA1402`, `SA1649`), no `async void` (`VSTHRD100`), the xUnit analyzers in test projects |
-| **Format** | `dotnet format SignalLog.slnx --verify-no-changes` | Whitespace (indentation, braces on their own lines, trailing spaces, blank lines between `using` groups), the order of `using` directives, and the code-style rules `IDE0049` and `IDE0003`, which the build does not report |
+| **Build** | `dotnet build` with `TreatWarningsAsErrors`, `AnalysisLevel` `latest-recommended`, `EnforceCodeStyleInBuild`, `GenerateDocumentationFile`, `Nullable`, `WarningsAsErrors` for `IDE0320` and the banned-API analyzer (`Directory.Build.props`); two rules of StyleCop.Analyzers and one of Microsoft.VisualStudio.Threading.Analyzers (`Directory.Packages.props`) | Every compiler and analyzer diagnostic at warning or error severity: nullability, the recommended .NET code-quality rules (`CA*`) and the ones `.editorconfig` raises to `warning`, the code-style rules whose severity in `.editorconfig` is `warning` (`IDE*`, including the naming rules), lambdas that can be `static` (`IDE0320`, raised in the compiler options), missing XML comments on public members (`CS1591`), banned APIs (`RS0030`), one type per file (`SA1402`, `SA1649`), no `async void` (`VSTHRD100`), the xUnit analyzers in test projects |
+| **Format** | `dotnet format SignalLog.slnx --verify-no-changes` | Whitespace (indentation, braces on their own lines, trailing spaces, blank lines between `using` groups), the order of `using` directives, and the code-style rules `IDE0049` and `IDE0003`, which the build cannot report: Microsoft Learn says they only surface in the IDE, even with code-style analysis on build |
 | **Review** | The owner reading the pull request, file by file ([change workflow, section 5](change-workflow.md#5-review-gate-a-resolved-thread-per-file)) | Everything else, including every `.editorconfig` preference at severity `silent` or `suggestion`: the editor may show it, nothing blocks it |
 
-Both Build and Format run in the `build` job of `ci.yml`, which every pull request must pass, and on the owner's machine before every commit (`Invoke-SolutionCheck`). The *Enforced by* entries below were checked with .NET SDK 10.0.402, on 2026-11-15, on 2026-11-19 after rules were moved from the review to the build, and on 2026-11-22 after the review of that change: each rule was broken on purpose in a probe file and the build or `dotnet format` was run; [Appendix A](#appendix-a-how-the-enforcement-was-checked) lists every probe and its result.
+Both Build and Format run in the `build` job of `ci.yml`, which every pull request must pass, and on the owner's machine before every commit (`Invoke-SolutionCheck`). The *Enforced by* entries below were checked with .NET SDK 10.0.402, on 2026-11-15, on 2026-11-19 after rules were moved from the review to the build, on 2026-11-22 after the review of that change, and on 2026-11-25 for `IDE0320`: each rule was broken on purpose in a probe file and the build or `dotnet format` was run; [Appendix A](#appendix-a-how-the-enforcement-was-checked) lists every probe and its result.
 
 A code-style rule (`IDE*`) is raised to the build by the severity suffix of its option in `.editorconfig`, for example `csharp_style_namespace_declarations = file_scoped:warning`. A line `dotnet_diagnostic.IDE0161.severity = warning` alone did not make the rule fail the build in the probes.
 
@@ -73,8 +73,8 @@ public AdapterRunner(IMarketDataSource source, ITickPublisher publisher, TimePro
 | Explicit types everywhere: no `var`. The type on the left is the documentation of the line | Build (`IDE0008`) |
 | `new()` without the type name when the type is already on the left: `List<CloudEvent<PriceTickData>> events = new(ticks.Count);` | Build (`IDE0090`) |
 | A return value that is ignored on purpose is discarded explicitly: `_ = activity.SetTag(...)` | Build (`IDE0058`); off for `tests/**`, where `Assert` methods return the checked value and a test needs only the check |
-| Language keywords for built-in types (`string`, `int`), not `String`, `Int32` | Format (`IDE0049`; the build does not report it, see Appendix A) |
-| No `this.` qualification | Format (`IDE0003`; the build does not report it, see Appendix A) |
+| Language keywords for built-in types (`string`, `int`), not `String`, `Int32` | Format (`IDE0049`). The build cannot report it: the rule only surfaces in the IDE, even with code-style analysis on build, and `dotnet format` runs the IDE analyzers |
+| No `this.` qualification | Format (`IDE0003`). The build cannot report it, for the same reason as `IDE0049` |
 
 ## 5. Naming
 
@@ -107,7 +107,7 @@ The naming rules in `.editorconfig` have the severity `warning`, so a wrong name
 | Fields that are assigned only in the constructor are `readonly` | Build (`IDE0044`, severity `warning`) |
 | A member that uses no instance state is `static` | Build (`CA1822`) |
 | Local functions that capture nothing are `static` | Build (`IDE0062`, severity `warning`) |
-| Lambdas that capture nothing are `static`: `Select(static e => e.Id)` | Review. The option is set to `true:warning`, but `IDE0320` reported nothing in the build or in `dotnet format`, also for the example from its documentation (Appendix A). A rule of the repository's own analyzer is to replace it (AB#38) |
+| Lambdas that capture nothing are `static`: `Select(static e => e.Id)` | Build (`IDE0320`). The analyzer reports it at the severity Hidden whatever `.editorconfig` says (dotnet/roslyn#76222), so `Directory.Build.props` adds `IDE0320` to `WarningsAsErrors`, and the option keeps the severity `true:warning`, without which the analyzer skips the analysis (Appendix A). `dotnet format` does not report it |
 | Accessibility modifiers are always written | Build (`IDE0040`) |
 
 ## 7. Numbers, text and culture
@@ -232,7 +232,7 @@ There is no suppression in the code today, and a new one is an exception that th
 
 ## Appendix A. How the enforcement was checked
 
-On 2026-11-15, 2026-11-19 and 2026-11-22, with .NET SDK 10.0.402, each rule below was broken on purpose in a probe file added to a copy of the repository (`src/SignalLog.Adapters.Core`, `src/SignalLog.Adapters` for logging, `tests/SignalLog.Adapters.Tests` for the xUnit rules), and the project was built in Release or checked with `dotnet format --verify-no-changes`. *Clean* means the build or the format check passed: only the review catches that rule.
+On 2026-11-15, 2026-11-19, 2026-11-22 and 2026-11-25, with .NET SDK 10.0.402, each rule below was broken on purpose in a probe file added to a copy of the repository (`src/SignalLog.Adapters.Core`, `src/SignalLog.Adapters` for logging, `tests/SignalLog.Adapters.Tests` for the xUnit rules), and the project was built in Release or checked with `dotnet format --verify-no-changes`. *Clean* means the build or the format check passed: only the review catches that rule.
 
 | Probe | Build | `dotnet format` |
 |---|---|---|
@@ -252,7 +252,9 @@ On 2026-11-15, 2026-11-19 and 2026-11-22, with .NET SDK 10.0.402, each rule belo
 | A local function that captures nothing, not `static` | error `IDE0062` | — |
 | `this._x` | clean | error `IDE0003` |
 | `Int32` instead of `int` | clean | error `IDE0049` |
-| A lambda that captures nothing, not `static` (`M(x => x + 1)`, the example of the `IDE0320` page) | clean | clean |
+| A lambda that captures nothing, not `static` (`M(x => x + 1)`, the example of the `IDE0320` page), with `WarningsAsErrors` for `IDE0320` | error `IDE0320` | clean |
+| The same lambda without `WarningsAsErrors` (2026-11-22, before the workaround) | clean | clean |
+| The same lambda with `WarningsAsErrors`, and the option `true`, `true:suggestion` or `true:silent` instead of `true:warning` | clean | — |
 | `Guid.NewGuid()`, `DateTime.UtcNow` | error `RS0030` | — |
 | An ignored return value without `_ =` in `src` | error `IDE0058` | — |
 | Dereferencing a `string?` | error `CS8602` | — |
@@ -300,6 +302,8 @@ Checked on 2026-11-15.
 - Microsoft Learn, `Guid.CreateVersion7` method: https://learn.microsoft.com/en-us/dotnet/api/system.guid.createversion7
 - xUnit.net analyzers, xUnit1030 "Do not call ConfigureAwait in test method" and xUnit1051 "Calls to methods which accept CancellationToken should use TestContext.Current.CancellationToken": https://xunit.net/xunit.analyzers/rules/
 - Microsoft Learn, *Make anonymous function static (IDE0320)*, checked on 2026-11-22: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0320
+- Microsoft Learn, *Use language keywords instead of framework type names for type references (IDE0049)* and *Member-access qualification preferences (IDE0003 and IDE0009)* (the rules only surface in the IDE), checked on 2026-11-25: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0049, https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0003-ide0009
+- GitHub, *dotnet/roslyn#76222 IDE0320 not enabled when dotnet_analyzer_diagnostic.severity = error* and the fix *dotnet/roslyn#86568 Respect the configured severity for IDE0320* (merged on 2026-11-23, after SDK 10.0.402), checked on 2026-11-25: https://github.com/dotnet/roslyn/issues/76222, https://github.com/dotnet/roslyn/pull/86568
 - Microsoft, vs-threading analyzers, *VSTHRD100 Avoid async void methods*, checked on 2026-11-22: https://microsoft.github.io/vs-threading/analyzers/VSTHRD100.html
 - StyleCop Analyzers, *SA1402 FileMayOnlyContainASingleType* and *SA1649 FileNameMustMatchTypeName*, checked on 2026-11-22: https://dotnetanalyzers.github.io/StyleCopAnalyzers/SA1402.html, https://dotnetanalyzers.github.io/StyleCopAnalyzers/SA1649.html
 - K. Beck, *Smalltalk Best Practice Patterns*, Prentice Hall, 1997, ISBN 978-0-13-476904-2, "Guard Clause"

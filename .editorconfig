@@ -119,6 +119,8 @@ csharp_style_prefer_switch_expression = true:suggestion
 csharp_style_conditional_delegate_call = true:suggestion
 
 # Modifier preferences
+# Keep :warning: IDE0320 fails the build through WarningsAsErrors in Directory.Build.props, and without an explicit
+# severity the analyzer skips the analysis in the build (coding standard, Appendix A).
 csharp_prefer_static_anonymous_function = true:warning
 csharp_prefer_static_local_function = true:warning
 csharp_preferred_modifier_order = public,private,protected,internal,file,const,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,required,volatile,async:suggestion
