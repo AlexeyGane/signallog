@@ -15,6 +15,10 @@
     <!-- Needed for two rules of the coding standard: CS1591 (an XML comment on every public member) and IDE0005
          (no unused using directive), which the build reports only when it generates documentation files. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- IDE0320 (a lambda that captures nothing is static) always reports at the severity Hidden, whatever
+         .editorconfig says (dotnet/roslyn#76222, fixed in dotnet/roslyn#86568 after SDK 10.0.402). A severity in the
+         compiler options still applies, so the build fails on it; .editorconfig keeps the option at true:warning. -->
+    <WarningsAsErrors>$(WarningsAsErrors);IDE0320</WarningsAsErrors>
     <!-- Supply chain (NFR-SEC-03): audit direct and transitive packages; high and critical advisories fail the build. -->
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>

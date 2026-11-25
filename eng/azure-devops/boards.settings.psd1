@@ -376,6 +376,13 @@
                             Tags               = 'ADR-0002; ADR-0003'
                             AcceptanceCriteria = 'Two changes can run at the same time in two working copies (git worktree) of one repository: Update-MainBranch fetches origin/main, then switches to main and pulls in the copy that has main checked out, or detaches HEAD at origin/main when another copy has main; Start-Change creates a new change branch from origin/main and works from a detached HEAD; Test-ChangeBranch names a detached HEAD in its message; Pester tests cover the copy that owns main, the second copy, a single copy, a failed fetch and the start from a detached HEAD; docs/standards/change-workflow.md describes the two copies, the rule that two open changes share no file, locks and merge order; boards.settings.psd1 carries the acceptance criteria of AB#50 and AB#53 that are on the board; the tooling tests pass.'
                         }
+                        @{
+                            Type               = 'User Story'
+                            Title              = 'Fail the build on lambdas that can be static (IDE0320)'
+                            Area               = 'Platform'
+                            Tags               = 'ADR-0004'
+                            AcceptanceCriteria = 'IDE0320 (a lambda or an anonymous method that captures nothing is static) fails the build: Directory.Build.props adds IDE0320 to WarningsAsErrors with a comment that names dotnet/roslyn#76222, the bug that keeps IDE0320 at the severity Hidden; .editorconfig keeps csharp_prefer_static_anonymous_function = true:warning with a comment that the workaround needs the explicit severity.<br><br>Appendix A of the coding standard has the probes: the build fails on a lambda that captures nothing, and it does not without the explicit severity; the probe also runs on the owner''s Windows machine. The rule says Build, and the entries for IDE0003 and IDE0049 give the reason that they stay with dotnet format (Microsoft Learn: they only surface in the IDE).<br><br>The analyzer time of IDE0320 from -p:ReportAnalyzer=true is recorded; there are no current violations; the solution check and CI pass.'
+                        }
                     )
                 }
                 @{
